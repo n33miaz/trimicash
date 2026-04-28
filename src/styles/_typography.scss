@@ -1,0 +1,75 @@
+// TrimiCash Typography
+// Fonte: architecture.md §1.2
+// Classes disponíveis para uso nos templates Angular
+
+// ─── Display (Plus Jakarta Sans) ──────────────────────────────────────────────
+
+// Números principais do dashboard (ex: saldo atual em destaque)
+.display-lg {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-4xl);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+
+// Títulos de página
+.display-md {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-3xl);
+  font-weight: 700;
+  line-height: 1.2;
+  letter-spacing: -0.01em;
+  color: var(--color-text-primary);
+}
+
+// ─── Heading (Plus Jakarta Sans) ──────────────────────────────────────────────
+
+// Cabeçalhos de card, seções
+.heading-lg {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-xl);
+  font-weight: 600;
+  line-height: 1.3;
+  color: var(--color-text-primary);
+}
+
+.heading-md {
+  font-family: var(--font-family-display);
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  line-height: 1.4;
+  color: var(--color-text-primary);
+}
+
+// ─── Body (Inter) ─────────────────────────────────────────────────────────────
+
+// Texto padrão
+.body-md {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-md);
+  font-weight: 400;
+  line-height: 1.6;
+  color: var(--color-text-primary);
+}
+
+// Texto auxiliar, metadados
+.body-sm {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-sm);
+  font-weight: 400;
+  line-height: 1.5;
+  color: var(--color-text-secondary);
+}
+
+// Labels, badges, metadados
+.label {
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-xs);
+  font-weight: 500;
+  line-height: 1.4;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--color-text-secondary);
+}
