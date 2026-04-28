@@ -22,4 +22,6 @@ export interface AppAlert {
   createdAt: Date;
   /** ID da entidade relacionada (ex: payableAccountId) */
   relatedId?: string;
+  /** Usado pelo frontend para saber se o alerta foi visualizado */
+  isRead?: boolean;
 }

@@ -3,7 +3,7 @@
  * Serviço responsável por gerar alertas (RN-009) baseado no estado financeiro.
  */
 import type { PayableAccount } from '../../../accounts-payable/domain/entities/payable-account.entity';
-import type { AppAlert } from '../../../shared/types/alert.type';
+import type { AppAlert } from '../../../../shared/types/alert.type';
 import { daysBetween, isOverdue } from '../../../../core/utils/date.util';
 
 export class AlertEngineService {
@@ -97,8 +97,8 @@ export class AlertEngineService {
     // Desempate por ID alfabético para garantir saída exata 100% das vezes.
     return alerts.sort((a, b) => {
       const sevMap = { 'CRITICAL': 1, 'WARNING': 2, 'INFO': 3 };
-      const sevA = sevMap[a.severity];
-      const sevB = sevMap[b.severity];
+      const sevA = sevMap[a.severity as keyof typeof sevMap];
+      const sevB = sevMap[b.severity as keyof typeof sevMap];
       
       if (sevA !== sevB) {
         return sevA - sevB;

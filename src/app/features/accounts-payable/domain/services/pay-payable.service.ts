@@ -4,7 +4,7 @@
  */
 import { addWeeks, addMonths, addYears } from 'date-fns';
 import { PayableAccount } from '../entities/payable-account.entity';
-import type { Movement } from '../../cash-flow/domain/entities/movement.entity';
+import type { Movement } from '../../../cash-flow/domain/entities/movement.entity';
 import { DomainError } from '../errors/domain-error';
 
 export interface PaymentResult {
