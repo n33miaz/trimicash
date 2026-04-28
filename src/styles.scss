@@ -1,0 +1,24 @@
+// TrimiCash — Global Styles
+// Importa todos os partials na ordem correta
+
+@use 'styles/tokens' as *;
+@use 'styles/reset' as *;
+@use 'styles/typography' as *;
+@use 'styles/utilities' as *;
+
+// ─── Base ──────────────────────────────────────────────────────────────────────
+html,
+body {
+  height: 100%;
+  background-color: var(--color-background);
+  font-family: var(--font-family-body);
+  font-size: var(--font-size-md);
+  color: var(--color-text-primary);
+}
+
+// Garante que app-root ocupe a altura total
+app-root {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+}
