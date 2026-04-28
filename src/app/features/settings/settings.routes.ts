@@ -1,6 +1,6 @@
 import { Routes } from '@angular/router';
-import { SettingsPlaceholderComponent } from './ui/placeholder.component';
+import { SettingsPageComponent } from './ui/settings-page.component';
 
 export const settingsRoutes: Routes = [
-  { path: '', component: SettingsPlaceholderComponent }
+  { path: '', component: SettingsPageComponent }
 ];
