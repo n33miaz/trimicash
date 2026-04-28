@@ -6,7 +6,7 @@
  */
 
 import type { Movement } from '../entities/movement.entity';
-import type { Period } from '../../../../../shared/types/period.type';
+import type { Period } from '../../../../shared/types/period.type';
 
 export interface MovementRepository {
   /** Lista movimentações, opcionalmente filtradas por período */

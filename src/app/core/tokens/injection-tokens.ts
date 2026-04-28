@@ -7,11 +7,11 @@
  */
 
 import { InjectionToken, Signal } from '@angular/core';
-import type { MovementRepository } from '../../../app/features/cash-flow/domain/ports/movement.repository';
-import type { PayableRepository } from '../../../app/features/accounts-payable/domain/ports/payable.repository';
-import type { CategoryRepository } from '../../../app/features/categories/domain/category.repository';
-import type { AuthPort } from '../../../app/features/auth/domain/auth.types';
-import type { AppSettings } from '../../../app/features/settings/domain/settings.types';
+import type { MovementRepository } from '../../features/cash-flow/domain/ports/movement.repository';
+import type { PayableRepository } from '../../features/accounts-payable/domain/ports/payable.repository';
+import type { CategoryRepository } from '../../features/categories/domain/category.repository';
+import type { AuthPort } from '../../features/auth/domain/auth.types';
+import type { AppSettings } from '../../features/settings/domain/settings.types';
 
 /** Repositório de movimentações (entradas/saídas efetivadas) */
 export const MOVEMENT_REPOSITORY = new InjectionToken<MovementRepository>(

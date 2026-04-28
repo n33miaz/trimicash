@@ -6,7 +6,7 @@
  */
 
 import type { PayableAccount, PayableStatus } from '../entities/payable-account.entity';
-import type { Period } from '../../../../../shared/types/period.type';
+import type { Period } from '../../../../shared/types/period.type';
 
 export interface PayableFilter {
   status?: PayableStatus;
