@@ -54,7 +54,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
   template: `
     <div class="ap-page">
       <tc-page-header title="Contas a Pagar">
-        <tc-button variant="primary" (onClick)="openCreateModal()">+ Nova conta</tc-button>
+        <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova conta</tc-button>
       </tc-page-header>
 
       <!-- KPIs -->
@@ -98,7 +98,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
           title="Nenhuma conta encontrada"
           message="Adicione uma conta a pagar para começar."
         >
-          <tc-button variant="primary" (onClick)="openCreateModal()">+ Nova conta</tc-button>
+          <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova conta</tc-button>
         </tc-empty-state>
       } @else {
         <!-- Desktop table -->
@@ -136,11 +136,11 @@ type StatusFilter = 'TODAS' | PayableStatus;
                   <td>
                     <div class="actions-cell">
                       @if (p.status === 'PENDENTE' || p.status === 'ATRASADA') {
-                        <tc-button variant="primary" size="sm" (onClick)="openPayModal(p)">Pagar</tc-button>
+                        <tc-button variant="primary" size="sm" (clicked)="openPayModal(p)">Pagar</tc-button>
                       }
-                      <tc-button variant="secondary" size="sm" (onClick)="openEditModal(p)">Editar</tc-button>
+                      <tc-button variant="secondary" size="sm" (clicked)="openEditModal(p)">Editar</tc-button>
                       @if (p.status !== 'CANCELADA' && p.status !== 'PAGA') {
-                        <tc-button variant="danger" size="sm" (onClick)="openCancelModal(p)">Cancelar</tc-button>
+                        <tc-button variant="danger" size="sm" (clicked)="openCancelModal(p)">Cancelar</tc-button>
                       }
                     </div>
                   </td>
@@ -175,11 +175,11 @@ type StatusFilter = 'TODAS' | PayableStatus;
               </div>
               <div class="card-actions">
                 @if (p.status === 'PENDENTE' || p.status === 'ATRASADA') {
-                  <tc-button variant="primary" size="sm" (onClick)="openPayModal(p)">Pagar</tc-button>
+                  <tc-button variant="primary" size="sm" (clicked)="openPayModal(p)">Pagar</tc-button>
                 }
-                <tc-button variant="secondary" size="sm" (onClick)="openEditModal(p)">Editar</tc-button>
+                <tc-button variant="secondary" size="sm" (clicked)="openEditModal(p)">Editar</tc-button>
                 @if (p.status !== 'CANCELADA' && p.status !== 'PAGA') {
-                  <tc-button variant="danger" size="sm" (onClick)="openCancelModal(p)">Cancelar</tc-button>
+                  <tc-button variant="danger" size="sm" (clicked)="openCancelModal(p)">Cancelar</tc-button>
                 }
               </div>
             </div>
@@ -210,7 +210,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
           [options]="recurrenceOptions"
         ></tc-select>
         <div class="modal-actions" style="margin-top: var(--space-5);">
-          <tc-button type="button" variant="ghost" (onClick)="closeFormModal()">Cancelar</tc-button>
+          <tc-button type="button" variant="ghost" (clicked)="closeFormModal()">Cancelar</tc-button>
           <tc-button type="submit" variant="primary" [loading]="facade.loading()" [disabled]="payableForm.invalid">Salvar</tc-button>
         </div>
       </form>
@@ -231,8 +231,8 @@ type StatusFilter = 'TODAS' | PayableStatus;
           Uma movimentação de saída será criada no Caixa e o saldo será atualizado.
         </p>
         <div class="modal-actions">
-          <tc-button variant="ghost" (onClick)="closePayModal()">Cancelar</tc-button>
-          <tc-button variant="primary" [loading]="facade.loading()" (onClick)="confirmPay()">Confirmar pagamento</tc-button>
+          <tc-button variant="ghost" (clicked)="closePayModal()">Cancelar</tc-button>
+          <tc-button variant="primary" [loading]="facade.loading()" (clicked)="confirmPay()">Confirmar pagamento</tc-button>
         </div>
       }
     </tc-modal>
@@ -248,8 +248,8 @@ type StatusFilter = 'TODAS' | PayableStatus;
           Tem certeza que deseja cancelar a conta <strong>{{ payableToCancel()!.description }}</strong>?
         </p>
         <div class="modal-actions">
-          <tc-button variant="ghost" (onClick)="closeCancelModal()">Voltar</tc-button>
-          <tc-button variant="danger" [loading]="facade.loading()" (onClick)="confirmCancel()">Sim, cancelar</tc-button>
+          <tc-button variant="ghost" (clicked)="closeCancelModal()">Voltar</tc-button>
+          <tc-button variant="danger" [loading]="facade.loading()" (clicked)="confirmCancel()">Sim, cancelar</tc-button>
         </div>
       }
     </tc-modal>
@@ -287,7 +287,10 @@ type StatusFilter = 'TODAS' | PayableStatus;
       border-bottom: 2px solid transparent;
       margin-bottom: -2px;
       white-space: nowrap;
-      transition: all var(--motion-fast);
+      transition:
+        color var(--motion-fast),
+        border-color var(--motion-fast),
+        background-color var(--motion-fast);
     }
     .tab-btn.active {
       color: var(--color-accent-500);

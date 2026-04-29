@@ -42,13 +42,13 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       color: var(--color-text-primary);
       transition: border-color var(--motion-fast);
     }
-    input:focus {
+    input:focus-visible {
       outline: none;
       border-color: var(--color-primary-500);
       box-shadow: 0 0 0 3px var(--color-primary-50);
     }
     input.has-error { border-color: var(--color-danger-500); }
-    input.has-error:focus { box-shadow: 0 0 0 3px var(--color-danger-50); }
+    input.has-error:focus-visible { box-shadow: 0 0 0 3px var(--color-danger-50); }
     input:disabled { background: var(--color-background); cursor: not-allowed; opacity: 0.7; }
     .error-msg { font-size: var(--font-size-xs); color: var(--color-danger-500); }
     .hint-msg { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
@@ -62,15 +62,15 @@ export class InputComponent implements ControlValueAccessor {
   hint = input<string>();
   type = input<string>('text');
 
-  value: string = '';
+  value = '';
   disabled = false;
 
-  onChange = (value: string) => {};
-  onTouched = () => {};
+  onChange: (value: string) => void = (_value: string): void => { return; };
+  onTouched: () => void = (): void => { return; };
 
   writeValue(val: string): void { this.value = val || ''; }
-  registerOnChange(fn: any): void { this.onChange = fn; }
-  registerOnTouched(fn: any): void { this.onTouched = fn; }
+  registerOnChange(fn: (value: string) => void): void { this.onChange = fn; }
+  registerOnTouched(fn: () => void): void { this.onTouched = fn; }
   setDisabledState(isDisabled: boolean): void { this.disabled = isDisabled; }
 
   onInputChange(event: Event) {

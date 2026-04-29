@@ -144,6 +144,7 @@ export class TopbarComponent implements OnInit {
 
   ngOnInit(): void {
     this.user.set(this.authPort.current());
+    void this.alertsFacade.loadData();
   }
 
   getInitials(): string {

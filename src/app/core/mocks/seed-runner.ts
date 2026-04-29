@@ -6,7 +6,7 @@
  * TypeScript puro (lógica) — usa serviços Angular apenas para inject.
  */
 
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { SEEDS, type SeedScenario } from './seeds';
 
 const STORAGE_KEYS = {

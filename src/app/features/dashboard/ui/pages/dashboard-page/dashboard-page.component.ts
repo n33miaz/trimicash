@@ -13,6 +13,7 @@ import { AlertsFacade } from '../../../../alerts/application/alerts.facade';
 import { CategoriesFacade } from '../../../../categories/application/categories.facade';
 import { AUTH_PORT } from '../../../../../core/tokens/injection-tokens';
 import { PeriodKey } from '../../../../../shared/types/period.type';
+import { AppAlert } from '../../../../../shared/types/alert.type';
 
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { StatCardComponent } from '../../../../../shared/components/stat-card/stat-card.component';
@@ -76,7 +77,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
         <tc-stat-card
           label="Dias de segurança"
           [value]="dashboard.safetyDays().insufficient ? 'N/A' : dashboard.safetyDays().value.toString()"
-          [tone]="dashboard.safetyDays().insufficient ? 'neutral' : (dashboard.safetyDays().value < 7 ? 'danger' : 'success')"
+          [tone]="dashboard.safetyDays().insufficient ? 'neutral' : (dashboard.safetyDays().value < dashboard.minSafetyDays() ? 'danger' : 'success')"
           [hint]="dashboard.safetyDays().insufficient ? 'Histórico insuficiente' : 'Dias'"
         ></tc-stat-card>
       </div>
@@ -192,7 +193,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
                   <strong>{{ alert.title }}</strong>
                   <p>{{ alert.message }}</p>
                 </div>
-                <tc-button variant="secondary" size="sm" (onClick)="goToAlert(alert)">Resolver</tc-button>
+                <tc-button variant="secondary" size="sm" (clicked)="goToAlert(alert)">Resolver</tc-button>
               </div>
             }
           </div>
@@ -228,7 +229,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       background-position: right var(--space-2) center;
     }
     
-    .tc-select-inline:focus {
+    .tc-select-inline:focus-visible {
       outline: none;
       border-color: var(--color-primary-500);
       box-shadow: 0 0 0 2px var(--color-primary-50);
@@ -433,7 +434,7 @@ export class DashboardPageComponent implements OnInit {
     return Math.min(100, Math.max(0, pct));
   }
 
-  goToAlert(alert: any) {
+  goToAlert(alert: AppAlert) {
     this.alertsFacade.markAsRead(alert.id);
     this.router.navigate(['/alerts']);
   }

@@ -8,6 +8,10 @@ import { ListPayablesUseCase } from './list-payables.usecase';
 import { PayPayableUseCase } from './pay-payable.usecase';
 import { Period } from '../../../shared/types/period.type';
 
+function errorMessage(err: unknown, fallback: string): string {
+  return err instanceof Error ? err.message : fallback;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -44,8 +48,8 @@ export class AccountsPayableFacade {
     try {
       const data = await this.listUseCase.execute(period);
       this._payables.set(data);
-    } catch (err: any) {
-      this._error.set(err.message || 'Erro ao carregar contas');
+    } catch (err: unknown) {
+      this._error.set(errorMessage(err, 'Erro ao carregar contas'));
     } finally {
       this._loading.set(false);
     }
@@ -57,8 +61,8 @@ export class AccountsPayableFacade {
     try {
       const created = await this.createUseCase.execute(input);
       this._payables.update(p => [...p, created]);
-    } catch (err: any) {
-      this._error.set(err.message || 'Erro ao criar conta');
+    } catch (err: unknown) {
+      this._error.set(errorMessage(err, 'Erro ao criar conta'));
       throw err;
     } finally {
       this._loading.set(false);
@@ -71,8 +75,8 @@ export class AccountsPayableFacade {
     try {
       const updated = await this.updateUseCase.execute(id, patch);
       this._payables.update(list => list.map(item => item.id === id ? updated : item));
-    } catch (err: any) {
-      this._error.set(err.message || 'Erro ao atualizar conta');
+    } catch (err: unknown) {
+      this._error.set(errorMessage(err, 'Erro ao atualizar conta'));
       throw err;
     } finally {
       this._loading.set(false);
@@ -85,8 +89,8 @@ export class AccountsPayableFacade {
     try {
       await this.cancelUseCase.execute(id);
       this._payables.update(list => list.map(item => item.id === id ? { ...item, status: 'CANCELADA' } : item));
-    } catch (err: any) {
-      this._error.set(err.message || 'Erro ao cancelar conta');
+    } catch (err: unknown) {
+      this._error.set(errorMessage(err, 'Erro ao cancelar conta'));
       throw err;
     } finally {
       this._loading.set(false);
@@ -103,8 +107,8 @@ export class AccountsPayableFacade {
       this._payables.update(list => list.map(item => item.id === id ? updated : item));
       // Idealmente, poderíamos fazer um `await this.load()` aqui para pegar a nova recorrência
       await this.load();
-    } catch (err: any) {
-      this._error.set(err.message || 'Erro ao pagar conta');
+    } catch (err: unknown) {
+      this._error.set(errorMessage(err, 'Erro ao pagar conta'));
       throw err;
     } finally {
       this._loading.set(false);

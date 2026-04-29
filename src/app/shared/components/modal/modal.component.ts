@@ -1,11 +1,16 @@
-import { ChangeDetectionStrategy, Component, input, output, ElementRef, ViewChild, AfterViewInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 
 @Component({
   selector: 'tc-modal',
   standalone: true,
   template: `
     @if (open()) {
-      <div class="tc-modal-backdrop" (click)="onBackdropClick($event)">
+      <div
+        class="tc-modal-backdrop"
+        tabindex="-1"
+        (click)="onBackdropClick($event)"
+        (keydown)="onBackdropKeydown($event)"
+      >
         <div class="tc-modal-dialog" role="dialog" aria-modal="true" [attr.aria-label]="title()">
           <div class="tc-modal-header">
             <h2 class="tc-modal-title">{{ title() }}</h2>
@@ -26,6 +31,7 @@ import { ChangeDetectionStrategy, Component, input, output, ElementRef, ViewChil
       top: 0; left: 0; width: 100vw; height: 100vh;
       background: rgba(17, 24, 39, 0.5);
       backdrop-filter: blur(4px);
+      overscroll-behavior: contain;
       z-index: 1000;
       display: flex;
       align-items: center;
@@ -52,7 +58,15 @@ import { ChangeDetectionStrategy, Component, input, output, ElementRef, ViewChil
     }
     .tc-modal-title { margin: 0; font-family: var(--font-family-display); font-size: var(--font-size-lg); font-weight: 600; color: var(--color-text-primary); }
     .tc-modal-close {
-      background: transparent; border: none; cursor: pointer; color: var(--color-text-secondary); padding: var(--space-1); border-radius: var(--radius-sm); transition: all var(--motion-fast);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      color: var(--color-text-secondary);
+      padding: var(--space-1);
+      border-radius: var(--radius-sm);
+      transition:
+        background-color var(--motion-fast),
+        color var(--motion-fast);
     }
     .tc-modal-close:hover { background: var(--color-background); color: var(--color-text-primary); }
     .tc-modal-content {
@@ -74,6 +88,12 @@ export class ModalComponent {
 
   onBackdropClick(event: MouseEvent) {
     if (this.closeOnBackdrop() && (event.target as HTMLElement).classList.contains('tc-modal-backdrop')) {
+      this.close.emit();
+    }
+  }
+
+  onBackdropKeydown(event: KeyboardEvent) {
+    if (event.key === 'Escape' && this.closeOnBackdrop()) {
       this.close.emit();
     }
   }

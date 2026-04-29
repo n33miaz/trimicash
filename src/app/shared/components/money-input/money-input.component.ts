@@ -64,19 +64,19 @@ export class MoneyInputComponent implements ControlValueAccessor {
   error = input<string>();
   hint = input<string>();
 
-  rawValue: number = 0;
-  displayValue: string = '';
+  rawValue = 0;
+  displayValue = '';
   disabled = false;
 
-  onChange = (value: number) => {};
-  onTouched = () => {};
+  onChange: (value: number) => void = (_value: number): void => { return; };
+  onTouched: () => void = (): void => { return; };
 
   writeValue(val: number): void { 
     this.rawValue = val || 0; 
     this.displayValue = this.formatMoney(this.rawValue);
   }
-  registerOnChange(fn: any): void { this.onChange = fn; }
-  registerOnTouched(fn: any): void { this.onTouched = fn; }
+  registerOnChange(fn: (value: number) => void): void { this.onChange = fn; }
+  registerOnTouched(fn: () => void): void { this.onTouched = fn; }
   setDisabledState(isDisabled: boolean): void { this.disabled = isDisabled; }
 
   onInputChange(event: Event) {

@@ -45,7 +45,7 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
   template: `
     <div class="cash-flow-page">
       <tc-page-header title="Caixa">
-        <tc-button variant="primary" (onClick)="openCreateModal()">+ Nova movimentação</tc-button>
+        <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova movimentação</tc-button>
       </tc-page-header>
 
       <!-- KPIs -->
@@ -98,7 +98,7 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
           title="Nenhuma movimentação"
           message="Adicione sua primeira movimentação de caixa."
         >
-          <tc-button variant="primary" (onClick)="openCreateModal()">+ Adicionar movimentação</tc-button>
+          <tc-button variant="primary" (clicked)="openCreateModal()">+ Adicionar movimentação</tc-button>
         </tc-empty-state>
       } @else {
         <!-- Desktop table -->
@@ -132,8 +132,8 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
                   </td>
                   <td>
                     <div class="actions-cell">
-                      <tc-button variant="secondary" size="sm" (onClick)="openEditModal(m)">Editar</tc-button>
-                      <tc-button variant="danger" size="sm" (onClick)="openDeleteModal(m)">Excluir</tc-button>
+                      <tc-button variant="secondary" size="sm" (clicked)="openEditModal(m)">Editar</tc-button>
+                      <tc-button variant="danger" size="sm" (clicked)="openDeleteModal(m)">Excluir</tc-button>
                     </div>
                   </td>
                 </tr>
@@ -161,8 +161,8 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
                   {{ m.type === 'ENTRADA' ? 'Entrada' : 'Saída' }}
                 </tc-badge>
                 <div class="actions-cell">
-                  <tc-button variant="secondary" size="sm" (onClick)="openEditModal(m)">Editar</tc-button>
-                  <tc-button variant="danger" size="sm" (onClick)="openDeleteModal(m)">Excluir</tc-button>
+                  <tc-button variant="secondary" size="sm" (clicked)="openEditModal(m)">Editar</tc-button>
+                  <tc-button variant="danger" size="sm" (clicked)="openDeleteModal(m)">Excluir</tc-button>
                 </div>
               </div>
             </div>
@@ -179,7 +179,7 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
     >
       <tc-movement-form
         [movementToEdit]="movementToEdit()"
-        (cancel)="closeFormModal()"
+        (cancelled)="closeFormModal()"
         (saved)="onSaved()"
       ></tc-movement-form>
     </tc-modal>
@@ -194,8 +194,8 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
         Tem certeza que deseja excluir a movimentação <strong>{{ movementToDelete()?.description }}</strong>?
       </p>
       <div class="modal-actions">
-        <tc-button variant="ghost" (onClick)="closeDeleteModal()">Cancelar</tc-button>
-        <tc-button variant="danger" [loading]="cashFlowFacade.loading()" (onClick)="confirmDelete()">Excluir</tc-button>
+        <tc-button variant="ghost" (clicked)="closeDeleteModal()">Cancelar</tc-button>
+        <tc-button variant="danger" [loading]="cashFlowFacade.loading()" (clicked)="confirmDelete()">Excluir</tc-button>
       </div>
     </tc-modal>
   `,
@@ -240,7 +240,10 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
       font-size: var(--font-size-sm);
       font-weight: 500;
       color: var(--color-text-secondary);
-      transition: all var(--motion-fast);
+      transition:
+        background-color var(--motion-fast),
+        color var(--motion-fast),
+        box-shadow var(--motion-fast);
     }
     .filter-tab.active {
       background: var(--color-surface);
@@ -257,7 +260,7 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
       color: var(--color-text-primary);
       cursor: pointer;
     }
-    .filter-select:focus {
+    .filter-select:focus-visible {
       outline: none;
       border-color: var(--color-accent-500);
     }

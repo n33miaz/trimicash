@@ -42,7 +42,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       color: var(--color-text-primary);
       transition: border-color var(--motion-fast);
     }
-    input:focus {
+    input:focus-visible {
       outline: none;
       border-color: var(--color-primary-500);
       box-shadow: 0 0 0 3px var(--color-primary-50);
@@ -60,11 +60,11 @@ export class DateInputComponent implements ControlValueAccessor {
   error = input<string>();
   hint = input<string>();
 
-  value: string = '';
+  value = '';
   disabled = false;
 
-  onChange = (value: string) => {};
-  onTouched = () => {};
+  onChange: (value: Date | null) => void = (_value: Date | null): void => { return; };
+  onTouched: () => void = (): void => { return; };
 
   writeValue(val: string | Date): void { 
     if (val instanceof Date) {
@@ -73,14 +73,14 @@ export class DateInputComponent implements ControlValueAccessor {
       this.value = val || ''; 
     }
   }
-  registerOnChange(fn: any): void { this.onChange = fn; }
-  registerOnTouched(fn: any): void { this.onTouched = fn; }
+  registerOnChange(fn: (value: Date | null) => void): void { this.onChange = fn; }
+  registerOnTouched(fn: () => void): void { this.onTouched = fn; }
   setDisabledState(isDisabled: boolean): void { this.disabled = isDisabled; }
 
   onInputChange(event: Event) {
     const val = (event.target as HTMLInputElement).value;
     this.value = val;
-    this.onChange(val);
+    this.onChange(val ? new Date(`${val}T12:00:00`) : null);
   }
   
   onBlur() { this.onTouched(); }

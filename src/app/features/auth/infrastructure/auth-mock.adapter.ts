@@ -23,7 +23,7 @@ export class AuthMockAdapter implements AuthPort {
     }
   }
 
-  async login(email: string, password: string): Promise<DemoUser> {
+  async login(_email: string, _password: string): Promise<DemoUser> {
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulando delay de rede
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(MOCK_USER));
     return MOCK_USER;

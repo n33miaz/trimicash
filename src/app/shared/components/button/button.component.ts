@@ -5,9 +5,10 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   standalone: true,
   template: `
     <button 
+      [type]="type()"
       [class]="'tc-btn tc-btn-' + variant() + ' tc-btn-' + size()"
       [disabled]="disabled() || loading()"
-      (click)="onClick.emit($event)">
+      (click)="clicked.emit($event)">
       @if (loading()) {
         <span class="spinner"></span>
       }
@@ -26,7 +27,11 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
       font-family: var(--font-family-body);
       font-weight: 500;
       cursor: pointer;
-      transition: all var(--motion-fast);
+      transition:
+        background-color var(--motion-fast),
+        border-color var(--motion-fast),
+        color var(--motion-fast),
+        opacity var(--motion-fast);
       white-space: nowrap;
     }
     .tc-btn:focus-visible {
@@ -71,7 +76,8 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 export class ButtonComponent {
   variant = input<'primary' | 'secondary' | 'ghost' | 'danger'>('primary');
   size = input<'sm' | 'md' | 'lg'>('md');
+  type = input<'button' | 'submit' | 'reset'>('button');
   loading = input<boolean>(false);
   disabled = input<boolean>(false);
-  onClick = output<MouseEvent>();
+  clicked = output<MouseEvent>();
 }

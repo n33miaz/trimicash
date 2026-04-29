@@ -51,7 +51,7 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       background-position: right var(--space-3) center;
       background-size: 16px;
     }
-    select:focus {
+    select:focus-visible {
       outline: none;
       border-color: var(--color-primary-500);
       box-shadow: 0 0 0 3px var(--color-primary-50);
@@ -68,17 +68,17 @@ export class SelectComponent implements ControlValueAccessor {
   label = input<string>();
   error = input<string>();
   hint = input<string>();
-  options = input.required<{label: string, value: any}[]>();
+  options = input.required<readonly { label: string; value: string }[]>();
 
-  value: any = '';
+  value = '';
   disabled = false;
 
-  onChange = (value: any) => {};
-  onTouched = () => {};
+  onChange: (value: string) => void = (_value: string): void => { return; };
+  onTouched: () => void = (): void => { return; };
 
-  writeValue(val: any): void { this.value = val || ''; }
-  registerOnChange(fn: any): void { this.onChange = fn; }
-  registerOnTouched(fn: any): void { this.onTouched = fn; }
+  writeValue(val: string | null): void { this.value = val || ''; }
+  registerOnChange(fn: (value: string) => void): void { this.onChange = fn; }
+  registerOnTouched(fn: () => void): void { this.onTouched = fn; }
   setDisabledState(isDisabled: boolean): void { this.disabled = isDisabled; }
 
   onChangeEvent(event: Event) {

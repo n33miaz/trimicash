@@ -8,7 +8,7 @@ import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
 
 import { AlertsFacade } from '../../../application/alerts.facade';
-import { AppAlert, AlertSeverity } from '../../../../../shared/types/alert.type';
+import { AppAlert } from '../../../../../shared/types/alert.type';
 
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
@@ -29,7 +29,7 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
     <div class="alerts-page">
       <tc-page-header title="Alertas e Avisos">
         @if (hasUnread()) {
-          <tc-button variant="secondary" (onClick)="markAllAsRead()">Marcar todos como lidos</tc-button>
+          <tc-button variant="secondary" (clicked)="markAllAsRead()">Marcar todos como lidos</tc-button>
         }
       </tc-page-header>
 
@@ -56,10 +56,10 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
                     <p class="alert-message">{{ alert.message }}</p>
                     <div class="alert-actions">
                       @if (!alert.isRead) {
-                        <tc-button variant="ghost" size="sm" (onClick)="alertsFacade.markAsRead(alert.id)">Marcar como lido</tc-button>
+                        <tc-button variant="ghost" size="sm" (clicked)="alertsFacade.markAsRead(alert.id)">Marcar como lido</tc-button>
                       }
                       @if (alert.relatedId) {
-                        <tc-button variant="secondary" size="sm" (onClick)="handleAction(alert)">Ver detalhes</tc-button>
+                        <tc-button variant="secondary" size="sm" (clicked)="handleAction(alert)">Ver detalhes</tc-button>
                       }
                     </div>
                   </div>
@@ -84,10 +84,10 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
                     <p class="alert-message">{{ alert.message }}</p>
                     <div class="alert-actions">
                       @if (!alert.isRead) {
-                        <tc-button variant="ghost" size="sm" (onClick)="alertsFacade.markAsRead(alert.id)">Marcar como lido</tc-button>
+                        <tc-button variant="ghost" size="sm" (clicked)="alertsFacade.markAsRead(alert.id)">Marcar como lido</tc-button>
                       }
                       @if (alert.relatedId) {
-                        <tc-button variant="secondary" size="sm" (onClick)="handleAction(alert)">Ver detalhes</tc-button>
+                        <tc-button variant="secondary" size="sm" (clicked)="handleAction(alert)">Ver detalhes</tc-button>
                       }
                     </div>
                   </div>
@@ -112,7 +112,7 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
                     <p class="alert-message">{{ alert.message }}</p>
                     <div class="alert-actions">
                       @if (!alert.isRead) {
-                        <tc-button variant="ghost" size="sm" (onClick)="alertsFacade.markAsRead(alert.id)">Marcar como lido</tc-button>
+                        <tc-button variant="ghost" size="sm" (clicked)="alertsFacade.markAsRead(alert.id)">Marcar como lido</tc-button>
                       }
                     </div>
                   </div>
@@ -153,7 +153,10 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
       padding: var(--space-4);
       margin-bottom: var(--space-3);
       box-shadow: var(--shadow-sm);
-      transition: all var(--motion-fast);
+      transition:
+        background-color var(--motion-fast),
+        border-color var(--motion-fast),
+        box-shadow var(--motion-fast);
     }
     .alert-card.unread { background: var(--color-background); border-left-width: 4px; }
     

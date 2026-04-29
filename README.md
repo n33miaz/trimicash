@@ -1,100 +1,82 @@
 # TrimiCash
 
-> Controle financeiro para micro e pequenos empreendedores. Visualize seu fluxo de caixa, contas a pagar e saúde financeira em segundos.
+Demo frontend para micro e pequenos empreendedores acompanharem caixa, contas a pagar, reserva recomendada, saldo projetado e alertas financeiros.
 
 ## Stack
 
-- **Framework:** Angular 18+ standalone
-- **Linguagem:** TypeScript 5.5 (strict mode)
-- **Estilos:** SCSS com design tokens próprios
-- **Estado:** Angular Signals
-- **Testes unitários:** Vitest + @analogjs/vitest-angular
-- **E2E:** Playwright
-- **Lint/Format:** ESLint (@angular-eslint) + Prettier
-- **Datas:** date-fns
-- **Pacotes:** pnpm
-
----
+- Angular 18 standalone
+- TypeScript strict
+- SCSS com design tokens próprios
+- Angular Signals + facades por feature
+- Persistência mockada em `localStorage` / `sessionStorage`
+- Vitest para testes unitários
+- Playwright para E2E desktop e mobile
 
 ## Como Rodar
 
-### Pré-requisitos
+Pré-requisitos:
 
-- Node.js ≥ 18
-- pnpm ≥ 9 (`npm install -g pnpm`)
+- Node.js 18+
+- npm 11+ ou compatível
 
-### Instalação
-
-```bash
-pnpm install
-```
-
-### Desenvolvimento
+Instalação:
 
 ```bash
-pnpm dev
-# Acesse: http://localhost:4200
+npm install
 ```
 
-### Build de produção
+Desenvolvimento:
 
 ```bash
-pnpm build
+npm run dev
 ```
 
-### Testes unitários
+Acesse `http://localhost:4200`.
+
+Build:
 
 ```bash
-# Roda uma vez
-pnpm test
-
-# Modo watch
-pnpm test:watch
+npm run build
 ```
 
-### Lint e formatação
+Testes:
 
 ```bash
-pnpm lint
-pnpm format
+npm test
+npm run lint
+npm run e2e
 ```
 
-### Testes E2E (Playwright)
+Na primeira execução do E2E, instale o Chromium do Playwright:
 
 ```bash
-# Instalar browsers na primeira vez
-npx playwright install
-
-# Rodar E2E (necessita dev server rodando)
-pnpm e2e
+npx playwright install chromium
 ```
 
----
+## Seeds
 
-## Arquitetura
+A demo sobe sem backend. Os dados são populados automaticamente no primeiro acesso.
 
-Veja [`docs/architecture.md`](./docs/architecture.md) para decisões de design, tokens, camadas e estrutura de pastas.
+- `/?seed=healthy`: cenário saudável, com reserva atendida.
+- `/?seed=risk`: cenário de risco, com atraso, déficit e alertas críticos.
 
-## Contexto de Domínio
+## Fluxo Principal da Demo
 
-Veja [`docs/domain_context.md`](./docs/domain_context.md) para regras de negócio, glossário e invariantes.
+1. Entrar com qualquer e-mail e senha.
+2. Ver no Dashboard: saldo atual, saldo projetado, reserva recomendada e dias de segurança.
+3. Criar uma nova conta em **Contas**.
+4. Voltar ao Dashboard e validar aumento da reserva recomendada.
+5. Pagar a conta em **Contas**.
+6. Confirmar que o saldo atual diminui, a reserva cai e a saída aparece em **Caixa**.
+7. Abrir **Alertas** para mostrar os riscos financeiros calculados.
 
-## Plano de Execução
+## Limites da Fase 1
 
-Veja [`docs/phase_1_tasks/README.md`](./docs/phase_1_tasks/README.md) para o plano de ondas e tarefas da Fase 1.
+Esta entrega é uma demo navegável e mockada. Não inclui backend, banco real, autenticação real, integração bancária, notificações externas, exportação de relatórios, multiusuário ou permissões.
 
----
+## Documentação
 
-## Roteiro de Demo (Fase 1)
-
-> Em construção — será atualizado em T12.
-
-1. Fazer login com qualquer e-mail/senha na tela de autenticação
-2. Ver o Dashboard com saldo atual, projetado e reserva recomendada
-3. Navegar para **Fluxo de Caixa** e cadastrar uma movimentação
-4. Navegar para **Contas a Pagar** e marcar uma conta como paga
-5. Verificar a mudança de saldo e o disparo de alertas
-
----
-
-*Fase 1 — Demo mockada. Fase 2 — Produto funcional com backend real.*
+- Arquitetura: [`docs/architecture.md`](./docs/architecture.md)
+- Contexto de domínio: [`docs/domain_context.md`](./docs/domain_context.md)
+- Escopo da Fase 1: [`docs/planning/phase_1_frontend_mock.md`](./docs/planning/phase_1_frontend_mock.md)
+- Roteiro de apresentação: [`docs/demo_script.md`](./docs/demo_script.md)

@@ -4,6 +4,11 @@ import type { PayableAccount } from '../domain/entities/payable-account.entity';
 
 const STORAGE_KEY = 'trimicash:payables';
 
+type StoredPayableAccount = Omit<PayableAccount, 'dueDate' | 'paidAt'> & {
+  dueDate: string;
+  paidAt?: string;
+};
+
 @Injectable({
   providedIn: 'root'
 })
@@ -73,8 +78,8 @@ export class PayableLocalAdapter implements PayableRepository {
     if (!data) return [];
     
     try {
-      const parsed = JSON.parse(data);
-      return parsed.map((item: any) => ({
+      const parsed = JSON.parse(data) as StoredPayableAccount[];
+      return parsed.map((item) => ({
         ...item,
         dueDate: new Date(item.dueDate),
         paidAt: item.paidAt ? new Date(item.paidAt) : undefined,

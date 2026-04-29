@@ -7,6 +7,10 @@ import { ListMovementsUseCase } from './list-movements.usecase';
 import { UpdateMovementUseCase } from './update-movement.usecase';
 import { Period } from '../../../shared/types/period.type';
 
+function errorMessage(err: unknown, fallback: string): string {
+  return err instanceof Error ? err.message : fallback;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -38,8 +42,8 @@ export class CashFlowFacade {
     try {
       const data = await this.listUseCase.execute(period);
       this._movements.set(data);
-    } catch (err: any) {
-      this._error.set(err.message || 'Erro ao carregar movimentações');
+    } catch (err: unknown) {
+      this._error.set(errorMessage(err, 'Erro ao carregar movimentacoes'));
     } finally {
       this._loading.set(false);
     }
@@ -51,8 +55,8 @@ export class CashFlowFacade {
     try {
       const created = await this.createUseCase.execute(input);
       this._movements.update(m => [...m, created]);
-    } catch (err: any) {
-      this._error.set(err.message || 'Erro ao criar movimentação');
+    } catch (err: unknown) {
+      this._error.set(errorMessage(err, 'Erro ao criar movimentacao'));
       throw err;
     } finally {
       this._loading.set(false);
@@ -65,8 +69,8 @@ export class CashFlowFacade {
     try {
       const updated = await this.updateUseCase.execute(id, patch);
       this._movements.update(m => m.map(item => item.id === id ? updated : item));
-    } catch (err: any) {
-      this._error.set(err.message || 'Erro ao atualizar movimentação');
+    } catch (err: unknown) {
+      this._error.set(errorMessage(err, 'Erro ao atualizar movimentacao'));
       throw err;
     } finally {
       this._loading.set(false);
@@ -79,8 +83,8 @@ export class CashFlowFacade {
     try {
       await this.deleteUseCase.execute(id);
       this._movements.update(m => m.filter(item => item.id !== id));
-    } catch (err: any) {
-      this._error.set(err.message || 'Erro ao remover movimentação');
+    } catch (err: unknown) {
+      this._error.set(errorMessage(err, 'Erro ao remover movimentacao'));
       throw err;
     } finally {
       this._loading.set(false);

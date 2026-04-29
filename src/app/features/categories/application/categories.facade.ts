@@ -2,6 +2,10 @@ import { Injectable, inject, signal } from '@angular/core';
 import { CATEGORY_REPOSITORY } from '../../../core/tokens/injection-tokens';
 import { Category } from '../domain/category.repository';
 
+function errorMessage(err: unknown, fallback: string): string {
+  return err instanceof Error ? err.message : fallback;
+}
+
 @Injectable({
   providedIn: 'root'
 })
@@ -24,8 +28,8 @@ export class CategoriesFacade {
     try {
       const data = await this.repository.list();
       this._categories.set(data);
-    } catch (err: any) {
-      this._error.set(err.message || 'Erro ao carregar categorias');
+    } catch (err: unknown) {
+      this._error.set(errorMessage(err, 'Erro ao carregar categorias'));
     } finally {
       this._loading.set(false);
     }
@@ -37,8 +41,8 @@ export class CategoriesFacade {
     try {
       const created = await this.repository.create(input);
       this._categories.update(c => [...c, created]);
-    } catch (err: any) {
-      this._error.set(err.message || 'Erro ao criar categoria');
+    } catch (err: unknown) {
+      this._error.set(errorMessage(err, 'Erro ao criar categoria'));
       throw err;
     } finally {
       this._loading.set(false);
@@ -51,8 +55,8 @@ export class CategoriesFacade {
     try {
       const updated = await this.repository.update(id, patch);
       this._categories.update(c => c.map(item => item.id === id ? updated : item));
-    } catch (err: any) {
-      this._error.set(err.message || 'Erro ao atualizar categoria');
+    } catch (err: unknown) {
+      this._error.set(errorMessage(err, 'Erro ao atualizar categoria'));
       throw err;
     } finally {
       this._loading.set(false);
@@ -65,8 +69,8 @@ export class CategoriesFacade {
     try {
       await this.repository.remove(id);
       this._categories.update(c => c.filter(item => item.id !== id));
-    } catch (err: any) {
-      this._error.set(err.message || 'Erro ao excluir categoria');
+    } catch (err: unknown) {
+      this._error.set(errorMessage(err, 'Erro ao excluir categoria'));
       throw err;
     } finally {
       this._loading.set(false);

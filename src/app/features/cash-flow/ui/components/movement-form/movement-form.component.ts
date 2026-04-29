@@ -50,7 +50,7 @@ import { ButtonComponent } from '../../../../../shared/components/button/button.
       <tc-input formControlName="description" label="Descrição" [error]="getError('description')"></tc-input>
 
       <div class="actions">
-        <tc-button type="button" variant="secondary" (click)="cancel.emit()">Cancelar</tc-button>
+        <tc-button type="button" variant="secondary" (clicked)="cancelled.emit()">Cancelar</tc-button>
         <tc-button type="submit" variant="primary" [loading]="cashFlowFacade.loading()">Salvar</tc-button>
       </div>
     </form>
@@ -70,7 +70,10 @@ import { ButtonComponent } from '../../../../../shared/components/button/button.
       border-radius: var(--radius-md);
       cursor: pointer;
       font-weight: 500;
-      transition: all var(--motion-fast);
+      transition:
+        background-color var(--motion-fast),
+        border-color var(--motion-fast),
+        color var(--motion-fast);
     }
     .type-btn.active {
       background: var(--color-primary-50);
@@ -89,7 +92,7 @@ import { ButtonComponent } from '../../../../../shared/components/button/button.
 export class MovementFormComponent implements OnInit {
   movementToEdit = input<Movement | null>(null);
   
-  cancel = output<void>();
+  cancelled = output<void>();
   saved = output<void>();
 
   private fb = inject(FormBuilder);
@@ -162,7 +165,7 @@ export class MovementFormComponent implements OnInit {
         await this.cashFlowFacade.create(movementData);
       }
       this.saved.emit();
-    } catch (e) {
+    } catch {
       // Facade already handles errors
     }
   }

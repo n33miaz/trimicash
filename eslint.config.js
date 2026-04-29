@@ -5,6 +5,16 @@ const angular = require('angular-eslint');
 
 module.exports = tseslint.config(
   {
+    ignores: [
+      '.angular/**',
+      'coverage/**',
+      'dist/**',
+      'node_modules/**',
+      'playwright-report/**',
+      'test-results/**',
+    ],
+  },
+  {
     files: ['**/*.ts'],
     extends: [
       eslint.configs.recommended,
@@ -20,7 +30,7 @@ module.exports = tseslint.config(
       ],
       '@angular-eslint/component-selector': [
         'error',
-        { type: 'element', prefix: 'app', style: 'kebab-case' },
+        { type: 'element', prefix: ['app', 'tc'], style: 'kebab-case' },
       ],
       '@typescript-eslint/no-unused-vars': [
         'error',

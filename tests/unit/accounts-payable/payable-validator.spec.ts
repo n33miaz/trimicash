@@ -1,6 +1,7 @@
 import { describe, it, expect } from 'vitest';
 import { validatePayableInput } from '../../../src/app/features/accounts-payable/domain/services/payable-validator';
 import { DomainError } from '../../../src/app/features/accounts-payable/domain/errors/domain-error';
+import { RecurrenceFrequency } from '../../../src/app/features/accounts-payable/domain/entities/payable-account.entity';
 
 describe('PayableValidator', () => {
   it('não deve lançar erro para input válido', () => {
@@ -51,7 +52,7 @@ describe('PayableValidator', () => {
       description: 'Conta',
       amount: 100,
       dueDate: new Date(),
-      recurrence: 'DAILY' as any
+      recurrence: 'DAILY' as unknown as RecurrenceFrequency
     })).toThrowError(DomainError);
   });
 });

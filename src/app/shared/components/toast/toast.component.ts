@@ -7,7 +7,7 @@ import { NgClass } from '@angular/common';
   standalone: true,
   imports: [NgClass],
   template: `
-    <div class="toast-container">
+    <div class="toast-container" aria-live="polite" aria-atomic="true">
       @for (toast of toastService.toasts(); track toast.id) {
         <div class="toast-message" [ngClass]="toast.type">
           {{ toast.message }}

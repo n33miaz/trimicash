@@ -34,7 +34,10 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
       border-radius: var(--radius-md);
       font-weight: 500;
       cursor: pointer;
-      transition: all var(--motion-fast);
+      transition:
+        background-color var(--motion-fast),
+        color var(--motion-fast),
+        border-color var(--motion-fast);
     }
     .retry-btn:hover { background: var(--color-danger-500); color: white; }
   `],

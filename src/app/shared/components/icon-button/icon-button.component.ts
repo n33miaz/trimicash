@@ -8,7 +8,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
       class="tc-icon-btn"
       [attr.aria-label]="ariaLabel()"
       [disabled]="disabled()"
-      (click)="onClick.emit($event)">
+      (click)="clicked.emit($event)">
       <!-- Render SVG here based on icon input (simplified) -->
       <span class="icon">{{ icon() }}</span>
     </button>
@@ -26,7 +26,10 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
       border-radius: var(--radius-sm);
       color: var(--color-text-secondary);
       cursor: pointer;
-      transition: all var(--motion-fast);
+      transition:
+        background-color var(--motion-fast),
+        color var(--motion-fast),
+        opacity var(--motion-fast);
     }
     .tc-icon-btn:hover:not(:disabled) {
       background: var(--color-background);
@@ -47,5 +50,5 @@ export class IconButtonComponent {
   ariaLabel = input.required<string>();
   icon = input.required<string>();
   disabled = input<boolean>(false);
-  onClick = output<MouseEvent>();
+  clicked = output<MouseEvent>();
 }

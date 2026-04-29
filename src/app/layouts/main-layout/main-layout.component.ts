@@ -78,7 +78,6 @@ import { SidebarComponent } from './sidebar/sidebar.component';
 })
 export class MainLayoutComponent {
   onOpenAlerts(): void {
-    // To be implemented or handled globally
-    console.log('Open alerts');
+    return;
   }
 }

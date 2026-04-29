@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, computed, inject, OnInit, signal } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { TitleCasePipe } from '@angular/common';
 
@@ -76,16 +76,16 @@ import { Category } from '../../categories/domain/category.repository';
             ></tc-input>
             
             <div class="color-picker-wrapper">
-              <label>Cor</label>
-              <input type="color" [formControl]="categoryColorCtrl">
+              <label for="category-color">Cor</label>
+              <input id="category-color" type="color" [formControl]="categoryColorCtrl">
             </div>
 
             <div class="cat-actions">
-              <tc-button variant="primary" (onClick)="saveCategory()" [disabled]="categoryNameCtrl.invalid">
+              <tc-button variant="primary" (clicked)="saveCategory()" [disabled]="categoryNameCtrl.invalid">
                 {{ editingCategory() ? 'Atualizar' : 'Adicionar' }}
               </tc-button>
               @if (editingCategory()) {
-                <tc-button variant="ghost" (onClick)="cancelEditCategory()">Cancelar</tc-button>
+                <tc-button variant="ghost" (clicked)="cancelEditCategory()">Cancelar</tc-button>
               }
             </div>
           </div>
@@ -99,8 +99,14 @@ import { Category } from '../../categories/domain/category.repository';
                 <td>{{ cat.name }}</td>
                 <td>
                   <div class="actions-cell">
-                    <tc-button variant="secondary" size="sm" (onClick)="editCategory(cat)">Editar</tc-button>
-                    <tc-button variant="danger" size="sm" (onClick)="deleteCategory(cat.id)">Excluir</tc-button>
+                    <tc-button variant="secondary" size="sm" (clicked)="editCategory(cat)">Editar</tc-button>
+                    <tc-button
+                      variant="danger"
+                      size="sm"
+                      (clicked)="deleteCategory(cat.id)"
+                      [disabled]="isCategoryInUse(cat.id)"
+                      [attr.title]="isCategoryInUse(cat.id) ? 'Categoria em uso em movimentacoes ou contas.' : null"
+                    >Excluir</tc-button>
                   </div>
                 </td>
               </tr>
@@ -118,10 +124,10 @@ import { Category } from '../../categories/domain/category.repository';
             Ao resetar, todas as movimentações e configurações atuais serão perdidas e substituídas por dados fictícios para fins de apresentação.
           </p>
           <div class="reset-actions">
-            <tc-button variant="danger" (onClick)="openResetModal('healthy')">
+            <tc-button variant="danger" (clicked)="openResetModal('healthy')">
               Carregar Cenário Saudável
             </tc-button>
-            <tc-button variant="danger" (onClick)="openResetModal('risk')">
+            <tc-button variant="danger" (clicked)="openResetModal('risk')">
               Carregar Cenário de Risco
             </tc-button>
           </div>
@@ -140,8 +146,8 @@ import { Category } from '../../categories/domain/category.repository';
         Esta ação apagará todos os dados atuais da demonstração.
       </p>
       <div style="display: flex; gap: var(--space-3); justify-content: flex-end;">
-        <tc-button variant="ghost" (onClick)="closeResetModal()">Cancelar</tc-button>
-        <tc-button variant="danger" (onClick)="confirmReset()">Sim, Resetar</tc-button>
+        <tc-button variant="ghost" (clicked)="closeResetModal()">Cancelar</tc-button>
+        <tc-button variant="danger" (clicked)="confirmReset()">Sim, Resetar</tc-button>
       </div>
     </tc-modal>
   `,
@@ -243,6 +249,12 @@ export class SettingsPageComponent implements OnInit {
       reserveAttentionThresholdPct: currentSettings.reserveAttentionThresholdPct,
       minSafetyDays: currentSettings.minSafetyDays
     });
+
+    void Promise.all([
+      this.categoriesFacade.load(),
+      this.cashFlowFacade.load(),
+      this.payablesFacade.load(),
+    ]);
   }
 
   saveSettings() {
@@ -294,10 +306,7 @@ export class SettingsPageComponent implements OnInit {
   }
 
   async deleteCategory(id: string) {
-    const isUsedInCashFlow = this.cashFlowFacade.movements().some(m => m.categoryId === id);
-    const isUsedInPayables = this.payablesFacade.payables().some(p => p.categoryId === id);
-
-    if (isUsedInCashFlow || isUsedInPayables) {
+    if (this.isCategoryInUse(id)) {
       this.toast.show('Categoria em uso. Não é possível excluir.', 'error');
       return;
     }
@@ -308,6 +317,12 @@ export class SettingsPageComponent implements OnInit {
     } catch {
       this.toast.show('Erro ao excluir categoria.', 'error');
     }
+  }
+
+  isCategoryInUse(id: string): boolean {
+    const isUsedInCashFlow = this.cashFlowFacade.movements().some(m => m.categoryId === id);
+    const isUsedInPayables = this.payablesFacade.payables().some(p => p.categoryId === id);
+    return isUsedInCashFlow || isUsedInPayables;
   }
 
   // Reset

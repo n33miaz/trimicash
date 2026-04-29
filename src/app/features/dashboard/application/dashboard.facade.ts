@@ -7,7 +7,16 @@ import { ReserveHealthService } from '../domain/services/reserve-health.service'
 import { SafetyDaysService } from '../domain/services/safety-days.service';
 import { OutflowStatsService } from '../../cash-flow/domain/services/outflow-stats.service';
 import { PeriodKey } from '../../../shared/types/period.type';
-import { startOfMonth, endOfMonth } from 'date-fns';
+import { ReserveHealth } from '../../../shared/types/reserve-health.type';
+import { APP_SETTINGS } from '../../../core/tokens/injection-tokens';
+import { getPeriod } from '../../../core/utils/date.util';
+import { roundCurrency } from '../../../core/utils/money.util';
+
+export interface DashboardReserveHealth {
+  status: ReserveHealth;
+  deficitAmount: number;
+  surplusAmount: number;
+}
 
 @Injectable({
   providedIn: 'root'
@@ -15,6 +24,7 @@ import { startOfMonth, endOfMonth } from 'date-fns';
 export class DashboardFacade {
   private readonly cashFlow = inject(CashFlowFacade);
   private readonly payablesFacade = inject(AccountsPayableFacade);
+  private readonly settings = inject(APP_SETTINGS);
 
   private readonly projectedService = new ProjectedBalanceService();
   private readonly reserveService = new RecommendedReserveService();
@@ -28,29 +38,49 @@ export class DashboardFacade {
   // Public API
   readonly period = this._period.asReadonly();
   readonly currentBalance = this.cashFlow.currentBalance;
+  readonly minSafetyDays = computed(() => this.settings().minSafetyDays);
 
   readonly projectedBalance = computed(() => {
+    const ref = new Date();
     return this.projectedService.projectedBalance({
       currentBalance: this.cashFlow.currentBalance(),
       payables: this.payablesFacade.payables(),
-      period: { key: 'CURRENT_MONTH', start: startOfMonth(new Date()), end: endOfMonth(new Date()) },
-      ref: new Date()
+      period: getPeriod(this._period(), ref),
+      ref
     });
   });
 
   readonly recommendedReserve = computed(() => {
+    const ref = new Date();
     return this.reserveService.recommendedReserve({
       payables: this.payablesFacade.payables(),
-      period: { key: 'CURRENT_MONTH', start: startOfMonth(new Date()), end: endOfMonth(new Date()) },
-      safetyMarginPct: 10,
-      ref: new Date()
+      period: getPeriod(this._period(), ref),
+      safetyMarginPct: this.settings().reserveSafetyMarginPct,
+      ref
     });
   });
 
-  readonly reserveHealth = computed(() => {
+  readonly reserveHealth = computed<DashboardReserveHealth>(() => {
+    const currentBalance = this.cashFlow.currentBalance();
+    const recommendedReserve = this.recommendedReserve();
+    const status = this.healthService.reserveHealth({
+      currentBalance,
+      recommendedReserve,
+      attentionThresholdPct: this.settings().reserveAttentionThresholdPct,
+    });
+
+    return {
+      status,
+      deficitAmount: roundCurrency(Math.max(0, recommendedReserve - currentBalance)),
+      surplusAmount: roundCurrency(Math.max(0, currentBalance - recommendedReserve)),
+    };
+  });
+
+  readonly reserveHealthStatus = computed(() => {
     return this.healthService.reserveHealth({
       currentBalance: this.cashFlow.currentBalance(),
-      recommendedReserve: this.recommendedReserve()
+      recommendedReserve: this.recommendedReserve(),
+      attentionThresholdPct: this.settings().reserveAttentionThresholdPct,
     });
   });
 

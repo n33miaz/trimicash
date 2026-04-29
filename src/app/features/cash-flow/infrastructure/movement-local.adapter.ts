@@ -5,6 +5,8 @@ import type { Period } from '../../../shared/types/period.type';
 
 const STORAGE_KEY = 'trimicash:movements';
 
+type StoredMovement = Omit<Movement, 'date'> & { date: string };
+
 @Injectable({
   providedIn: 'root'
 })
@@ -69,8 +71,8 @@ export class MovementLocalAdapter implements MovementRepository {
     if (!data) return [];
     
     try {
-      const parsed = JSON.parse(data);
-      return parsed.map((item: any) => ({
+      const parsed = JSON.parse(data) as StoredMovement[];
+      return parsed.map((item) => ({
         ...item,
         date: new Date(item.date)
       }));

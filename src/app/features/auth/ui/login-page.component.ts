@@ -122,8 +122,8 @@ export class LoginPageComponent {
       const { email, password } = this.loginForm.value;
       await this.authPort.login(email!, password!);
       this.router.navigate(['/']);
-    } catch (err: any) {
-      this.error.set(err.message || 'Erro ao efetuar login');
+    } catch (err: unknown) {
+      this.error.set(err instanceof Error ? err.message : 'Erro ao efetuar login');
     } finally {
       this.loading.set(false);
     }
