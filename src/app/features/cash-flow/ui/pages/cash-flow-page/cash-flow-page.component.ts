@@ -36,7 +36,6 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
     ButtonComponent,
     BadgeComponent,
     ModalComponent,
-    SelectComponent,
     EmptyStateComponent,
     LoadingStateComponent,
     BrlCurrencyPipe,
@@ -225,11 +224,12 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
     }
     .filter-tabs {
       display: flex;
-      gap: var(--space-1);
-      background: var(--color-background);
-      border: 1px solid var(--color-border);
+      gap: var(--space-2);
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border-card);
       border-radius: var(--radius-md);
       padding: var(--space-1);
+      box-shadow: var(--shadow-sm);
     }
     .filter-tab {
       padding: var(--space-2) var(--space-4);
@@ -240,87 +240,80 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
       font-size: var(--font-size-sm);
       font-weight: 500;
       color: var(--color-text-secondary);
-      transition:
-        background-color var(--motion-fast),
-        color var(--motion-fast),
-        box-shadow var(--motion-fast);
+      transition: background-color var(--motion-fast), color var(--motion-fast), box-shadow var(--motion-fast);
     }
+    .filter-tab:hover { color: var(--color-accent-500); }
     .filter-tab.active {
-      background: var(--color-surface);
-      color: var(--color-text-primary);
-      box-shadow: var(--shadow-sm);
+      background: var(--color-accent-500);
+      color: #fff;
+      box-shadow: var(--shadow-glow-accent);
     }
     .filter-select {
       padding: var(--space-2) var(--space-3);
-      border: 1px solid var(--color-border);
+      border: 1px solid var(--color-border-card);
       border-radius: var(--radius-md);
       font-family: var(--font-family-body);
       font-size: var(--font-size-sm);
-      background: var(--color-surface);
+      background: var(--color-bg-card);
       color: var(--color-text-primary);
       cursor: pointer;
+      transition: border-color var(--motion-fast);
     }
     .filter-select:focus-visible {
       outline: none;
       border-color: var(--color-accent-500);
+      box-shadow: 0 0 0 3px rgba(47,128,237,0.15);
     }
 
     /* Table */
     .table-wrapper {
-      background: var(--color-surface);
+      background: var(--color-bg-card);
       border-radius: var(--radius-lg);
-      border: 1px solid var(--color-border);
+      border: 1px solid var(--color-border-card);
       overflow: hidden;
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--shadow-card);
     }
-    .tc-table {
-      width: 100%;
-      border-collapse: collapse;
-      text-align: left;
-    }
+    .tc-table { width: 100%; border-collapse: collapse; text-align: left; }
     .tc-table th {
       padding: var(--space-3) var(--space-4);
       background: var(--color-background);
       font-size: var(--font-size-xs);
       font-weight: 600;
-      color: var(--color-text-secondary);
+      color: var(--color-text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--color-border);
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--color-border-card);
     }
     .tc-table td {
       padding: var(--space-4);
-      border-bottom: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border-card);
       font-size: var(--font-size-sm);
       color: var(--color-text-primary);
     }
     .tc-table tr:last-child td { border-bottom: none; }
-    .tc-table tbody tr:hover { background: var(--color-background); }
+    .tc-table tbody tr { transition: background var(--motion-fast); }
+    .tc-table tbody tr:hover { background: var(--color-bg-row-hover); }
     .text-right { text-align: right; }
     .text-secondary { color: var(--color-text-secondary); }
-    .amount { font-weight: 600; font-family: var(--font-family-display); }
+    .amount { font-weight: 700; font-family: var(--font-family-display); }
     .amount-entrada { color: var(--color-success-500); }
-    .amount-saida { color: var(--color-danger-500); }
-
+    .amount-saida  { color: var(--color-danger-500); }
     .actions-cell { display: flex; gap: var(--space-2); }
 
     /* Mobile cards */
     .movement-card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border-card);
       border-radius: var(--radius-lg);
       padding: var(--space-4);
       margin-bottom: var(--space-3);
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--shadow-card);
+      transition: all 0.25s var(--motion-spring);
     }
-    .movement-card-header {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      margin-bottom: var(--space-3);
-    }
+    .movement-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow-accent); border-color: rgba(47,128,237,0.18); }
+    .movement-card-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-3); }
     .movement-description { display: block; font-weight: 500; font-size: var(--font-size-sm); }
-    .movement-date { display: block; font-size: var(--font-size-xs); margin-top: var(--space-1); }
+    .movement-date { display: block; font-size: var(--font-size-xs); color: var(--color-text-secondary); margin-top: var(--space-1); }
     .movement-amount { font-weight: 700; font-size: var(--font-size-md); font-family: var(--font-family-display); }
     .movement-card-footer { display: flex; gap: var(--space-2); align-items: center; flex-wrap: wrap; }
 

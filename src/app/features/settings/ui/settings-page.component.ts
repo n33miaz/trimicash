@@ -157,13 +157,11 @@ import { Category } from '../../categories/domain/category.repository';
       margin: 0 auto;
       padding-bottom: var(--space-8);
     }
-    .settings-header {
-      margin-bottom: var(--space-6);
-    }
+    .settings-header { margin-bottom: var(--space-6); }
     .settings-grid {
       display: flex;
       flex-direction: column;
-      gap: var(--space-6);
+      gap: var(--space-5);
     }
     .form-actions {
       display: flex;
@@ -185,32 +183,30 @@ import { Category } from '../../categories/domain/category.repository';
     }
     .color-picker-wrapper label { font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); }
     .color-picker-wrapper input {
-      height: 44px; /* Match input height */
+      height: 44px;
       width: 60px;
-      padding: 2px;
+      padding: 3px;
       cursor: pointer;
-      border: 1px solid var(--color-border);
-      border-radius: var(--radius-sm);
+      border: 1px solid var(--color-border-card);
+      border-radius: var(--radius-md);
+      box-shadow: var(--shadow-sm);
+      transition: border-color var(--motion-fast), box-shadow var(--motion-fast);
     }
-    .cat-actions {
-      display: flex;
-      gap: var(--space-2);
+    .color-picker-wrapper input:focus-visible {
+      outline: none;
+      border-color: var(--color-accent-500);
+      box-shadow: 0 0 0 3px rgba(47,128,237,0.15);
     }
+    .cat-actions { display: flex; gap: var(--space-2); }
     .color-swatch {
-      width: 24px;
-      height: 24px;
+      width: 32px;
+      height: 32px;
       border-radius: var(--radius-sm);
       border: 1px solid rgba(0,0,0,0.1);
+      box-shadow: var(--shadow-sm);
     }
-    .actions-cell {
-      display: flex;
-      gap: var(--space-2);
-    }
-    .reset-actions {
-      display: flex;
-      gap: var(--space-3);
-      flex-wrap: wrap;
-    }
+    .actions-cell { display: flex; gap: var(--space-2); }
+    .reset-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
     .text-secondary { color: var(--color-text-secondary); }
     .text-center { text-align: center; }
   `],

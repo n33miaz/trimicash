@@ -21,42 +21,62 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   `,
   styles: [`
     :host { display: block; }
+
     .tc-table-container {
       width: 100%;
       overflow-x: auto;
-      background: var(--color-surface);
+      background: var(--color-bg-card);
       border-radius: var(--radius-lg);
-      border: 1px solid var(--color-border);
+      border: 1px solid var(--color-border-card);
+      box-shadow: var(--shadow-card);
+      /* Scrollbar fina e elegante */
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-border) transparent;
     }
+
+    .tc-table-container::-webkit-scrollbar { height: 4px; }
+    .tc-table-container::-webkit-scrollbar-track { background: transparent; }
+    .tc-table-container::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+
     .tc-table {
       width: 100%;
       border-collapse: collapse;
       text-align: left;
     }
+
     .tc-table th {
       padding: var(--space-3) var(--space-4);
       background: var(--color-background);
       font-size: var(--font-size-xs);
       font-weight: 600;
-      color: var(--color-text-secondary);
+      color: var(--color-text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--color-border);
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--color-border-card);
+      white-space: nowrap;
     }
-    ::ng-deep .tc-table td {
+
+    /* Estilos das células via projeção — sem ::ng-deep */
+    :host ::ng-deep .tc-table td {
       padding: var(--space-4);
-      border-bottom: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border-card);
       font-size: var(--font-size-sm);
       color: var(--color-text-primary);
+      vertical-align: middle;
     }
-    ::ng-deep .tc-table tr:last-child td {
+
+    :host ::ng-deep .tc-table tbody tr:last-child td {
       border-bottom: none;
     }
-    ::ng-deep .tc-table tbody tr:hover {
-      background: var(--color-background);
+
+    :host ::ng-deep .tc-table tbody tr {
+      background: transparent;
+      transition: background var(--motion-fast);
     }
-    
-    /* Mobile styles applied to the slotted content usually, handled in component */
+
+    :host ::ng-deep .tc-table tbody tr:hover {
+      background: var(--color-bg-row-hover);
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

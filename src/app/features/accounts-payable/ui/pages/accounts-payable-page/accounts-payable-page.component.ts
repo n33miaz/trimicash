@@ -273,7 +273,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
       display: flex;
       gap: var(--space-1);
       margin-bottom: var(--space-5);
-      border-bottom: 2px solid var(--color-border);
+      border-bottom: 2px solid var(--color-border-card);
       overflow-x: auto;
     }
     .tab-btn {
@@ -287,23 +287,22 @@ type StatusFilter = 'TODAS' | PayableStatus;
       border-bottom: 2px solid transparent;
       margin-bottom: -2px;
       white-space: nowrap;
-      transition:
-        color var(--motion-fast),
-        border-color var(--motion-fast),
-        background-color var(--motion-fast);
+      transition: color var(--motion-fast), border-color var(--motion-fast);
     }
+    .tab-btn:hover { color: var(--color-accent-500); }
     .tab-btn.active {
       color: var(--color-accent-500);
       border-bottom-color: var(--color-accent-500);
+      font-weight: 600;
     }
 
     /* Table */
     .table-wrapper {
-      background: var(--color-surface);
+      background: var(--color-bg-card);
       border-radius: var(--radius-lg);
-      border: 1px solid var(--color-border);
+      border: 1px solid var(--color-border-card);
       overflow: hidden;
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--shadow-card);
     }
     .tc-table { width: 100%; border-collapse: collapse; text-align: left; }
     .tc-table th {
@@ -311,51 +310,56 @@ type StatusFilter = 'TODAS' | PayableStatus;
       background: var(--color-background);
       font-size: var(--font-size-xs);
       font-weight: 600;
-      color: var(--color-text-secondary);
+      color: var(--color-text-muted);
       text-transform: uppercase;
-      letter-spacing: 0.05em;
-      border-bottom: 1px solid var(--color-border);
+      letter-spacing: 0.06em;
+      border-bottom: 1px solid var(--color-border-card);
     }
     .tc-table td {
       padding: var(--space-4);
-      border-bottom: 1px solid var(--color-border);
+      border-bottom: 1px solid var(--color-border-card);
       font-size: var(--font-size-sm);
       color: var(--color-text-primary);
     }
     .tc-table tr:last-child td { border-bottom: none; }
-    .tc-table tbody tr:hover { background: var(--color-background); }
-    .row-overdue { background: var(--color-danger-50) !important; }
+    .tc-table tbody tr { transition: background var(--motion-fast); }
+    .tc-table tbody tr:hover { background: var(--color-bg-row-hover); }
+    .row-overdue td:first-child { border-left: 3px solid var(--color-danger-500) !important; }
+    .row-overdue { background: rgba(220,38,38,0.02) !important; }
     .text-right { text-align: right; }
     .text-secondary { color: var(--color-text-secondary); font-size: var(--font-size-xs); }
-    .amount { font-weight: 600; font-family: var(--font-family-display); }
+    .amount { font-weight: 700; font-family: var(--font-family-display); }
     .actions-cell { display: flex; gap: var(--space-2); flex-wrap: wrap; }
 
     /* Due date pills */
     .due-pill {
       display: inline-block;
       margin-left: var(--space-2);
-      padding: 2px 6px;
-      border-radius: 10px;
+      padding: 3px 8px;
+      border-radius: var(--radius-full);
       font-size: var(--font-size-xs);
       font-weight: 600;
     }
     .due-overdue { color: var(--color-danger-500); font-weight: 700; }
-    .due-urgent { color: var(--color-warning-500); }
-    .due-normal { color: var(--color-text-secondary); }
-    .pill-danger { background: var(--color-danger-50); color: var(--color-danger-500); }
-    .pill-warning { background: var(--color-warning-50); color: var(--color-warning-500); }
-    .pill-neutral { background: var(--color-background); color: var(--color-text-secondary); }
+    .due-urgent  { color: var(--color-warning-500); }
+    .due-normal  { color: var(--color-text-secondary); }
+    .pill-danger  { background: var(--color-danger-50);  color: var(--color-danger-500);  border: 1px solid rgba(220,38,38,0.2); }
+    .pill-warning { background: var(--color-warning-50); color: var(--color-warning-500); border: 1px solid rgba(245,158,11,0.2); }
+    .pill-neutral { background: var(--color-background); color: var(--color-text-secondary); border: 1px solid var(--color-border-card); }
 
     /* Mobile cards */
     .payable-card {
-      background: var(--color-surface);
-      border: 1px solid var(--color-border);
+      background: var(--color-bg-card);
+      border: 1px solid var(--color-border-card);
       border-radius: var(--radius-lg);
       padding: var(--space-4);
       margin-bottom: var(--space-3);
-      box-shadow: var(--shadow-sm);
+      box-shadow: var(--shadow-card);
+      transition: all 0.25s var(--motion-spring);
     }
-    .card-overdue { border-left: 4px solid var(--color-danger-500); background: var(--color-danger-50); }
+    .payable-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow-accent); border-color: rgba(47,128,237,0.18); }
+    .card-overdue { border-left: 3px solid var(--color-danger-500); background: rgba(220,38,38,0.02); }
+    .card-overdue:hover { box-shadow: var(--shadow-glow-danger) !important; border-color: rgba(220,38,38,0.3) !important; }
     .card-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-3); }
     .card-footer { align-items: center; }
     .card-description { display: block; font-weight: 500; font-size: var(--font-size-sm); margin-bottom: var(--space-2); }

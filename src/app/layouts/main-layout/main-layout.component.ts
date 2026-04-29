@@ -1,4 +1,8 @@
-import { ChangeDetectionStrategy, Component } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  ViewChild,
+} from '@angular/core';
 import { RouterOutlet } from '@angular/router';
 import { TopbarComponent } from './topbar/topbar.component';
 import { SidebarComponent } from './sidebar/sidebar.component';
@@ -8,75 +12,44 @@ import { SidebarComponent } from './sidebar/sidebar.component';
   standalone: true,
   imports: [RouterOutlet, TopbarComponent, SidebarComponent],
   template: `
-    <div class="layout-container">
-      <tc-topbar class="topbar" (openAlerts)="onOpenAlerts()"></tc-topbar>
-      
-      <div class="layout-body">
-        <tc-sidebar class="sidebar"></tc-sidebar>
-        
-        <main class="main-content">
-          <router-outlet></router-outlet>
-        </main>
-      </div>
-    </div>
+    <!-- Topbar (visível apenas no mobile — contém hamburger) -->
+    <tc-topbar (menuToggled)="sidebar.toggle()" (openAlerts)="onOpenAlerts()"></tc-topbar>
+
+    <!-- Sidebar (fixed, overlay no mobile) -->
+    <tc-sidebar #sidebar></tc-sidebar>
+
+    <!-- Conteúdo principal -->
+    <main class="main-content">
+      <router-outlet></router-outlet>
+    </main>
   `,
   styles: [`
     :host {
       display: block;
-      height: 100vh;
-      width: 100vw;
-      overflow: hidden;
+      min-height: 100vh;
       background: var(--color-background);
     }
-    .layout-container {
-      display: flex;
-      flex-direction: column;
-      height: 100%;
-    }
-    .topbar {
-      flex-shrink: 0;
-      z-index: 10;
-    }
-    .layout-body {
-      flex: 1;
-      display: flex;
-      overflow: hidden;
-      position: relative;
-    }
+
     .main-content {
-      flex: 1;
-      overflow-y: auto;
-      padding: var(--space-4);
+      /* Desktop: deslocar para direita da sidebar */
+      margin-left: 0;
+      min-height: 100vh;
+      padding: 16px 12px 80px; /* Mobile: padding inferior p/ bottom safe area */
+      transition: margin-left var(--motion-slow);
     }
-    
-    /* Mobile-first: Sidebar is bottom-nav */
-    @media (max-width: 767px) {
-      .layout-body {
-        flex-direction: column;
-      }
-      .sidebar {
-        order: 2; /* Bottom nav goes at the bottom */
-        z-index: 10;
-      }
-      .main-content {
-        order: 1;
-        padding-bottom: env(safe-area-inset-bottom, 0); /* Support for mobile safe areas */
-      }
-    }
-    
-    /* Desktop: Sidebar is on the left */
+
     @media (min-width: 768px) {
-      .layout-body {
-        flex-direction: row;
-      }
-      .sidebar {
-        flex-shrink: 0;
+      .main-content {
+        margin-left: var(--sidebar-width);
+        padding: 28px 36px 48px;
       }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MainLayoutComponent {
+  @ViewChild('sidebar') sidebar!: SidebarComponent;
+
   onOpenAlerts(): void {
     return;
   }
