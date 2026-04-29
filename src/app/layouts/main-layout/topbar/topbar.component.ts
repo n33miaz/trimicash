@@ -1,7 +1,8 @@
-import { ChangeDetectionStrategy, Component, inject, output, signal, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, inject, output, signal, OnInit, computed } from '@angular/core';
 import { AUTH_PORT } from '../../../core/tokens/injection-tokens';
 import { DemoUser } from '../../../features/auth/domain/auth.types';
-import { RouterLink } from '@angular/router';
+import { RouterLink, Router } from '@angular/router';
+import { AlertsFacade } from '../../../features/alerts/application/alerts.facade';
 
 @Component({
   selector: 'tc-topbar',
@@ -20,12 +21,14 @@ import { RouterLink } from '@angular/router';
         @if (user()) {
           <span class="business-name">{{ user()?.businessName }}</span>
           
-          <button class="alerts-btn" (click)="openAlerts.emit()" aria-label="Abrir alertas">
+          <button class="alerts-btn" (click)="goToAlerts()" aria-label="Abrir alertas">
             <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
               <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
             </svg>
-            <span class="badge"></span>
+            @if (unreadCount() > 0) {
+              <span class="badge">{{ unreadCount() > 9 ? '9+' : unreadCount() }}</span>
+            }
           </button>
           
           <div class="avatar">
@@ -100,12 +103,19 @@ import { RouterLink } from '@angular/router';
     }
     .badge {
       position: absolute;
-      top: 0;
-      right: 0;
-      width: 8px;
-      height: 8px;
+      top: -4px;
+      right: -4px;
+      min-width: 16px;
+      height: 16px;
+      padding: 0 4px;
       background: var(--color-danger-500);
-      border-radius: 50%;
+      color: white;
+      border-radius: 8px;
+      font-size: 10px;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      justify-content: center;
     }
     .avatar {
       width: 36px;
@@ -124,9 +134,13 @@ import { RouterLink } from '@angular/router';
 })
 export class TopbarComponent implements OnInit {
   private readonly authPort = inject(AUTH_PORT);
+  private readonly router = inject(Router);
+  private readonly alertsFacade = inject(AlertsFacade);
   
   openAlerts = output<void>();
   user = signal<DemoUser | null>(null);
+
+  readonly unreadCount = computed(() => this.alertsFacade.unreadCount());
 
   ngOnInit(): void {
     this.user.set(this.authPort.current());
@@ -140,5 +154,10 @@ export class TopbarComponent implements OnInit {
       return (parts[0][0] + parts[1][0]).toUpperCase();
     }
     return name.substring(0, 2).toUpperCase();
+  }
+
+  goToAlerts() {
+    this.openAlerts.emit();
+    this.router.navigate(['/alerts']);
   }
 }

@@ -1,6 +1,11 @@
 import { Routes } from '@angular/router';
-import { AlertsPlaceholderComponent } from './ui/placeholder.component';
 
 export const alertsRoutes: Routes = [
-  { path: '', component: AlertsPlaceholderComponent }
+  {
+    path: '',
+    loadComponent: () =>
+      import('./ui/pages/alerts-center-page/alerts-center-page.component').then(
+        (m) => m.AlertsCenterPageComponent
+      ),
+  },
 ];

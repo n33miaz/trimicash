@@ -1,6 +1,11 @@
 import { Routes } from '@angular/router';
-import { CashFlowPlaceholderComponent } from './ui/placeholder.component';
 
 export const cashFlowRoutes: Routes = [
-  { path: '', component: CashFlowPlaceholderComponent }
+  {
+    path: '',
+    loadComponent: () =>
+      import('./ui/pages/cash-flow-page/cash-flow-page.component').then(
+        (m) => m.CashFlowPageComponent
+      ),
+  },
 ];

@@ -1,6 +1,11 @@
 import { Routes } from '@angular/router';
-import { AccountsPayablePlaceholderComponent } from './ui/placeholder.component';
 
 export const accountsPayableRoutes: Routes = [
-  { path: '', component: AccountsPayablePlaceholderComponent }
+  {
+    path: '',
+    loadComponent: () =>
+      import('./ui/pages/accounts-payable-page/accounts-payable-page.component').then(
+        (m) => m.AccountsPayablePageComponent
+      ),
+  },
 ];

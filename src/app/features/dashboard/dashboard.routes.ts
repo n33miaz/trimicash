@@ -1,6 +1,11 @@
 import { Routes } from '@angular/router';
-import { DashboardPlaceholderComponent } from './ui/placeholder.component';
 
 export const dashboardRoutes: Routes = [
-  { path: '', component: DashboardPlaceholderComponent }
+  {
+    path: '',
+    loadComponent: () =>
+      import('./ui/pages/dashboard-page/dashboard-page.component').then(
+        (m) => m.DashboardPageComponent
+      ),
+  },
 ];
