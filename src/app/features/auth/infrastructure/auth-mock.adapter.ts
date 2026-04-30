@@ -2,12 +2,7 @@ import { Injectable } from '@angular/core';
 import type { AuthPort, DemoUser } from '../domain/auth.types';
 
 const SESSION_KEY = 'trimicash:session';
-
-const MOCK_USER: DemoUser = {
-  id: 'demo-user-123',
-  name: 'Empreendedor Demo',
-  businessName: 'Minha Empresa TrimiCash',
-};
+const USER_NAME_KEY = 'trimicash:userName';
 
 @Injectable({
   providedIn: 'root'
@@ -25,8 +20,16 @@ export class AuthMockAdapter implements AuthPort {
 
   async login(_email: string, _password: string): Promise<DemoUser> {
     await new Promise(resolve => setTimeout(resolve, 500)); // Simulando delay de rede
-    sessionStorage.setItem(SESSION_KEY, JSON.stringify(MOCK_USER));
-    return MOCK_USER;
+
+    const userName = localStorage.getItem(USER_NAME_KEY) || 'Empreendedor';
+    const user: DemoUser = {
+      id: 'demo-user-123',
+      name: userName,
+      businessName: 'Minha Empresa TrimiCash',
+    };
+
+    sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));
+    return user;
   }
 
   logout(): void {

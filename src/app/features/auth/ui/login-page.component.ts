@@ -1,24 +1,41 @@
-import { ChangeDetectionStrategy, Component, inject, signal } from '@angular/core';
+import {
+  ChangeDetectionStrategy,
+  Component,
+  inject,
+  signal,
+} from '@angular/core';
 import { Router } from '@angular/router';
 import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
 import { AUTH_PORT } from '../../../core/tokens/injection-tokens';
 import { InputComponent } from '../../../shared/components/input/input.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { WelcomeModalComponent } from './components/welcome-modal.component';
 
 @Component({
   selector: 'tc-login-page',
   standalone: true,
-  imports: [ReactiveFormsModule, InputComponent, ButtonComponent],
+  imports: [ReactiveFormsModule, InputComponent, ButtonComponent, WelcomeModalComponent],
   template: `
+    <!-- T1: Modal de boas-vindas na primeira visita -->
+    @if (showWelcome()) {
+      <tc-welcome-modal 
+        (nameChanged)="onWelcomeNameChanged($event)"
+        (confirmed)="onWelcomeConfirmed($event)">
+      </tc-welcome-modal>
+    }
+
     <div class="login-container">
+      <div class="login-logo">
+        <img
+          src="assets/icons/logo.png"
+          alt="TrimiCash Logo"
+          class="logo-img"
+        />
+      </div>
+
       <div class="login-header">
-        <h2 class="display-md">Bem-vindo ao TrimiCash</h2>
-        <p class="body-sm text-secondary">Acesse sua conta para continuar.</p>
-        
-        <div class="demo-notice">
-          <p class="body-sm"><strong>Modo Demonstração (Fase 1)</strong></p>
-          <p class="body-xs">Qualquer e-mail e senha serão aceitos. Esta é uma versão mock sem backend real.</p>
-        </div>
+        <h2 class="login-title">TrimiCash</h2>
+        <p class="login-subtitle">Sistema Fluxo de Caixa</p>
       </div>
 
       <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
@@ -44,11 +61,12 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
           type="submit"
           variant="primary"
           size="lg"
+          [block]="true"
           [loading]="loading()"
           [disabled]="loginForm.invalid || loading()"
-          style="width: 100%; margin-top: var(--space-4);"
+          style="margin-top: var(--space-4);"
         >
-          Entrar na Demo
+          Entrar
         </tc-button>
       </form>
     </div>
@@ -59,29 +77,50 @@ import { ButtonComponent } from '../../../shared/components/button/button.compon
       max-width: 400px;
       margin: 0 auto;
     }
+
+    /* T2: Logo icon */
+    .login-logo {
+      display: flex;
+      justify-content: center;
+      margin-bottom: var(--space-4);
+    }
+    
+    .logo-img {
+      width: 160px;
+      height: 160px;
+      margin: -32px;
+      object-fit: contain;
+      border-radius: 12px;
+      filter: drop-shadow(0 4px 12px rgba(47, 128, 237, 0.2));
+    }
+
     .login-header {
       text-align: center;
       margin-bottom: var(--space-6);
     }
-    .text-secondary {
+
+    .login-title {
+      font-family: var(--font-family-display);
+      font-size: var(--font-size-3xl);
+      font-weight: 800;
+      letter-spacing: -0.03em;
+      color: var(--color-text-primary);
+      margin: 0 0 var(--space-1) 0;
+    }
+
+    .login-subtitle {
+      font-family: var(--font-family-body);
+      font-size: var(--font-size-md);
       color: var(--color-text-secondary);
+      line-height: 1.5;
+      margin: 0 0 -6px 0;
     }
-    .demo-notice {
-      margin-top: var(--space-4);
-      padding: var(--space-3);
-      background-color: var(--color-warning-50);
-      border: 1px solid var(--color-warning-500);
-      border-radius: var(--radius-md);
-      color: var(--color-warning-900);
-      text-align: left;
-    }
-    .demo-notice p { margin: 0; }
-    .demo-notice .body-xs { margin-top: var(--space-1); font-size: var(--font-size-xs); }
-    
+
     .login-form {
       display: flex;
       flex-direction: column;
     }
+
     .error-alert {
       color: var(--color-danger-500);
       font-size: var(--font-size-sm);
@@ -96,13 +135,37 @@ export class LoginPageComponent {
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
 
+  // T1: Mostrar modal apenas se não há nome salvo
+  readonly showWelcome = signal(!localStorage.getItem('trimicash:userName'));
+
   readonly loginForm = this.fb.group({
-    email: ['demo@trimicash.com', [Validators.required, Validators.email]],
-    password: ['123456', Validators.required]
+    email: ['', [Validators.required, Validators.email]],
+    password: ['', Validators.required],
   });
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
+
+  /** T1: Atualiza campos em tempo real conforme digitação no modal */
+  onWelcomeNameChanged(name: string): void {
+    const formattedEmail = name.trim() ? `${name.toLowerCase().replace(/\s+/g, '')}@gmail.com` : '';
+    this.loginForm.patchValue({
+      email: formattedEmail,
+      password: name
+    });
+  }
+
+  /** T1: Persiste nome e fecha modal. */
+  onWelcomeConfirmed(name: string): void {
+    localStorage.setItem('trimicash:userName', name);
+    this.showWelcome.set(false);
+    
+    const formattedEmail = name.trim() ? `${name.toLowerCase().replace(/\s+/g, '')}@gmail.com` : '';
+    this.loginForm.patchValue({
+      email: formattedEmail,
+      password: name
+    });
+  }
 
   showError(controlName: string): boolean {
     const control = this.loginForm.get(controlName);

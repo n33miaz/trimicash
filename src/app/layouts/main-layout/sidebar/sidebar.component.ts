@@ -10,6 +10,7 @@ import {
 import { RouterLink, RouterLinkActive, Router } from '@angular/router';
 import { AlertsFacade } from '../../../features/alerts/application/alerts.facade';
 import { AUTH_PORT } from '../../../core/tokens/injection-tokens';
+import { ThemeService } from '../../../core/services/theme.service';
 
 @Component({
   selector: 'tc-sidebar',
@@ -22,14 +23,16 @@ import { AUTH_PORT } from '../../../core/tokens/injection-tokens';
     }
 
     <aside class="sidebar" [class.open]="isOpen()">
-      <!-- Logo -->
+      <!-- Logo — T5: usa logo.png real -->
       <div class="sidebar-logo">
         <div class="logo-icon" routerLink="/" style="cursor:pointer">
-          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-            <rect x="2" y="6" width="20" height="12" rx="2"/>
-            <line x1="2" y1="10" x2="22" y2="10"/>
-            <line x1="6" y1="15" x2="9" y2="15"/>
-          </svg>
+          <img
+            src="assets/icons/logo.png"
+            alt="TrimiCash"
+            width="28"
+            height="28"
+            style="object-fit: contain; border-radius: 4px;"
+          />
         </div>
         <span class="logo-text">Trimi<span class="logo-accent">Cash</span></span>
       </div>
@@ -104,6 +107,33 @@ import { AUTH_PORT } from '../../../core/tokens/injection-tokens';
         </a>
       </nav>
 
+      <!-- T4: Botão de tema antes do footer -->
+      <button
+        class="theme-toggle-btn"
+        (click)="toggleTheme()"
+        [attr.aria-label]="isDark() ? 'Mudar para modo claro' : 'Mudar para modo escuro'">
+        @if (isDark()) {
+          <!-- Sol -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="5"/>
+            <line x1="12" y1="1" x2="12" y2="3"/>
+            <line x1="12" y1="21" x2="12" y2="23"/>
+            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/>
+            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/>
+            <line x1="1" y1="12" x2="3" y2="12"/>
+            <line x1="21" y1="12" x2="23" y2="12"/>
+            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/>
+            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
+          </svg>
+        } @else {
+          <!-- Lua -->
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+          </svg>
+        }
+        <span>{{ isDark() ? 'Modo Claro' : 'Modo Escuro' }}</span>
+      </button>
+
       <!-- Footer -->
       @if (user()) {
         <div class="sidebar-footer">
@@ -141,7 +171,7 @@ import { AUTH_PORT } from '../../../core/tokens/injection-tokens';
       flex-direction: column;
       z-index: 100;
       box-shadow: var(--shadow-sm);
-      transition: transform var(--motion-slow);
+      transition: transform var(--motion-slow), background var(--motion-slow);
       /* Mobile: escondida por padrão */
       transform: translateX(-100%);
     }
@@ -284,6 +314,32 @@ import { AUTH_PORT } from '../../../core/tokens/injection-tokens';
       50%       { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
     }
 
+    /* ─── T4: Toggle tema ────────────────────────────────── */
+    .theme-toggle-btn {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 10px 14px;
+      border-radius: var(--radius-sm);
+      color: var(--sidebar-text);
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      font-family: var(--font-family-body);
+      cursor: pointer;
+      transition: all 0.25s ease;
+      background: transparent;
+      border: none;
+      width: 100%;
+      text-align: left;
+      margin-top: var(--space-2);
+      margin-bottom: var(--space-2);
+    }
+
+    .theme-toggle-btn:hover {
+      color: var(--sidebar-text-active);
+      background: rgba(47, 128, 237, 0.07);
+    }
+
     /* ─── Footer ─────────────────────────────────────────── */
     .sidebar-footer {
       border-top: 1px solid var(--color-border-card);
@@ -337,11 +393,13 @@ import { AUTH_PORT } from '../../../core/tokens/injection-tokens';
 export class SidebarComponent implements OnInit {
   private readonly alertsFacade = inject(AlertsFacade);
   private readonly authPort = inject(AUTH_PORT);
+  private readonly themeService = inject(ThemeService);
 
   readonly isOpen = signal(false);
   readonly user = signal<{ name: string; businessName?: string } | null>(null);
 
   readonly unreadCount = computed(() => this.alertsFacade.unreadCount());
+  readonly isDark = computed(() => this.themeService.current() === 'dark');
 
   readonly initials = computed(() => {
     const name = this.user()?.name ?? '';
@@ -363,6 +421,8 @@ export class SidebarComponent implements OnInit {
   open(): void  { this.isOpen.set(true); }
   close(): void { this.isOpen.set(false); }
   toggle(): void { this.isOpen.update(v => !v); }
+
+  toggleTheme(): void { this.themeService.toggle(); }
 
   onNavClick(): void {
     // Fecha sidebar ao navegar no mobile

@@ -107,33 +107,33 @@ type StatusFilter = 'TODAS' | PayableStatus;
             <thead>
               <tr>
                 <th>Descrição</th>
-                <th>Categoria</th>
-                <th>Vencimento</th>
-                <th>Recorrência</th>
-                <th>Status</th>
+                <th class="text-center">Categoria</th>
+                <th class="text-center">Vencimento</th>
+                <th class="text-center">Recorrência</th>
+                <th class="text-center">Status</th>
                 <th class="text-right">Valor</th>
-                <th>Ações</th>
+                <th class="text-center">Ações</th>
               </tr>
             </thead>
             <tbody>
               @for (p of filteredPayables(); track p.id) {
                 <tr [class.row-overdue]="p.status === 'ATRASADA'">
-                  <td>{{ p.description }}</td>
-                  <td><tc-badge tone="neutral">{{ getCategoryName(p.categoryId) }}</tc-badge></td>
-                  <td>
+                  <td class="truncate-cell" [title]="p.description">{{ p.description }}</td>
+                  <td class="text-center"><tc-badge tone="neutral">{{ getCategoryName(p.categoryId) }}</tc-badge></td>
+                  <td class="text-center">
                     <span [class]="getDueDateClass(p)">{{ p.dueDate | date:'dd/MM/yyyy' }}</span>
                     <span class="due-pill" [class]="getDuePillClass(p)">{{ getDuePillText(p) }}</span>
                   </td>
-                  <td>
+                  <td class="text-center">
                     @if (p.recurrence !== 'NONE') {
                       <tc-badge tone="info">{{ getRecurrenceLabel(p.recurrence) }}</tc-badge>
                     } @else {
                       <span class="text-secondary">—</span>
                     }
                   </td>
-                  <td><tc-badge [tone]="getStatusTone(p.status)">{{ p.status }}</tc-badge></td>
+                  <td class="text-center"><tc-badge [tone]="getStatusTone(p.status)">{{ p.status }}</tc-badge></td>
                   <td class="text-right amount">{{ p.amount | brlCurrency }}</td>
-                  <td>
+                  <td class="text-center">
                     <div class="actions-cell">
                       @if (p.status === 'PENDENTE' || p.status === 'ATRASADA') {
                         <tc-button variant="primary" size="sm" (clicked)="openPayModal(p)">Pagar</tc-button>
@@ -263,9 +263,11 @@ type StatusFilter = 'TODAS' | PayableStatus;
 
     .kpis-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: var(--space-4);
       margin-bottom: var(--space-5);
+      max-width: 100%;
+      overflow: hidden;
     }
     @media (max-width: 768px) { .kpis-grid { grid-template-columns: 1fr; } }
 
@@ -301,10 +303,16 @@ type StatusFilter = 'TODAS' | PayableStatus;
       background: var(--color-bg-card);
       border-radius: var(--radius-lg);
       border: 1px solid var(--color-border-card);
-      overflow: hidden;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       box-shadow: var(--shadow-card);
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-border) transparent;
     }
-    .tc-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .table-wrapper::-webkit-scrollbar { height: 4px; }
+    .table-wrapper::-webkit-scrollbar-track { background: transparent; }
+    .table-wrapper::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+    .tc-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 700px; }
     .tc-table th {
       padding: var(--space-3) var(--space-4);
       background: var(--color-background);
@@ -327,9 +335,17 @@ type StatusFilter = 'TODAS' | PayableStatus;
     .row-overdue td:first-child { border-left: 3px solid var(--color-danger-500) !important; }
     .row-overdue { background: rgba(220,38,38,0.02) !important; }
     .text-right { text-align: right; }
+    .text-center { text-align: center; }
     .text-secondary { color: var(--color-text-secondary); font-size: var(--font-size-xs); }
     .amount { font-weight: 700; font-family: var(--font-family-display); }
-    .actions-cell { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+    .actions-cell { display: flex; gap: var(--space-2); flex-wrap: wrap; justify-content: center; }
+    /* Truncamento com tooltip nativo */
+    .truncate-cell {
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     /* Due date pills */
     .due-pill {

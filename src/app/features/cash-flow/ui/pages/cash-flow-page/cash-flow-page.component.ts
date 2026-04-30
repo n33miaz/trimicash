@@ -105,23 +105,23 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
           <table class="tc-table">
             <thead>
               <tr>
-                <th>Data</th>
+                <th class="text-center">Data</th>
                 <th>Descrição</th>
-                <th>Categoria</th>
-                <th>Tipo</th>
+                <th class="text-center">Categoria</th>
+                <th class="text-center">Tipo</th>
                 <th class="text-right">Valor</th>
-                <th>Ações</th>
+                <th class="text-center">Ações</th>
               </tr>
             </thead>
             <tbody>
               @for (m of filteredMovements(); track m.id) {
                 <tr>
-                  <td class="text-secondary">{{ m.date | date:'dd/MM/yyyy' }}</td>
-                  <td>{{ m.description }}</td>
-                  <td>
+                  <td class="text-center text-secondary">{{ m.date | date:'dd/MM/yyyy' }}</td>
+                  <td class="truncate-cell" [title]="m.description">{{ m.description }}</td>
+                  <td class="text-center">
                     <tc-badge tone="neutral">{{ getCategoryName(m.categoryId) }}</tc-badge>
                   </td>
-                  <td>
+                  <td class="text-center">
                     <tc-badge [tone]="m.type === 'ENTRADA' ? 'success' : 'danger'">
                       {{ m.type === 'ENTRADA' ? 'Entrada' : 'Saída' }}
                     </tc-badge>
@@ -129,7 +129,7 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
                   <td class="text-right amount" [class.amount-entrada]="m.type === 'ENTRADA'" [class.amount-saida]="m.type === 'SAIDA'">
                     {{ m.type === 'ENTRADA' ? '+' : '-' }}{{ m.amount | brlCurrency }}
                   </td>
-                  <td>
+                  <td class="text-center">
                     <div class="actions-cell">
                       <tc-button variant="secondary" size="sm" (clicked)="openEditModal(m)">Editar</tc-button>
                       <tc-button variant="danger" size="sm" (clicked)="openDeleteModal(m)">Excluir</tc-button>
@@ -207,9 +207,11 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
 
     .kpis-grid {
       display: grid;
-      grid-template-columns: repeat(3, 1fr);
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
       gap: var(--space-4);
       margin-bottom: var(--space-5);
+      max-width: 100%;
+      overflow: hidden;
     }
     @media (max-width: 768px) {
       .kpis-grid { grid-template-columns: 1fr; }
@@ -270,10 +272,16 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
       background: var(--color-bg-card);
       border-radius: var(--radius-lg);
       border: 1px solid var(--color-border-card);
-      overflow: hidden;
+      overflow-x: auto;
+      -webkit-overflow-scrolling: touch;
       box-shadow: var(--shadow-card);
+      scrollbar-width: thin;
+      scrollbar-color: var(--color-border) transparent;
     }
-    .tc-table { width: 100%; border-collapse: collapse; text-align: left; }
+    .table-wrapper::-webkit-scrollbar { height: 4px; }
+    .table-wrapper::-webkit-scrollbar-track { background: transparent; }
+    .table-wrapper::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+    .tc-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 600px; }
     .tc-table th {
       padding: var(--space-3) var(--space-4);
       background: var(--color-background);
@@ -294,11 +302,18 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
     .tc-table tbody tr { transition: background var(--motion-fast); }
     .tc-table tbody tr:hover { background: var(--color-bg-row-hover); }
     .text-right { text-align: right; }
+    .text-center { text-align: center; }
     .text-secondary { color: var(--color-text-secondary); }
     .amount { font-weight: 700; font-family: var(--font-family-display); }
     .amount-entrada { color: var(--color-success-500); }
     .amount-saida  { color: var(--color-danger-500); }
-    .actions-cell { display: flex; gap: var(--space-2); }
+    .actions-cell { display: flex; gap: var(--space-2); justify-content: center; }
+    .truncate-cell {
+      max-width: 200px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
 
     /* Mobile cards */
     .movement-card {

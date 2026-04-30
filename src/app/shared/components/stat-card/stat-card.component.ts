@@ -153,6 +153,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       color: var(--color-text-secondary);
       font-weight: 500;
       margin-bottom: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .value {
@@ -162,6 +165,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       letter-spacing: -0.03em;
       line-height: 1.1;
       color: var(--color-text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
     }
 
     .hint {

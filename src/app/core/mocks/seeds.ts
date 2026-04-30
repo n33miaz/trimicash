@@ -121,7 +121,7 @@ export const HEALTHY_MOVEMENTS: Movement[] = [
     amount: 1800,
     date: daysAgo(20),
     categoryId: CAT_IDS.energia,
-    description: 'Conta de energia — Abr',
+    description: 'Conta de energia — Abril',
   },
   {
     id: 'mov-h-007',
@@ -129,7 +129,7 @@ export const HEALTHY_MOVEMENTS: Movement[] = [
     amount: 4500,
     date: daysAgo(15),
     categoryId: CAT_IDS.salarios,
-    description: 'Salário colaborador — Abr',
+    description: 'Salário colaborador — Abril',
   },
   {
     id: 'mov-h-008',
@@ -153,7 +153,7 @@ export const HEALTHY_MOVEMENTS: Movement[] = [
     amount: 1200,
     date: daysAgo(2),
     categoryId: CAT_IDS.impostos,
-    description: 'DAS Simples Nacional — Abr',
+    description: 'DAS Simples Nacional — Abril',
   },
 ];
 
@@ -162,7 +162,7 @@ export const HEALTHY_MOVEMENTS: Movement[] = [
 export const HEALTHY_PAYABLES: PayableAccount[] = [
   {
     id: 'pay-h-001',
-    description: 'Aluguel — Mai',
+    description: 'Aluguel — Maio',
     amount: 2800,
     dueDate: daysFromNow(7),
     categoryId: CAT_IDS.aluguel,
@@ -172,7 +172,7 @@ export const HEALTHY_PAYABLES: PayableAccount[] = [
   },
   {
     id: 'pay-h-002',
-    description: 'Fornecedores — Farinha e insumos Mai',
+    description: 'Fornecedores — Farinha e insumos Maio',
     amount: 3200,
     dueDate: daysFromNow(10),
     categoryId: CAT_IDS.fornecedores,
@@ -181,7 +181,7 @@ export const HEALTHY_PAYABLES: PayableAccount[] = [
   },
   {
     id: 'pay-h-003',
-    description: 'Energia — Mai',
+    description: 'Energia — Maio',
     amount: 1800,
     dueDate: daysFromNow(12),
     categoryId: CAT_IDS.energia,
@@ -190,7 +190,7 @@ export const HEALTHY_PAYABLES: PayableAccount[] = [
   },
   {
     id: 'pay-h-004',
-    description: 'Salário colaborador — Mai',
+    description: 'Salário colaborador — Maio',
     amount: 4500,
     dueDate: daysFromNow(5),
     categoryId: CAT_IDS.salarios,
@@ -199,7 +199,7 @@ export const HEALTHY_PAYABLES: PayableAccount[] = [
   },
   {
     id: 'pay-h-005',
-    description: 'DAS Simples Nacional — Mai',
+    description: 'DAS Simples Nacional — Maio',
     amount: 1200,
     dueDate: daysFromNow(9),
     categoryId: CAT_IDS.impostos,
@@ -217,7 +217,7 @@ export const HEALTHY_PAYABLES: PayableAccount[] = [
   },
   {
     id: 'pay-h-007',
-    description: 'Marketing digital — Mai',
+    description: 'Marketing digital — Maio',
     amount: 980,
     dueDate: daysFromNow(20),
     categoryId: CAT_IDS.marketing,
@@ -269,7 +269,7 @@ export const RISK_MOVEMENTS: Movement[] = [
     amount: 2800,
     date: daysAgo(26),
     categoryId: CAT_IDS.aluguel,
-    description: 'Aluguel — Abr',
+    description: 'Aluguel — Abril',
   },
   {
     id: 'mov-r-006',
@@ -277,7 +277,7 @@ export const RISK_MOVEMENTS: Movement[] = [
     amount: 4500,
     date: daysAgo(19),
     categoryId: CAT_IDS.salarios,
-    description: 'Salário colaborador — Abr',
+    description: 'Salário colaborador — Abril',
   },
   {
     id: 'mov-r-007',
@@ -285,7 +285,7 @@ export const RISK_MOVEMENTS: Movement[] = [
     amount: 1800,
     date: daysAgo(12),
     categoryId: CAT_IDS.energia,
-    description: 'Conta de energia — Abr',
+    description: 'Conta de energia — Abril',
   },
   {
     id: 'mov-r-008',
@@ -293,7 +293,7 @@ export const RISK_MOVEMENTS: Movement[] = [
     amount: 1200,
     date: daysAgo(8),
     categoryId: CAT_IDS.impostos,
-    description: 'DAS Simples Nacional — Abr',
+    description: 'DAS Simples Nacional — Abril',
   },
   {
     id: 'mov-r-009',
@@ -318,7 +318,7 @@ export const RISK_MOVEMENTS: Movement[] = [
 export const RISK_PAYABLES: PayableAccount[] = [
   {
     id: 'pay-r-001',
-    description: 'Aluguel — Mai (ATRASADO)',
+    description: 'Aluguel — Maio',
     amount: 2800,
     dueDate: daysAgo(3), // Atrasada há 3 dias
     categoryId: CAT_IDS.aluguel,
@@ -328,7 +328,7 @@ export const RISK_PAYABLES: PayableAccount[] = [
   },
   {
     id: 'pay-r-002',
-    description: 'Salário colaborador — Mai',
+    description: 'Salário colaborador — Maio',
     amount: 4500,
     dueDate: daysFromNow(2), // Vence em 2 dias
     categoryId: CAT_IDS.salarios,
@@ -337,7 +337,7 @@ export const RISK_PAYABLES: PayableAccount[] = [
   },
   {
     id: 'pay-r-003',
-    description: 'Energia — Mai',
+    description: 'Energia — Maio',
     amount: 1800,
     dueDate: daysFromNow(6),
     categoryId: CAT_IDS.energia,
@@ -355,7 +355,7 @@ export const RISK_PAYABLES: PayableAccount[] = [
   },
   {
     id: 'pay-r-005',
-    description: 'Fornecedores — Insumos Mai',
+    description: 'Fornecedores — Insumos Maio',
     amount: 2100,
     dueDate: daysFromNow(14),
     categoryId: CAT_IDS.fornecedores,

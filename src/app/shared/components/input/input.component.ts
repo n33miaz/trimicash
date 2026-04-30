@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, forwardRef, input } from '@angular/core';
+import { ChangeDetectionStrategy, ChangeDetectorRef, Component, forwardRef, inject, input } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
@@ -65,13 +65,21 @@ export class InputComponent implements ControlValueAccessor {
   value = '';
   disabled = false;
 
+  private cdr = inject(ChangeDetectorRef);
+
   onChange: (value: string) => void = (_value: string): void => { return; };
   onTouched: () => void = (): void => { return; };
 
-  writeValue(val: string): void { this.value = val || ''; }
+  writeValue(val: string): void { 
+    this.value = val || ''; 
+    this.cdr.markForCheck();
+  }
   registerOnChange(fn: (value: string) => void): void { this.onChange = fn; }
   registerOnTouched(fn: () => void): void { this.onTouched = fn; }
-  setDisabledState(isDisabled: boolean): void { this.disabled = isDisabled; }
+  setDisabledState(isDisabled: boolean): void { 
+    this.disabled = isDisabled; 
+    this.cdr.markForCheck();
+  }
 
   onInputChange(event: Event) {
     const val = (event.target as HTMLInputElement).value;

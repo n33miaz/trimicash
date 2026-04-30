@@ -6,7 +6,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   template: `
     <button
       [type]="type()"
-      [class]="'tc-btn tc-btn-' + variant() + ' tc-btn-' + size()"
+      [class]="'tc-btn tc-btn-' + variant() + ' tc-btn-' + size() + (block() ? ' tc-btn-block' : '')"
       [disabled]="disabled() || loading()"
       (click)="clicked.emit($event)">
       @if (loading()) {
@@ -56,6 +56,11 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
     .tc-btn-sm { padding: var(--space-2) var(--space-3); font-size: var(--font-size-sm); }
     .tc-btn-md { padding: var(--space-3) var(--space-4); font-size: var(--font-size-md); }
     .tc-btn-lg { padding: var(--space-4) var(--space-5); font-size: var(--font-size-lg); }
+    
+    .tc-btn-block {
+      width: 100%;
+      display: flex;
+    }
 
     /* ─── Variants ───────────────────────────────────────── */
     .tc-btn-primary {
@@ -115,6 +120,7 @@ export class ButtonComponent {
   variant  = input<'primary' | 'secondary' | 'ghost' | 'danger'>('primary');
   size     = input<'sm' | 'md' | 'lg'>('md');
   type     = input<'button' | 'submit' | 'reset'>('button');
+  block    = input<boolean>(false);
   loading  = input<boolean>(false);
   disabled = input<boolean>(false);
   clicked  = output<MouseEvent>();
