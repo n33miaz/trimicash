@@ -25,7 +25,7 @@ export class AuthMockAdapter implements AuthPort {
     const user: DemoUser = {
       id: 'demo-user-123',
       name: userName,
-      businessName: 'Minha Empresa TrimiCash',
+      businessName: 'Nome da Minha Empresa',
     };
 
     sessionStorage.setItem(SESSION_KEY, JSON.stringify(user));

@@ -40,6 +40,7 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
     LoadingStateComponent,
     BrlCurrencyPipe,
     MovementFormComponent,
+    SelectComponent,
   ],
   template: `
     <div class="cash-flow-page">
@@ -81,12 +82,11 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
           }
         </div>
 
-        <select class="filter-select" [(ngModel)]="activeCategoryId">
-          <option value="">Todas as categorias</option>
-          @for (cat of categoriesFacade.categories(); track cat.id) {
-            <option [value]="cat.id">{{ cat.name }}</option>
-          }
-        </select>
+        <tc-select
+          class="filter-select"
+          [options]="categoryOptions()"
+          [(ngModel)]="activeCategoryId"
+        ></tc-select>
       </div>
 
       <!-- Lista -->
@@ -250,21 +250,15 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
       color: #fff;
       box-shadow: var(--shadow-glow-accent);
     }
-    .filter-select {
-      padding: var(--space-2) var(--space-3);
-      border: 1px solid var(--color-border-card);
-      border-radius: var(--radius-md);
-      font-family: var(--font-family-body);
-      font-size: var(--font-size-sm);
-      background: var(--color-bg-card);
-      color: var(--color-text-primary);
-      cursor: pointer;
-      transition: border-color var(--motion-fast);
+    .filter-select tc-select {
+      margin-bottom: 0;
     }
-    .filter-select:focus-visible {
-      outline: none;
-      border-color: var(--color-accent-500);
-      box-shadow: 0 0 0 3px rgba(47,128,237,0.15);
+    ::ng-deep .filter-select select {
+      padding: var(--space-2) var(--space-3) !important;
+      border-color: var(--color-border-card) !important;
+      background: var(--color-bg-card) !important;
+      box-shadow: none !important;
+      font-size: var(--font-size-sm) !important;
     }
 
     /* Table */
@@ -362,6 +356,13 @@ export class CashFlowPageComponent implements OnInit {
     { label: 'Entradas', value: 'ENTRADA' as const },
     { label: 'Saídas', value: 'SAIDA' as const },
   ];
+
+  readonly categoryOptions = computed(() => {
+    return [
+      { label: 'Todas as categorias', value: '' },
+      ...this.categoriesFacade.categories().map(c => ({ label: c.name, value: c.id }))
+    ];
+  });
 
   readonly filteredMovements = computed(() => {
     return this.cashFlowFacade.movements()

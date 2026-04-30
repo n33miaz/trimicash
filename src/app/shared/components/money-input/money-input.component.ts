@@ -48,8 +48,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
       box-shadow: 0 0 0 3px var(--color-primary-50);
     }
     .input-with-prefix:has(.has-error) { border-color: var(--color-danger-500); }
-    .prefix { padding: 0 var(--space-3); color: var(--color-text-secondary); background: var(--color-background); border-right: 1px solid var(--color-border); height: 100%; display: flex; align-items: center; }
-    input { flex: 1; padding: var(--space-3); border: none; font-family: var(--font-family-body); font-size: var(--font-size-md); color: var(--color-text-primary); background: transparent; }
+    .prefix { padding: 0 var(--space-3); color: var(--color-text-secondary); background: var(--color-bg-input); border-right: 1px solid var(--color-border); height: 100%; display: flex; align-items: center; font-weight: 600; font-family: var(--font-family-display); }
+    input { flex: 1; padding: var(--space-3); border: none; font-family: var(--font-family-body); font-size: var(--font-size-md); color: var(--color-text-primary); background: transparent; font-weight: 500; }
     input:focus { outline: none; }
     input:disabled { cursor: not-allowed; }
     .input-with-prefix:has(input:disabled) { background: var(--color-background); opacity: 0.7; }

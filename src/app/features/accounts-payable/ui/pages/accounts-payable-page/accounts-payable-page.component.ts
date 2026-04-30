@@ -79,6 +79,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
         ></tc-stat-card>
       </div>
 
+
       <!-- Tabs de status -->
       <div class="tabs-bar">
         @for (tab of tabs; track tab.value) {
@@ -186,6 +187,8 @@ type StatusFilter = 'TODAS' | PayableStatus;
           }
         </div>
       }
+
+
     </div>
 
     <!-- Modal: Criar / Editar conta -->
@@ -274,10 +277,13 @@ type StatusFilter = 'TODAS' | PayableStatus;
     .tabs-bar {
       display: flex;
       gap: var(--space-1);
-      margin-bottom: var(--space-5);
+      margin-bottom: var(--space-4);
       border-bottom: 2px solid var(--color-border-card);
       overflow-x: auto;
+      scrollbar-width: none;
+      -ms-overflow-style: none;
     }
+    .tabs-bar::-webkit-scrollbar { display: none; }
     .tab-btn {
       padding: var(--space-3) var(--space-4);
       border: none;

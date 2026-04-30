@@ -33,22 +33,38 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     .tc-input-wrapper { display: flex; flex-direction: column; gap: var(--space-2); }
     label { font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); }
     input {
-      padding: var(--space-3);
+      padding: var(--space-3) var(--space-4);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-md);
       font-family: var(--font-family-body);
       font-size: var(--font-size-md);
       background: var(--color-surface);
       color: var(--color-text-primary);
-      transition: border-color var(--motion-fast);
+      transition: border-color var(--motion-fast), box-shadow var(--motion-fast);
+      box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+      cursor: pointer;
+    }
+    input:hover:not(:disabled) {
+      border-color: var(--color-accent-500);
     }
     input:focus-visible {
       outline: none;
       border-color: var(--color-primary-500);
-      box-shadow: 0 0 0 3px var(--color-primary-50);
+      box-shadow: 0 0 0 3px var(--color-primary-50), 0 1px 2px rgba(0, 0, 0, 0.05);
+    }
+    input::-webkit-calendar-picker-indicator {
+      cursor: pointer;
+      opacity: 0.6;
+      transition: opacity var(--motion-fast);
+      padding: 4px;
+      border-radius: 4px;
+    }
+    input::-webkit-calendar-picker-indicator:hover {
+      opacity: 1;
+      background-color: var(--color-bg-input);
     }
     input.has-error { border-color: var(--color-danger-500); }
-    input:disabled { background: var(--color-background); cursor: not-allowed; opacity: 0.7; }
+    input:disabled { background: var(--color-background); cursor: not-allowed; opacity: 0.7; box-shadow: none; }
     .error-msg { font-size: var(--font-size-xs); color: var(--color-danger-500); }
     .hint-msg { font-size: var(--font-size-xs); color: var(--color-text-secondary); }
   `],

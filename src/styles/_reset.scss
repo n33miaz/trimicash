@@ -5,6 +5,7 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  transition: background-color var(--motion-normal), border-color var(--motion-normal), color var(--motion-normal), opacity var(--motion-normal), box-shadow var(--motion-normal), transform var(--motion-normal);
 }
 
 * {

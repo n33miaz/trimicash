@@ -159,19 +159,20 @@ import { ThemeService } from '../../../core/services/theme.service';
 
     @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-    /* ─── Sidebar Base ────────────────────────────────────── */
     .sidebar {
       position: fixed;
       left: 0; top: 0; bottom: 0;
       width: var(--sidebar-width);
       background: var(--sidebar-bg);
+      backdrop-filter: blur(12px);
+      -webkit-backdrop-filter: blur(12px);
       border-right: 1px solid var(--color-border-sidebar);
       padding: 24px 16px;
       display: flex;
       flex-direction: column;
       z-index: 100;
       box-shadow: var(--shadow-sm);
-      transition: transform var(--motion-slow), background var(--motion-slow);
+      transition: transform var(--motion-slow), background var(--motion-slow), backdrop-filter var(--motion-slow);
       /* Mobile: escondida por padrão */
       transform: translateX(-100%);
     }

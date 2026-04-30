@@ -25,13 +25,13 @@ import { ButtonComponent } from '../../../../../shared/components/button/button.
       <div class="form-row type-selector">
         <button type="button" 
                 class="type-btn" 
-                [class.active]="form.get('type')?.value === 'ENTRADA'"
+                [class.active-entrada]="form.get('type')?.value === 'ENTRADA'"
                 (click)="form.get('type')?.setValue('ENTRADA')">
           Entrada
         </button>
         <button type="button" 
                 class="type-btn" 
-                [class.active]="form.get('type')?.value === 'SAIDA'"
+                [class.active-saida]="form.get('type')?.value === 'SAIDA'"
                 (click)="form.get('type')?.setValue('SAIDA')">
           Saída
         </button>
@@ -75,10 +75,17 @@ import { ButtonComponent } from '../../../../../shared/components/button/button.
         border-color var(--motion-fast),
         color var(--motion-fast);
     }
-    .type-btn.active {
-      background: var(--color-primary-50);
-      border-color: var(--color-primary-500);
-      color: var(--color-primary-900);
+    .type-btn.active-entrada {
+      background: var(--color-success-50);
+      border-color: var(--color-success-500);
+      color: var(--color-success-600);
+      font-weight: 600;
+    }
+    .type-btn.active-saida {
+      background: var(--color-danger-50);
+      border-color: var(--color-danger-500);
+      color: var(--color-danger-600);
+      font-weight: 600;
     }
     .actions {
       display: flex;

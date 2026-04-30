@@ -20,6 +20,8 @@ import { StatCardComponent } from '../../../../../shared/components/stat-card/st
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
 import { BadgeComponent } from '../../../../../shared/components/badge/badge.component';
 import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
+import { SelectComponent } from '../../../../../shared/components/select/select.component';
+import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'tc-dashboard-page',
@@ -32,22 +34,18 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
     ButtonComponent,
     BadgeComponent,
     BrlCurrencyPipe,
+    SelectComponent,
+    FormsModule,
   ],
   template: `
     <div class="dashboard-page">
       <tc-page-header [title]="greeting()">
         <div class="period-selector">
-          <select 
-            class="tc-select-inline" 
-            [value]="dashboard.period()" 
-            (change)="onPeriodChange($event)"
-          >
-            <option value="CURRENT_MONTH">Este Mês</option>
-            <option value="NEXT_7">Próximos 7 Dias</option>
-            <option value="NEXT_15">Próximos 15 Dias</option>
-            <option value="NEXT_30">Próximos 30 Dias</option>
-            <option value="END_OF_MONTH">Até o Fim do Mês</option>
-          </select>
+          <tc-select 
+            [options]="periodOptions" 
+            [ngModel]="dashboard.period()" 
+            (ngModelChange)="onPeriodChange($event)"
+          ></tc-select>
         </div>
       </tc-page-header>
 
@@ -208,28 +206,15 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       padding-bottom: var(--space-8);
     }
 
-    .period-selector { display: flex; align-items: center; }
-
-    .tc-select-inline {
-      padding: var(--space-2) var(--space-6) var(--space-2) var(--space-3);
-      border: 1px solid var(--color-border-card);
-      border-radius: var(--radius-md);
-      font-family: var(--font-family-body);
-      font-size: var(--font-size-sm);
-      font-weight: 500;
-      background-color: var(--color-bg-card);
-      color: var(--color-text-primary);
-      cursor: pointer;
-      appearance: none;
-      background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="%236B7280" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>');
-      background-repeat: no-repeat;
-      background-position: right var(--space-2) center;
-      transition: border-color var(--motion-fast), box-shadow var(--motion-fast);
+    .period-selector tc-select {
+      margin-bottom: 0;
     }
-    .tc-select-inline:focus-visible {
-      outline: none;
-      border-color: var(--color-accent-500);
-      box-shadow: 0 0 0 3px rgba(47,128,237,0.15);
+    
+    ::ng-deep .period-selector select {
+      padding: var(--space-2) var(--space-6) var(--space-2) var(--space-3) !important;
+      font-size: var(--font-size-sm) !important;
+      border-color: var(--color-border-card) !important;
+      box-shadow: none !important;
     }
 
     /* ─── KPIs ──────────────────────────────────────────── */
@@ -342,6 +327,14 @@ export class DashboardPageComponent implements OnInit {
   
   readonly unreadAlertsCount = computed(() => this.alertsFacade.unreadCount());
 
+  readonly periodOptions = [
+    { value: 'CURRENT_MONTH', label: 'Este Mês' },
+    { value: 'NEXT_7', label: 'Próximos 7 Dias' },
+    { value: 'NEXT_15', label: 'Próximos 15 Dias' },
+    { value: 'NEXT_30', label: 'Próximos 30 Dias' },
+    { value: 'END_OF_MONTH', label: 'Até o Fim do Mês' },
+  ];
+
   async ngOnInit() {
     await Promise.all([
       this.dashboard.loadData(),
@@ -349,9 +342,8 @@ export class DashboardPageComponent implements OnInit {
     ]);
   }
 
-  onPeriodChange(event: Event) {
-    const val = (event.target as HTMLSelectElement).value as PeriodKey;
-    this.dashboard.setPeriod(val);
+  onPeriodChange(val: string) {
+    this.dashboard.setPeriod(val as PeriodKey);
   }
 
   getCategoryName(id: string): string {
