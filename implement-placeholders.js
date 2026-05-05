@@ -17,27 +17,29 @@ features.forEach(feat => {
   const compName = feat.name + 'PlaceholderComponent';
   const compPath = path.join(__dirname, 'src', 'app', 'features', feat.path, 'ui', 'placeholder.component.ts');
   
-  const compContent = `import { Component } from '@angular/core';
+  const compContent = 
+  `import { Component } from '@angular/core';
 
-@Component({
-  standalone: true,
-  template: \`<div style="padding: 2rem;"><h1>\${title}</h1><p>Em construção...</p></div>\`
-})
-export class \${compName} {}
-`;
+  @Component({
+    standalone: true,
+    template: \`<div style="padding: 2rem;"><h1>\${title}</h1><p>Em construção...</p></div>\`
+  })
+  export class \${compName} {}
+  `;
 
   fs.mkdirSync(path.dirname(compPath), { recursive: true });
   fs.writeFileSync(compPath, compContent);
   console.log('Created', compPath);
 
   const routePath = path.join(__dirname, 'src', 'app', 'features', feat.path, feat.routeFile);
-  const routeContent = `import { Routes } from '@angular/router';
-import { \${compName} } from './ui/placeholder.component';
+  const routeContent = 
+  `import { Routes } from '@angular/router';
+  import { \${compName} } from './ui/placeholder.component';
 
-export const \${feat.routeExport}: Routes = [
-  { path: '', component: \${compName} }
-];
-`;
+  export const \${feat.routeExport}: Routes = [
+    { path: '', component: \${compName} }
+  ];
+  `;
   
   fs.writeFileSync(routePath, routeContent);
   console.log('Updated', routePath);

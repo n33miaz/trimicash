@@ -228,6 +228,21 @@ interface SelectOption {
       animation: dropdownIn var(--motion-normal);
     }
 
+    :host-context([data-theme="dark"]) .select-trigger {
+      background: color-mix(in srgb, var(--color-surface) 88%, #000 12%);
+    }
+
+    :host-context([data-theme="dark"]) .select-dropdown {
+      background: color-mix(in srgb, var(--color-surface) 94%, #000 6%);
+      border-color: color-mix(in srgb, var(--color-accent-500) 24%, transparent);
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+    }
+
+    :host-context([data-theme="dark"]) .select-option.is-selected {
+      background: color-mix(in srgb, var(--color-accent-500) 18%, var(--color-surface));
+    }
+
     .select-option {
       width: 100%;
       min-height: 44px;

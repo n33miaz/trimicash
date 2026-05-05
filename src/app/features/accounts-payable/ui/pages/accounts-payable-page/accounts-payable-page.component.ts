@@ -9,6 +9,7 @@ import {
 import { DatePipe } from '@angular/common';
 import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { differenceInDays } from 'date-fns';
+import { Router } from '@angular/router';
 import { CashFlowFacade } from '../../../../cash-flow/application/cash-flow.facade';
 import { CategoriesFacade } from '../../../../categories/application/categories.facade';
 import { AccountsPayableFacade } from '../../../application/accounts-payable.facade';
@@ -59,16 +60,16 @@ type StatusFilter = 'TODAS' | PayableStatus;
 
       <div class="kpis-grid">
         <tc-stat-card
-          label="Total a pagar no mes"
+          label="Total a pagar"
           [value]="totalMes() | brlCurrency"
           tone="warning"
-          hint="Contas pendentes e atrasadas"
+          hint="Último mês"
         ></tc-stat-card>
         <tc-stat-card
-          label="Vencendo em 7 dias"
+          label="Vencendo"
           [value]="vencendo7d() | brlCurrency"
           tone="warning"
-          hint="Pendentes com vencimento em ate 7 dias"
+          hint="em até 7 dias"
         ></tc-stat-card>
         <tc-stat-card
           label="Atrasadas"
@@ -149,25 +150,25 @@ type StatusFilter = 'TODAS' | PayableStatus;
         <div class="mobile-cards mobile-only">
           @for (p of filteredPayables(); track p.id) {
             <div class="payable-card" [class.card-overdue]="p.status === 'ATRASADA'">
-              <div class="card-row card-top">
-                <div class="card-main">
-                  <span class="card-description">{{ p.description }}</span>
-                  <tc-badge [tone]="getStatusTone(p.status)">{{ p.status }}</tc-badge>
-                </div>
+              <div class="card-row card-title-row">
+                <span class="card-description">{{ p.description }}</span>
                 <span class="card-amount">{{ p.amount | brlCurrency }}</span>
               </div>
 
-              <div class="card-row card-due-row">
-                <div class="card-due">
-                  <span [class]="getDueDateClass(p)">{{ p.dueDate | date:'dd/MM/yyyy' }}</span>
-                  <span class="due-pill" [class]="getDuePillClass(p)">{{ getDuePillText(p) }}</span>
-                </div>
+              <div class="card-row card-status-row">
+                <tc-badge [tone]="getStatusTone(p.status)">{{ p.status }}</tc-badge>
+                <span [class]="getDueDateClass(p)">{{ p.dueDate | date:'dd/MM/yyyy' }}</span>
               </div>
 
-              <div class="card-meta">
-                <tc-badge tone="neutral">{{ getCategoryName(p.categoryId) }}</tc-badge>
-                @if (p.recurrence !== 'NONE') {
-                  <tc-badge tone="info">{{ getRecurrenceLabel(p.recurrence) }}</tc-badge>
+              <div class="card-row card-meta-row">
+                <div class="card-meta">
+                  <tc-badge tone="neutral">{{ getCategoryName(p.categoryId) }}</tc-badge>
+                  @if (p.recurrence !== 'NONE') {
+                    <tc-badge tone="info">{{ getRecurrenceLabel(p.recurrence) }}</tc-badge>
+                  }
+                </div>
+                @if (getDuePillText(p)) {
+                  <span class="due-pill" [class]="getDuePillClass(p)">{{ getDuePillText(p) }}</span>
                 }
               </div>
 
@@ -193,28 +194,46 @@ type StatusFilter = 'TODAS' | PayableStatus;
       [title]="payableToEdit() ? 'Editar Conta' : 'Nova Conta'"
       (close)="closeFormModal()"
     >
-      <form [formGroup]="payableForm" (ngSubmit)="savePayable()">
-        <tc-input formControlName="description" label="Descricao" [error]="getFormError('description')"></tc-input>
-        <tc-money-input formControlName="amount" label="Valor" [error]="getFormError('amount')"></tc-money-input>
-        <tc-date-input formControlName="dueDate" label="Vencimento" [error]="getFormError('dueDate')"></tc-date-input>
-        <tc-select
-          formControlName="categoryId"
-          label="Categoria"
-          [options]="categoryOptions()"
-          [fullWidth]="true"
-          [error]="getFormError('categoryId')"
-        ></tc-select>
-        <tc-select
-          formControlName="recurrence"
-          label="Recorrencia"
-          [options]="recurrenceOptions"
-          [fullWidth]="true"
-        ></tc-select>
-        <div class="modal-actions" style="margin-top: var(--space-5);">
-          <tc-button type="button" variant="ghost" (clicked)="closeFormModal()">Cancelar</tc-button>
-          <tc-button type="submit" variant="primary" [loading]="facade.loading()" [disabled]="payableForm.invalid">Salvar</tc-button>
+      @if (!hasCategories()) {
+        <div class="blocked-form-state">
+          <div class="blocked-form-icon" aria-hidden="true">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path d="M3 7h18"></path>
+              <path d="M6 12h12"></path>
+              <path d="M9 17h6"></path>
+            </svg>
+          </div>
+          <h3>Cadastre uma categoria primeiro</h3>
+          <p>Para criar uma conta a pagar, voce precisa ter pelo menos uma categoria disponivel em Configuracoes.</p>
+          <div class="modal-actions blocked-form-actions">
+            <tc-button type="button" variant="ghost" [block]="true" (clicked)="closeFormModal()">Cancelar</tc-button>
+            <tc-button type="button" variant="primary" [block]="true" (clicked)="goToSettings()">Ir para Configuracoes</tc-button>
+          </div>
         </div>
-      </form>
+      } @else {
+        <form [formGroup]="payableForm" (ngSubmit)="savePayable()">
+          <tc-input formControlName="description" label="Descricao" [error]="getFormError('description')"></tc-input>
+          <tc-money-input formControlName="amount" label="Valor" [error]="getFormError('amount')"></tc-money-input>
+          <tc-date-input formControlName="dueDate" label="Vencimento" [error]="getFormError('dueDate')"></tc-date-input>
+          <tc-select
+            formControlName="categoryId"
+            label="Categoria"
+            [options]="categoryOptions()"
+            [fullWidth]="true"
+            [error]="getFormError('categoryId')"
+          ></tc-select>
+          <tc-select
+            formControlName="recurrence"
+            label="Recorrencia"
+            [options]="recurrenceOptions"
+            [fullWidth]="true"
+          ></tc-select>
+          <div class="modal-actions" style="margin-top: var(--space-5);">
+            <tc-button type="button" variant="ghost" [block]="true" (clicked)="closeFormModal()">Cancelar</tc-button>
+            <tc-button type="submit" variant="primary" [block]="true" [loading]="facade.loading()" [disabled]="payableForm.invalid">Salvar</tc-button>
+          </div>
+        </form>
+      }
     </tc-modal>
 
     <tc-modal
@@ -231,8 +250,8 @@ type StatusFilter = 'TODAS' | PayableStatus;
           Uma movimentacao de saida sera criada no Caixa e o saldo sera atualizado.
         </p>
         <div class="modal-actions">
-          <tc-button variant="ghost" (clicked)="closePayModal()">Cancelar</tc-button>
-          <tc-button variant="primary" [loading]="facade.loading()" (clicked)="confirmPay()">Confirmar pagamento</tc-button>
+          <tc-button variant="ghost" [block]="true" (clicked)="closePayModal()">Cancelar</tc-button>
+          <tc-button variant="primary" [block]="true" [loading]="facade.loading()" (clicked)="confirmPay()">Confirmar pagamento</tc-button>
         </div>
       }
     </tc-modal>
@@ -247,8 +266,8 @@ type StatusFilter = 'TODAS' | PayableStatus;
           Tem certeza que deseja cancelar a conta <strong>{{ payableToCancel()!.description }}</strong>?
         </p>
         <div class="modal-actions">
-          <tc-button variant="ghost" (clicked)="closeCancelModal()">Voltar</tc-button>
-          <tc-button variant="danger" [loading]="facade.loading()" (clicked)="confirmCancel()">Sim, cancelar</tc-button>
+          <tc-button variant="ghost" [block]="true" (clicked)="closeCancelModal()">Voltar</tc-button>
+          <tc-button variant="danger" [block]="true" [loading]="facade.loading()" (clicked)="confirmCancel()">Sim, cancelar</tc-button>
         </div>
       }
     </tc-modal>
@@ -421,27 +440,24 @@ type StatusFilter = 'TODAS' | PayableStatus;
       margin-bottom: var(--space-3);
     }
 
-    .card-main {
-      min-width: 0;
-      display: flex;
-      flex-direction: column;
-      gap: var(--space-2);
-      align-items: flex-start;
-    }
-
     .card-description {
       display: block;
       font-weight: 600;
       font-size: var(--font-size-sm);
       line-height: 1.4;
       color: var(--color-text-primary);
+      min-width: 0;
+      flex: 1;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
     }
 
     .card-meta {
       display: flex;
       gap: var(--space-2);
       flex-wrap: wrap;
-      margin-top: var(--space-1);
+      min-width: 0;
     }
 
     .card-amount {
@@ -452,18 +468,15 @@ type StatusFilter = 'TODAS' | PayableStatus;
       flex-shrink: 0;
     }
 
-    .card-due-row {
+    .card-status-row,
+    .card-meta-row {
       align-items: center;
-      margin-bottom: var(--space-3);
     }
 
-    .card-due {
-      display: flex;
-      align-items: center;
-      gap: var(--space-2);
-      flex-wrap: wrap;
-      font-size: var(--font-size-xs);
-      color: var(--color-text-secondary);
+    .card-status-row > :last-child,
+    .card-meta-row > :last-child {
+      flex-shrink: 0;
+      white-space: nowrap;
     }
 
     .card-actions {
@@ -487,10 +500,8 @@ type StatusFilter = 'TODAS' | PayableStatus;
     @media (max-width: 768px) {
       .desktop-only { display: none; }
       .mobile-only { display: block; }
-
-      .page-header-action,
-      .page-header-action tc-button {
-        width: 100%;
+      .page-header-action {
+        margin-left: auto;
       }
     }
 
@@ -498,6 +509,43 @@ type StatusFilter = 'TODAS' | PayableStatus;
       display: flex;
       justify-content: flex-end;
       gap: var(--space-3);
+    }
+
+    .blocked-form-state {
+      display: grid;
+      gap: var(--space-3);
+      text-align: center;
+    }
+
+    .blocked-form-icon {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--color-background);
+      color: var(--color-accent-500);
+    }
+
+    .blocked-form-state h3,
+    .blocked-form-state p {
+      margin: 0;
+    }
+
+    .blocked-form-state h3 {
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+    }
+
+    .blocked-form-state p {
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-sm);
+      line-height: 1.5;
+    }
+
+    .blocked-form-actions {
+      margin-top: var(--space-2);
     }
 
     @media (max-width: 767px) {
@@ -512,6 +560,10 @@ type StatusFilter = 'TODAS' | PayableStatus;
       .modal-actions {
         flex-direction: column-reverse;
       }
+
+      .modal-actions > * {
+        width: 100%;
+      }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -522,6 +574,7 @@ export class AccountsPayablePageComponent implements OnInit {
   readonly categoriesFacade = inject(CategoriesFacade);
   private readonly toast = inject(ToastService);
   private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
 
   readonly activeTab = signal<StatusFilter>('TODAS');
   readonly isFormModalOpen = signal(false);
@@ -580,6 +633,8 @@ export class AccountsPayablePageComponent implements OnInit {
   readonly categoryOptions = computed(() =>
     this.categoriesFacade.categories().map(category => ({ label: category.name, value: category.id }))
   );
+
+  readonly hasCategories = computed(() => this.categoryOptions().length > 0);
 
   async ngOnInit(): Promise<void> {
     await Promise.all([
@@ -677,6 +732,10 @@ export class AccountsPayablePageComponent implements OnInit {
   }
 
   async savePayable(): Promise<void> {
+    if (!this.hasCategories()) {
+      return;
+    }
+
     if (this.payableForm.invalid) {
       this.payableForm.markAllAsTouched();
       return;
@@ -752,5 +811,10 @@ export class AccountsPayablePageComponent implements OnInit {
     } finally {
       this.closeCancelModal();
     }
+  }
+
+  async goToSettings(): Promise<void> {
+    this.closeFormModal();
+    await this.router.navigate(['/settings']);
   }
 }

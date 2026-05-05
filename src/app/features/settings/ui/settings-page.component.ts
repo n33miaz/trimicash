@@ -1,11 +1,11 @@
 import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
-import { TitleCasePipe } from '@angular/common';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AccountsPayableFacade } from '../../accounts-payable/application/accounts-payable.facade';
 import { CategoriesFacade } from '../../categories/application/categories.facade';
 import { Category } from '../../categories/domain/category.repository';
 import { CashFlowFacade } from '../../cash-flow/application/cash-flow.facade';
 import { SeedRunner } from '../../../core/mocks/seed-runner';
+import type { SeedScenario } from '../../../core/mocks/seeds';
 import { SettingsLocalAdapter } from '../../../features/settings/infrastructure/settings-local.adapter';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { CardComponent } from '../../../shared/components/card/card.component';
@@ -19,12 +19,11 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
   standalone: true,
   imports: [
     ReactiveFormsModule,
-    TitleCasePipe,
     InputComponent,
     ButtonComponent,
     CardComponent,
     TableComponent,
-    ModalComponent
+    ModalComponent,
   ],
   template: `
     <div class="settings-layout">
@@ -33,7 +32,7 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
       </div>
 
       <div class="settings-grid">
-        <tc-card title="Parametros de Analise" subtitle="Ajuste como o TrimiCash avalia a saude do seu caixa.">
+        <tc-card title="Parametros de Analise" subtitle="Ajuste como avaliamos a saude financeira">
           <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
             <tc-input
               formControlName="reserveSafetyMarginPct"
@@ -57,43 +56,45 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
             ></tc-input>
 
             <div class="form-actions">
-              <tc-button type="submit" variant="primary" [disabled]="settingsForm.invalid || !settingsForm.dirty">
+              <tc-button type="submit" variant="primary" [block]="true" [disabled]="settingsForm.invalid || !settingsForm.dirty">
                 Salvar Parametros
               </tc-button>
             </div>
           </form>
         </tc-card>
 
-        <tc-card title="Categorias" subtitle="Gerencie como voce organiza suas contas e movimentacoes.">
+        <tc-card title="Categorias" subtitle="Gerencie como organiza seus registros.">
           <div class="category-add-form">
             <tc-input
               [label]="editingCategory() ? 'Editar Nome' : 'Nova Categoria'"
               [formControl]="categoryNameCtrl"
             ></tc-input>
 
-            <div class="color-picker-wrapper">
-              <label for="category-color">Cor</label>
-              <input id="category-color" type="color" [formControl]="categoryColorCtrl">
-            </div>
+            <div class="category-editor-row">
+              <div class="color-picker-wrapper">
+                <label for="category-color">Cor</label>
+                <input id="category-color" type="color" [formControl]="categoryColorCtrl">
+              </div>
 
-            <div class="cat-actions">
-              <tc-button variant="primary" (clicked)="saveCategory()" [disabled]="categoryNameCtrl.invalid">
-                {{ editingCategory() ? 'Atualizar' : 'Adicionar' }}
-              </tc-button>
-              @if (editingCategory()) {
-                <tc-button variant="ghost" (clicked)="cancelEditCategory()">Cancelar</tc-button>
-              }
+              <div class="category-editor-actions">
+                <tc-button variant="primary" [block]="true" (clicked)="saveCategory()" [disabled]="categoryNameCtrl.invalid">
+                  {{ editingCategory() ? 'Atualizar Categoria' : 'Adicionar Categoria' }}
+                </tc-button>
+                @if (editingCategory()) {
+                  <tc-button variant="ghost" (clicked)="cancelEditCategory()">Cancelar</tc-button>
+                }
+              </div>
             </div>
           </div>
 
           <tc-table [columns]="['Cor', 'Nome', 'Acoes']">
             @for (cat of categoriesFacade.categories(); track cat.id) {
-              <tr>
-                <td>
+              <tr class="category-row">
+                <td class="col-color">
                   <div class="color-swatch" [style.background]="cat.color"></div>
                 </td>
-                <td>{{ cat.name }}</td>
-                <td>
+                <td class="col-name">{{ cat.name }}</td>
+                <td class="col-actions">
                   <div class="actions-cell">
                     <tc-button variant="secondary" size="sm" (clicked)="editCategory(cat)">Editar</tc-button>
                     <tc-button
@@ -114,16 +115,16 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
           </tc-table>
         </tc-card>
 
-        <tc-card title="Modo Demonstracao" subtitle="Reinicie os dados para testar diferentes cenarios.">
-          <p class="body-sm text-secondary" style="margin-bottom: var(--space-4);">
-            Ao resetar, todas as movimentacoes e configuracoes atuais serao perdidas e substituidas por dados ficticios para fins de apresentacao.
-          </p>
+        <tc-card title="Modo Demonstração" subtitle="Troque rapidamente o estado atual do sistema.">
           <div class="reset-actions">
-            <tc-button variant="danger" [block]="true" (clicked)="openResetModal('healthy')">
-              Carregar Cenario Saudavel
+            <tc-button variant="success" [block]="true" (clicked)="openResetModal('healthy')">
+              Cenário Saudável
             </tc-button>
             <tc-button variant="danger" [block]="true" (clicked)="openResetModal('risk')">
-              Carregar Cenario de Risco
+              Cenário de Risco
+            </tc-button>
+            <tc-button variant="secondary" [block]="true" (clicked)="openResetModal('blank')">
+              Cenário em Branco
             </tc-button>
           </div>
         </tc-card>
@@ -132,16 +133,23 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
 
     <tc-modal
       [open]="isResetModalOpen()"
-      title="Confirmar Reset"
+      title="Aviso de Substituicao"
       (close)="closeResetModal()"
     >
       <p class="body-md" style="margin-bottom: var(--space-4);">
-        Tem certeza que deseja carregar o cenario <strong>{{ selectedScenario() | titlecase }}</strong>?
-        Esta acao apagara todos os dados atuais da demonstracao.
+        Voce vai carregar o cenario <strong>{{ getScenarioLabel(selectedScenario()) }}</strong>.
       </p>
-      <div style="display: flex; gap: var(--space-3); justify-content: flex-end;">
+      <p class="body-sm text-secondary" style="margin-bottom: var(--space-5);">
+        Todos os dados atuais da demonstracao serao apagados antes da troca.
+        @if (selectedScenario() === 'blank') {
+          O sistema ficara sem dados ficticios.
+        } @else {
+          O sistema sera preenchido novamente com dados ficticios desse cenario.
+        }
+      </p>
+      <div class="reset-modal-actions">
         <tc-button variant="ghost" (clicked)="closeResetModal()">Cancelar</tc-button>
-        <tc-button variant="danger" (clicked)="confirmReset()">Sim, Resetar</tc-button>
+        <tc-button [variant]="selectedScenario() === 'blank' ? 'secondary' : 'danger'" (clicked)="confirmReset()">Confirmar troca</tc-button>
       </div>
     </tc-modal>
   `,
@@ -152,7 +160,9 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
       padding-bottom: var(--space-8);
     }
 
-    .settings-header { margin-bottom: var(--space-6); }
+    .settings-header {
+      margin-bottom: var(--space-6);
+    }
 
     .settings-grid {
       display: flex;
@@ -168,22 +178,41 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
 
     .category-add-form {
       display: flex;
-      align-items: flex-end;
+      flex-direction: column;
       gap: var(--space-3);
       margin-bottom: var(--space-5);
-      flex-wrap: wrap;
     }
 
     .category-add-form > tc-input {
       margin-bottom: 0;
+    }
+
+    .category-editor-row {
+      display: flex;
+      align-items: flex-end;
+      justify-content: space-between;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .category-editor-actions {
+      display: flex;
+      align-items: flex-end;
+      gap: var(--space-2);
+      margin-left: auto;
       flex: 1;
-      min-width: 200px;
+    }
+
+    .category-editor-actions > tc-button:first-child {
+      min-width: 160px;
+      flex: 1;
     }
 
     .color-picker-wrapper {
       display: flex;
       flex-direction: column;
       gap: var(--space-2);
+      flex-shrink: 0;
     }
 
     .color-picker-wrapper label {
@@ -209,7 +238,25 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
       box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.15);
     }
 
-    .cat-actions { display: flex; gap: var(--space-2); }
+    :host ::ng-deep .tc-table th:first-child,
+    :host ::ng-deep .tc-table td.col-color {
+      width: 72px;
+      text-align: center;
+    }
+
+    :host ::ng-deep .tc-table th:last-child,
+    :host ::ng-deep .tc-table td.col-actions {
+      width: 1%;
+      white-space: nowrap;
+    }
+
+    :host ::ng-deep .tc-table td.col-name {
+      width: 100%;
+    }
+
+    :host ::ng-deep .tc-table .category-row td {
+      vertical-align: middle;
+    }
 
     .color-swatch {
       width: 32px;
@@ -219,21 +266,52 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
       box-shadow: var(--shadow-sm);
     }
 
-    .actions-cell { display: flex; gap: var(--space-2); }
-    .reset-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
-    .text-secondary { color: var(--color-text-secondary); }
-    .text-center { text-align: center; }
+    .actions-cell {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    .reset-actions {
+      display: flex;
+      gap: var(--space-3);
+      flex-wrap: wrap;
+    }
+
+    .reset-modal-actions {
+      display: flex;
+      gap: var(--space-3);
+      justify-content: flex-end;
+    }
+
+    .text-secondary {
+      color: var(--color-text-secondary);
+    }
+
+    .text-center {
+      text-align: center;
+    }
 
     @media (max-width: 767px) {
-      .category-add-form {
-        flex-direction: column;
+      .form-actions {
+        width: 100%;
+      }
+
+      .category-editor-row {
         align-items: stretch;
       }
 
-      .cat-actions,
+      .category-editor-actions,
       .reset-actions {
         display: grid;
         grid-template-columns: 1fr;
+        width: 100%;
+      }
+
+      .reset-modal-actions {
+        flex-direction: column-reverse;
+      }
+
+      .reset-modal-actions > * {
         width: 100%;
       }
 
@@ -242,7 +320,7 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
       }
     }
   `],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class SettingsPageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
@@ -265,14 +343,14 @@ export class SettingsPageComponent implements OnInit {
   readonly editingCategory = signal<Category | null>(null);
 
   readonly isResetModalOpen = signal(false);
-  readonly selectedScenario = signal<'healthy' | 'risk'>('healthy');
+  readonly selectedScenario = signal<SeedScenario>('healthy');
 
   ngOnInit(): void {
     const currentSettings = this.settingsAdapter.settings();
     this.settingsForm.patchValue({
       reserveSafetyMarginPct: currentSettings.reserveSafetyMarginPct,
       reserveAttentionThresholdPct: currentSettings.reserveAttentionThresholdPct,
-      minSafetyDays: currentSettings.minSafetyDays
+      minSafetyDays: currentSettings.minSafetyDays,
     });
 
     void Promise.all([
@@ -349,7 +427,7 @@ export class SettingsPageComponent implements OnInit {
     return isUsedInCashFlow || isUsedInPayables;
   }
 
-  openResetModal(scenario: 'healthy' | 'risk'): void {
+  openResetModal(scenario: SeedScenario): void {
     this.selectedScenario.set(scenario);
     this.isResetModalOpen.set(true);
   }
@@ -363,5 +441,16 @@ export class SettingsPageComponent implements OnInit {
     this.closeResetModal();
     this.toast.show('Dados resetados com sucesso. Recarregando...', 'success');
     setTimeout(() => window.location.reload(), 1500);
+  }
+
+  getScenarioLabel(scenario: SeedScenario): string {
+    switch (scenario) {
+      case 'healthy':
+        return 'Cenario Saudavel';
+      case 'risk':
+        return 'Cenario de Risco';
+      case 'blank':
+        return 'Cenario em Branco';
+    }
   }
 }

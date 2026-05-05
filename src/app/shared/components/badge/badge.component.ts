@@ -53,6 +53,12 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       color: #2563eb;
       border: 1px solid rgba(37, 99, 235, 0.2);
     }
+
+    :host-context([data-theme="dark"]) .tc-badge-info {
+      background: color-mix(in srgb, var(--color-accent-500) 18%, var(--color-surface));
+      color: #9dc6ff;
+      border-color: color-mix(in srgb, var(--color-accent-500) 34%, transparent);
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

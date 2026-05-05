@@ -105,6 +105,16 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
       box-shadow: var(--shadow-glow-danger);
     }
 
+    .tc-btn-success {
+      background: var(--color-success-500);
+      color: white;
+    }
+
+    .tc-btn-success:hover:not(:disabled) {
+      background: var(--color-success-hover);
+      box-shadow: var(--shadow-glow-success);
+    }
+
     .spinner {
       width: 16px;
       height: 16px;
@@ -124,7 +134,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ButtonComponent {
-  variant = input<'primary' | 'secondary' | 'ghost' | 'danger'>('primary');
+  variant = input<'primary' | 'secondary' | 'ghost' | 'danger' | 'success'>('primary');
   size = input<'sm' | 'md' | 'lg'>('md');
   type = input<'button' | 'submit' | 'reset'>('button');
   block = input<boolean>(false);

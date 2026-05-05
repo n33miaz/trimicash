@@ -79,7 +79,7 @@ export class SeedRunner {
     try {
       const params = new URLSearchParams(window.location.search);
       const raw = params.get('seed');
-      if (raw === 'healthy' || raw === 'risk') return raw;
+      if (raw === 'healthy' || raw === 'risk' || raw === 'blank') return raw;
     } catch {
       // Ambiente SSR ou sem window — ignorar
     }

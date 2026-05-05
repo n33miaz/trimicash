@@ -37,7 +37,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
   ],
   template: `
     <div class="dashboard-page">
-      <tc-page-header [title]="greeting()">
+      <tc-page-header [title]="greeting()" [stackOnMobile]="true">
         <div class="period-selector">
           <tc-select
             [options]="periodOptions"
@@ -54,34 +54,34 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
           label="Saldo atual"
           [value]="dashboard.currentBalance() | brlCurrency"
           [tone]="dashboard.currentBalance() >= 0 ? 'success' : 'danger'"
-          hint="Entradas - Saidas efetivadas"
+          hint="Entradas/Saídas"
         ></tc-stat-card>
 
         <tc-stat-card
           label="Saldo projetado"
           [value]="dashboard.projectedBalance() | brlCurrency"
           [tone]="dashboard.projectedBalance() >= 0 ? 'primary' : 'danger'"
-          hint="Apos pagar contas pendentes do periodo"
+          hint="Contas Futuras"
         ></tc-stat-card>
 
         <tc-stat-card
-          label="Reserva recomendada"
+          label="Reserva"
           [value]="dashboard.recommendedReserve() | brlCurrency"
           tone="neutral"
-          hint="Minimo para honrar compromissos do periodo"
+          hint="Recomendação"
         ></tc-stat-card>
 
         <tc-stat-card
-          label="Dias de seguranca"
+          label="Prevenção"
           [value]="dashboard.safetyDays().insufficient ? 'N/A' : dashboard.safetyDays().value.toString()"
           [tone]="dashboard.safetyDays().insufficient ? 'neutral' : (dashboard.safetyDays().value < dashboard.minSafetyDays() ? 'danger' : 'success')"
-          [hint]="dashboard.safetyDays().insufficient ? 'Historico insuficiente' : 'Dias'"
+          [hint]="dashboard.safetyDays().insufficient ? 'Perigo' : 'Dias Seguros'"
         ></tc-stat-card>
       </div>
 
       <div class="health-panel">
         <div class="health-header">
-          <h3 class="health-title">Saude da Reserva</h3>
+          <h3 class="health-title">Saúde da Reserva</h3>
           <tc-badge [tone]="getHealthTone(dashboard.reserveHealth().status)">
             {{ getHealthLabel(dashboard.reserveHealth().status) }}
           </tc-badge>
@@ -97,11 +97,11 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 
         <p class="health-message text-secondary">
           @if (dashboard.reserveHealth().status === 'DEFICIT') {
-            Falta {{ dashboard.reserveHealth().deficitAmount | brlCurrency }} para cobrir os compromissos.
+            Faltam {{ dashboard.reserveHealth().deficitAmount | brlCurrency }} para cobrir as contas.
           } @else if (dashboard.reserveHealth().status === 'ATTENTION') {
-            Caixa apertado. Voce tem caixa suficiente, mas a folga e pequena ({{ dashboard.reserveHealth().surplusAmount | brlCurrency }}).
+            Caixa apertado. Você tem caixa suficiente, mas a folga é curta ({{ dashboard.reserveHealth().surplusAmount | brlCurrency }}).
           } @else {
-            Voce tem caixa suficiente para os proximos compromissos, com uma folga de {{ dashboard.reserveHealth().surplusAmount | brlCurrency }}.
+            Você tem caixa suficiente para as próximas contas, com uma folga de {{ dashboard.reserveHealth().surplusAmount | brlCurrency }}.
           }
         </p>
       </div>
@@ -109,7 +109,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       <div class="lists-grid">
         <div class="list-panel">
           <div class="panel-header">
-            <h3 class="panel-title">Proximos Vencimentos</h3>
+            <h3 class="panel-title">Próximos Vencimentos</h3>
             <tc-button variant="ghost" size="sm" routerLink="/accounts-payable">Ver todas</tc-button>
           </div>
 
@@ -141,13 +141,13 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 
         <div class="list-panel">
           <div class="panel-header">
-            <h3 class="panel-title">Ultimas Movimentacoes</h3>
+            <h3 class="panel-title">Últimas Movimentações</h3>
             <tc-button variant="ghost" size="sm" routerLink="/cash-flow">Ver todas</tc-button>
           </div>
 
           <div class="panel-content">
             @if (dashboard.recentMovements().length === 0) {
-              <div class="empty-list">Nenhuma movimentacao registrada.</div>
+              <div class="empty-list">Nenhuma movimentação registrada.</div>
             } @else {
               <ul class="item-list">
                 @for (m of dashboard.recentMovements(); track m.id) {
@@ -172,20 +172,22 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       @if (criticalAlerts().length > 0) {
         <div class="alerts-summary">
           <div class="panel-header">
-            <h3 class="panel-title">Alertas Criticos</h3>
+            <h3 class="panel-title">Alertas Críticos</h3>
             <tc-button variant="ghost" size="sm" routerLink="/alerts">Ver todos ({{ unreadAlertsCount() }})</tc-button>
           </div>
           <div class="alerts-grid">
             @for (alert of criticalAlerts(); track alert.id) {
               <div class="alert-mini-card">
-                <div class="alert-icon">
-                  <svg width="20" height="20" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                <div class="alert-card-top">
+                  <div class="alert-icon">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><line x1="12" y1="8" x2="12" y2="12"></line><line x1="12" y1="16" x2="12.01" y2="16"></line></svg>
+                  </div>
+                  <tc-button variant="secondary" size="sm" class="alert-action" (clicked)="goToAlert(alert)">Resolver</tc-button>
                 </div>
                 <div class="alert-content">
                   <strong>{{ alert.title }}</strong>
                   <p>{{ alert.message }}</p>
                 </div>
-                <tc-button variant="secondary" size="sm" (clicked)="goToAlert(alert)">Resolver</tc-button>
               </div>
             }
           </div>
@@ -409,8 +411,9 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 
     .alert-mini-card {
       display: flex;
-      align-items: center;
-      gap: var(--space-4);
+      flex-direction: column;
+      align-items: stretch;
+      gap: var(--space-3);
       padding: var(--space-4);
       background: var(--color-danger-50);
       border: 1px solid rgba(220, 38, 38, 0.15);
@@ -425,6 +428,13 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       border-color: rgba(220, 38, 38, 0.3);
     }
 
+    .alert-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-3);
+    }
+
     .alert-icon {
       width: 40px;
       height: 40px;
@@ -437,7 +447,6 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
     }
 
     .alert-content {
-      flex: 1;
       min-width: 0;
     }
 
@@ -465,17 +474,15 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       .list-panel {
         padding: var(--space-4);
       }
-
-      .panel-header {
-        flex-direction: column;
-        align-items: flex-start;
-      }
     }
 
     @media (max-width: 640px) {
-      .alert-mini-card {
-        flex-direction: column;
-        align-items: flex-start;
+      .alert-card-top {
+        align-items: center;
+      }
+
+      .alert-action {
+        margin-left: auto;
       }
     }
   `],

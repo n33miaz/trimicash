@@ -1,4 +1,5 @@
 import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, output } from '@angular/core';
+import { Router } from '@angular/router';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { CashFlowFacade } from '../../../application/cash-flow.facade';
 import { Movement, MovementType } from '../../../domain/entities/movement.entity';
@@ -21,49 +22,101 @@ import { SelectComponent } from '../../../../../shared/components/select/select.
     ButtonComponent
   ],
   template: `
-    <form [formGroup]="form" (ngSubmit)="onSubmit()">
-      <div class="form-row type-selector">
-        <button
-          type="button"
-          class="type-btn"
-          [class.active-entrada]="form.get('type')?.value === 'ENTRADA'"
-          (click)="form.get('type')?.setValue('ENTRADA')">
-          Entrada
-        </button>
-        <button
-          type="button"
-          class="type-btn"
-          [class.active-saida]="form.get('type')?.value === 'SAIDA'"
-          (click)="form.get('type')?.setValue('SAIDA')">
-          Saida
-        </button>
+    @if (!hasCategories()) {
+      <div class="blocked-state">
+        <div class="blocked-icon" aria-hidden="true">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 7h18"></path>
+            <path d="M6 12h12"></path>
+            <path d="M9 17h6"></path>
+          </svg>
+        </div>
+        <h3>Cadastre uma categoria primeiro</h3>
+        <p>Para registrar uma movimentacao, voce precisa ter pelo menos uma categoria disponivel em Configuracoes.</p>
+        <div class="actions actions-blocked">
+          <tc-button type="button" variant="secondary" (clicked)="cancelled.emit()">Cancelar</tc-button>
+          <tc-button type="button" variant="primary" (clicked)="goToSettings()">Ir para Configuracoes</tc-button>
+        </div>
       </div>
+    } @else {
+      <form [formGroup]="form" (ngSubmit)="onSubmit()">
+        <div class="form-row type-selector">
+          <button
+            type="button"
+            class="type-btn"
+            [class.active-entrada]="form.get('type')?.value === 'ENTRADA'"
+            (click)="form.get('type')?.setValue('ENTRADA')">
+            Entrada
+          </button>
+          <button
+            type="button"
+            class="type-btn"
+            [class.active-saida]="form.get('type')?.value === 'SAIDA'"
+            (click)="form.get('type')?.setValue('SAIDA')">
+            Saida
+          </button>
+        </div>
 
-      <tc-money-input
-        formControlName="amount"
-        label="Valor"
-        [hint]="form.get('type')?.value === 'ENTRADA' ? 'Informe o valor que entrou no caixa.' : 'Informe o valor que saiu do caixa.'"
-        [error]="getError('amount')">
-      </tc-money-input>
+        <tc-money-input
+          formControlName="amount"
+          label="Valor"
+          [hint]="form.get('type')?.value === 'ENTRADA' ? 'Informe o valor que entrou no caixa.' : 'Informe o valor que saiu do caixa.'"
+          [error]="getError('amount')">
+        </tc-money-input>
 
-      <tc-date-input formControlName="date" label="Data" [error]="getError('date')"></tc-date-input>
+        <tc-date-input formControlName="date" label="Data" [error]="getError('date')"></tc-date-input>
 
-      <tc-select
-        formControlName="categoryId"
-        label="Categoria"
-        [options]="categoryOptions()"
-        [error]="getError('categoryId')">
-      </tc-select>
+        <tc-select
+          formControlName="categoryId"
+          label="Categoria"
+          [options]="categoryOptions()"
+          [error]="getError('categoryId')">
+        </tc-select>
 
-      <tc-input formControlName="description" label="Descricao" [error]="getError('description')"></tc-input>
+        <tc-input formControlName="description" label="Descricao" [error]="getError('description')"></tc-input>
 
-      <div class="actions">
-        <tc-button type="button" variant="secondary" (clicked)="cancelled.emit()">Cancelar</tc-button>
-        <tc-button type="submit" variant="primary" [loading]="cashFlowFacade.loading()">Salvar</tc-button>
-      </div>
-    </form>
+        <div class="actions">
+          <tc-button type="button" variant="secondary" (clicked)="cancelled.emit()">Cancelar</tc-button>
+          <tc-button type="submit" variant="primary" [loading]="cashFlowFacade.loading()">Salvar</tc-button>
+        </div>
+      </form>
+    }
   `,
   styles: [`
+    .blocked-state {
+      display: grid;
+      gap: var(--space-3);
+      padding: var(--space-3) 0;
+      text-align: center;
+    }
+
+    .blocked-icon {
+      width: 44px;
+      height: 44px;
+      margin: 0 auto;
+      border-radius: 12px;
+      display: grid;
+      place-items: center;
+      background: var(--color-background);
+      color: var(--color-accent-500);
+    }
+
+    .blocked-state h3,
+    .blocked-state p {
+      margin: 0;
+    }
+
+    .blocked-state h3 {
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+    }
+
+    .blocked-state p {
+      color: var(--color-text-secondary);
+      font-size: var(--font-size-sm);
+      line-height: 1.5;
+    }
+
     .type-selector {
       display: flex;
       gap: var(--space-2);
@@ -106,6 +159,10 @@ import { SelectComponent } from '../../../../../shared/components/select/select.
       margin-top: var(--space-6);
     }
 
+    .actions-blocked {
+      margin-top: var(--space-2);
+    }
+
     @media (max-width: 767px) {
       .actions {
         flex-direction: column-reverse;
@@ -121,6 +178,7 @@ export class MovementFormComponent implements OnInit {
   saved = output<void>();
 
   private readonly fb = inject(FormBuilder);
+  private readonly router = inject(Router);
   readonly cashFlowFacade = inject(CashFlowFacade);
   private readonly categoriesFacade = inject(CategoriesFacade);
 
@@ -138,6 +196,8 @@ export class MovementFormComponent implements OnInit {
       value: category.id
     }));
   });
+
+  readonly hasCategories = computed(() => this.categoryOptions().length > 0);
 
   ngOnInit(): void {
     if (this.categoriesFacade.categories().length === 0) {
@@ -167,6 +227,10 @@ export class MovementFormComponent implements OnInit {
   }
 
   async onSubmit(): Promise<void> {
+    if (!this.hasCategories()) {
+      return;
+    }
+
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -192,5 +256,10 @@ export class MovementFormComponent implements OnInit {
     } catch {
       // Facade already handles errors.
     }
+  }
+
+  async goToSettings(): Promise<void> {
+    this.cancelled.emit();
+    await this.router.navigate(['/settings']);
   }
 }

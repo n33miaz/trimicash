@@ -69,7 +69,7 @@ import { DemoUser } from '../../../features/auth/domain/auth.types';
             class="topbar-btn"
             (click)="goToAlerts()"
             [attr.aria-label]="'Abrir alertas - ' + unreadCount() + ' nao lidos'">
-            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
               <path d="M13.73 21a2 2 0 01-3.46 0"/>
             </svg>
@@ -110,6 +110,7 @@ import { DemoUser } from '../../../features/auth/domain/auth.types';
       gap: var(--space-3);
       height: var(--header-height);
       padding: 0 16px;
+      overflow: visible;
     }
 
     .topbar-left,
@@ -118,6 +119,8 @@ import { DemoUser } from '../../../features/auth/domain/auth.types';
       align-items: center;
       gap: var(--space-3);
       min-width: 0;
+      overflow: visible;
+      padding-right: 2px;
     }
 
     .hamburger {
@@ -204,6 +207,7 @@ import { DemoUser } from '../../../features/auth/domain/auth.types';
       position: relative;
       width: 44px;
       height: 44px;
+      padding: 0;
       flex-shrink: 0;
       border-radius: var(--radius-sm);
       border: 1px solid var(--color-border-card);
@@ -222,12 +226,17 @@ import { DemoUser } from '../../../features/auth/domain/auth.types';
       background: rgba(47, 128, 237, 0.06);
     }
 
+    .topbar-btn svg {
+      display: block;
+      flex-shrink: 0;
+    }
+
     .notif-dot {
       position: absolute;
-      top: 9px;
-      right: 10px;
-      width: 10px;
-      height: 10px;
+      top: 8px;
+      right: 8px;
+      width: 8px;
+      height: 8px;
       background: var(--color-danger-500);
       border-radius: 50%;
       border: 2px solid var(--color-background);
@@ -262,6 +271,16 @@ import { DemoUser } from '../../../features/auth/domain/auth.types';
       .topbar-left,
       .topbar-right {
         gap: var(--space-2);
+      }
+
+      .topbar-btn {
+        width: 42px;
+        height: 42px;
+      }
+
+      .notif-dot {
+        top: 8px;
+        right: 8px;
       }
 
       .logo-text {

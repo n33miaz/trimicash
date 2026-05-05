@@ -4,9 +4,9 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
   selector: 'tc-page-header',
   standalone: true,
   template: `
-    <header class="tc-page-header">
+    <header class="tc-page-header" [class.stack-mobile]="stackOnMobile()">
       <h1 class="title">{{ title() }}</h1>
-      <div class="actions">
+      <div class="actions" [class.stack-mobile]="stackOnMobile()">
         <ng-content></ng-content>
       </div>
     </header>
@@ -40,14 +40,25 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 
     @media (max-width: 767px) {
       .tc-page-header {
-        align-items: stretch;
+        align-items: center;
+        flex-wrap: nowrap;
       }
 
       .title {
+        min-width: 0;
         font-size: var(--font-size-2xl);
       }
 
       .actions {
+        flex-shrink: 0;
+      }
+
+      .tc-page-header.stack-mobile {
+        align-items: stretch;
+        flex-wrap: wrap;
+      }
+
+      .actions.stack-mobile {
         width: 100%;
       }
     }
@@ -56,4 +67,5 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
 })
 export class PageHeaderComponent {
   title = input.required<string>();
+  stackOnMobile = input(false);
 }

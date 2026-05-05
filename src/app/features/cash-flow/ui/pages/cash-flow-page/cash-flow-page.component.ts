@@ -50,16 +50,16 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 
       <div class="kpis-grid">
         <tc-stat-card
-          label="Entradas no periodo"
+          label="Entradas"
           [value]="totalEntradas() | brlCurrency"
           tone="success"
-          hint="Soma das entradas efetivadas"
+          hint=" "
         ></tc-stat-card>
         <tc-stat-card
-          label="Saidas no periodo"
+          label="Saidas"
           [value]="totalSaidas() | brlCurrency"
           tone="danger"
-          hint="Soma das saidas efetivadas"
+          hint=" "
         ></tc-stat-card>
         <tc-stat-card
           label="Saldo atual"
@@ -143,21 +143,26 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
           @for (m of filteredMovements(); track m.id) {
             <div class="movement-card">
               <div class="movement-card-header" [class.is-entrada]="m.type === 'ENTRADA'" [class.is-saida]="m.type === 'SAIDA'">
-                <div class="movement-main">
-                  <span class="movement-description">{{ m.description }}</span>
+                <div class="movement-card-row movement-card-row-top">
+                  <div class="movement-main">
+                    <span class="movement-description">{{ m.description }}</span>
+                  </div>
+                  <span class="movement-amount" [class.amount-entrada]="m.type === 'ENTRADA'" [class.amount-saida]="m.type === 'SAIDA'">
+                    {{ m.type === 'ENTRADA' ? '+' : '-' }}{{ m.amount | brlCurrency }}
+                  </span>
+                </div>
+
+                <div class="movement-card-row movement-card-row-meta">
                   <div class="movement-meta">
-                    <span class="movement-date text-secondary">{{ m.date | date:'dd/MM/yyyy' }}</span>
-                    <tc-badge tone="neutral">{{ getCategoryName(m.categoryId) }}</tc-badge>
                     <tc-badge [tone]="m.type === 'ENTRADA' ? 'success' : 'danger'">
                       {{ m.type === 'ENTRADA' ? 'Entrada' : 'Saida' }}
                     </tc-badge>
+                    <tc-badge tone="neutral">{{ getCategoryName(m.categoryId) }}</tc-badge>
                   </div>
+                  <span class="movement-date text-secondary">{{ m.date | date:'dd/MM/yyyy' }}</span>
                 </div>
-                <span class="movement-amount" [class.amount-entrada]="m.type === 'ENTRADA'" [class.amount-saida]="m.type === 'SAIDA'">
-                  {{ m.type === 'ENTRADA' ? '+' : '-' }}{{ m.amount | brlCurrency }}
-                </span>
               </div>
-
+ 
               <div class="movement-card-footer">
                 <div class="actions-cell">
                   <tc-button variant="secondary" size="sm" [block]="true" (clicked)="openEditModal(m)">Editar</tc-button>
@@ -191,8 +196,8 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
         Tem certeza que deseja excluir a movimentacao <strong>{{ movementToDelete()?.description }}</strong>?
       </p>
       <div class="modal-actions">
-        <tc-button variant="ghost" (clicked)="closeDeleteModal()">Cancelar</tc-button>
-        <tc-button variant="danger" [loading]="cashFlowFacade.loading()" (clicked)="confirmDelete()">Excluir</tc-button>
+        <tc-button variant="ghost" [block]="true" (clicked)="closeDeleteModal()">Cancelar</tc-button>
+        <tc-button variant="danger" [block]="true" [loading]="cashFlowFacade.loading()" (clicked)="confirmDelete()">Excluir</tc-button>
       </div>
     </tc-modal>
   `,
@@ -346,9 +351,8 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 
     .movement-card-header {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-      gap: var(--space-3);
+      flex-direction: column;
+      gap: var(--space-2);
       margin-bottom: var(--space-3);
       position: relative;
     }
@@ -368,6 +372,13 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 
     .movement-card-header.is-saida::before {
       background: var(--color-danger-500);
+    }
+
+    .movement-card-row {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: var(--space-3);
     }
 
     .movement-main {
@@ -391,13 +402,15 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       flex-wrap: wrap;
       gap: var(--space-2);
       align-items: center;
-      margin-top: var(--space-2);
+      min-width: 0;
     }
 
     .movement-date {
       display: inline-flex;
       font-size: var(--font-size-xs);
       color: var(--color-text-secondary);
+      white-space: nowrap;
+      flex-shrink: 0;
     }
 
     .movement-amount {
@@ -406,6 +419,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       font-family: var(--font-family-display);
       text-align: right;
       flex-shrink: 0;
+      white-space: nowrap;
     }
 
     .movement-card-footer {
@@ -426,11 +440,6 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
     @media (max-width: 768px) {
       .desktop-only { display: none; }
       .mobile-only { display: block; }
-
-      .page-header-action,
-      .page-header-action tc-button {
-        width: 100%;
-      }
 
       .filters-bar {
         flex-direction: column;
@@ -453,6 +462,10 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
         width: 100%;
         min-width: 100%;
       }
+
+      .page-header-action {
+        margin-left: auto;
+      }
     }
 
     .modal-actions {
@@ -462,8 +475,16 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
     }
 
     @media (max-width: 767px) {
+      .movement-card-row-meta {
+        align-items: center;
+      }
+
       .modal-actions {
         flex-direction: column-reverse;
+      }
+
+      .modal-actions > * {
+        width: 100%;
       }
     }
   `],
