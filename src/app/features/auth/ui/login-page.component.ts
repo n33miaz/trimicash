@@ -5,10 +5,16 @@ import {
   signal,
 } from '@angular/core';
 import { Router } from '@angular/router';
-import { ReactiveFormsModule, FormBuilder, Validators } from '@angular/forms';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AUTH_PORT } from '../../../core/tokens/injection-tokens';
-import { InputComponent } from '../../../shared/components/input/input.component';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
+import { InputComponent } from '../../../shared/components/input/input.component';
+import {
+  buildDemoEmail,
+  readDemoCredentials,
+  saveDemoCredentials,
+  USER_NAME_KEY,
+} from '../infrastructure/auth-mock.adapter';
 import { WelcomeModalComponent } from './components/welcome-modal.component';
 
 @Component({
@@ -16,9 +22,8 @@ import { WelcomeModalComponent } from './components/welcome-modal.component';
   standalone: true,
   imports: [ReactiveFormsModule, InputComponent, ButtonComponent, WelcomeModalComponent],
   template: `
-    <!-- T1: Modal de boas-vindas na primeira visita -->
     @if (showWelcome()) {
-      <tc-welcome-modal 
+      <tc-welcome-modal
         (nameChanged)="onWelcomeNameChanged($event)"
         (confirmed)="onWelcomeConfirmed($event)">
       </tc-welcome-modal>
@@ -43,14 +48,14 @@ import { WelcomeModalComponent } from './components/welcome-modal.component';
           formControlName="email"
           label="E-mail"
           type="email"
-          [error]="showError('email') ? 'E-mail inválido' : ''"
+          [error]="showError('email') ? 'E-mail invalido' : ''"
         ></tc-input>
 
         <tc-input
           formControlName="password"
           label="Senha"
           type="password"
-          [error]="showError('password') ? 'Senha é obrigatória' : ''"
+          [error]="showError('password') ? 'Senha e obrigatoria' : ''"
         ></tc-input>
 
         @if (error()) {
@@ -78,13 +83,12 @@ import { WelcomeModalComponent } from './components/welcome-modal.component';
       margin: 0 auto;
     }
 
-    /* T2: Logo icon */
     .login-logo {
       display: flex;
       justify-content: center;
       margin-bottom: var(--space-4);
     }
-    
+
     .logo-img {
       width: 160px;
       height: 160px;
@@ -134,36 +138,56 @@ export class LoginPageComponent {
   private readonly authPort = inject(AUTH_PORT);
   private readonly router = inject(Router);
   private readonly fb = inject(FormBuilder);
+  private readonly savedCredentials = readDemoCredentials();
+  private readonly savedName = localStorage.getItem(USER_NAME_KEY);
 
-  // T1: Mostrar modal apenas se não há nome salvo
-  readonly showWelcome = signal(!localStorage.getItem('trimicash:userName'));
+  readonly showWelcome = signal(!this.savedCredentials && !this.savedName);
 
   readonly loginForm = this.fb.group({
-    email: ['', [Validators.required, Validators.email]],
-    password: ['', Validators.required],
+    email: [this.savedCredentials?.email ?? '', [Validators.required, Validators.email]],
+    password: [this.savedCredentials?.password ?? '', Validators.required],
   });
 
   readonly loading = signal(false);
   readonly error = signal<string | null>(null);
 
-  /** T1: Atualiza campos em tempo real conforme digitação no modal */
+  constructor() {
+    if (!this.savedCredentials && this.savedName) {
+      const generatedCredentials = {
+        name: this.savedName,
+        email: buildDemoEmail(this.savedName),
+        password: this.savedName,
+      };
+
+      saveDemoCredentials(generatedCredentials);
+      this.loginForm.patchValue({
+        email: generatedCredentials.email,
+        password: generatedCredentials.password,
+      });
+    }
+  }
+
   onWelcomeNameChanged(name: string): void {
-    const formattedEmail = name.trim() ? `${name.toLowerCase().replace(/\s+/g, '')}@gmail.com` : '';
+    const formattedEmail = name.trim() ? buildDemoEmail(name) : '';
+
     this.loginForm.patchValue({
       email: formattedEmail,
-      password: name
+      password: name,
     });
   }
 
-  /** T1: Persiste nome e fecha modal. */
   onWelcomeConfirmed(name: string): void {
-    localStorage.setItem('trimicash:userName', name);
+    const credentials = {
+      name,
+      email: buildDemoEmail(name),
+      password: name,
+    };
+
+    saveDemoCredentials(credentials);
     this.showWelcome.set(false);
-    
-    const formattedEmail = name.trim() ? `${name.toLowerCase().replace(/\s+/g, '')}@gmail.com` : '';
     this.loginForm.patchValue({
-      email: formattedEmail,
-      password: name
+      email: credentials.email,
+      password: credentials.password,
     });
   }
 
@@ -172,7 +196,7 @@ export class LoginPageComponent {
     return !!control && control.invalid && (control.dirty || control.touched);
   }
 
-  async onSubmit() {
+  async onSubmit(): Promise<void> {
     if (this.loginForm.invalid) {
       this.loginForm.markAllAsTouched();
       return;
@@ -183,8 +207,16 @@ export class LoginPageComponent {
 
     try {
       const { email, password } = this.loginForm.value;
+      const existingCredentials = readDemoCredentials();
+
+      saveDemoCredentials({
+        name: existingCredentials?.name || this.savedName || 'Empreendedor',
+        email: email!,
+        password: password!,
+      });
+
       await this.authPort.login(email!, password!);
-      this.router.navigate(['/']);
+      await this.router.navigate(['/']);
     } catch (err: unknown) {
       this.error.set(err instanceof Error ? err.message : 'Erro ao efetuar login');
     } finally {

@@ -1,17 +1,17 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  OnInit,
   computed,
   inject,
-  OnInit,
   output,
   signal,
 } from '@angular/core';
-import { RouterLink, Router } from '@angular/router';
-import { AUTH_PORT } from '../../../core/tokens/injection-tokens';
-import { DemoUser } from '../../../features/auth/domain/auth.types';
-import { AlertsFacade } from '../../../features/alerts/application/alerts.facade';
+import { Router, RouterLink } from '@angular/router';
 import { ThemeService } from '../../../core/services/theme.service';
+import { AUTH_PORT } from '../../../core/tokens/injection-tokens';
+import { AlertsFacade } from '../../../features/alerts/application/alerts.facade';
+import { DemoUser } from '../../../features/auth/domain/auth.types';
 
 @Component({
   selector: 'tc-topbar',
@@ -20,7 +20,6 @@ import { ThemeService } from '../../../core/services/theme.service';
   template: `
     <header class="topbar">
       <div class="topbar-left">
-        <!-- Hamburger: visível apenas no mobile -->
         <button
           class="hamburger"
           (click)="menuToggled.emit()"
@@ -33,11 +32,7 @@ import { ThemeService } from '../../../core/services/theme.service';
 
         <div class="logo-container" routerLink="/">
           <div class="logo-icon" aria-hidden="true">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-              <rect x="2" y="6" width="20" height="12" rx="2"/>
-              <line x1="2" y1="10" x2="22" y2="10"/>
-              <line x1="6" y1="15" x2="9" y2="15"/>
-            </svg>
+            <img src="assets/icons/logo.png" alt="" />
           </div>
           <span class="logo-text">Trimi<span class="logo-accent">Cash</span></span>
         </div>
@@ -47,13 +42,11 @@ import { ThemeService } from '../../../core/services/theme.service';
         @if (user()) {
           <span class="business-name">{{ user()?.businessName }}</span>
 
-          <!-- T4: Toggle tema -->
           <button
             class="topbar-btn"
             (click)="toggleTheme()"
             [attr.aria-label]="isDark() ? 'Mudar para modo claro' : 'Mudar para modo escuro'">
             @if (isDark()) {
-              <!-- Sol -->
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <circle cx="12" cy="12" r="5"/>
                 <line x1="12" y1="1" x2="12" y2="3"/>
@@ -66,7 +59,6 @@ import { ThemeService } from '../../../core/services/theme.service';
                 <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>
               </svg>
             } @else {
-              <!-- Lua -->
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
                 <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
               </svg>
@@ -76,8 +68,8 @@ import { ThemeService } from '../../../core/services/theme.service';
           <button
             class="topbar-btn"
             (click)="goToAlerts()"
-            [attr.aria-label]="'Abrir alertas — ' + unreadCount() + ' não lidos'">
-            <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            [attr.aria-label]="'Abrir alertas - ' + unreadCount() + ' nao lidos'">
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
               <path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/>
               <path d="M13.73 21a2 2 0 01-3.46 0"/>
             </svg>
@@ -86,7 +78,7 @@ import { ThemeService } from '../../../core/services/theme.service';
             }
           </button>
 
-          <div class="avatar" [attr.aria-label]="'Usuário: ' + user()?.name">
+          <div class="avatar" [attr.aria-label]="'Usuario: ' + user()?.name">
             {{ getInitials() }}
           </div>
         }
@@ -95,10 +87,9 @@ import { ThemeService } from '../../../core/services/theme.service';
   `,
   styles: [`
     :host {
-      display: none; /* Topbar oculta — logo e hamburger ficam na sidebar no desktop */
+      display: none;
     }
 
-    /* No mobile, mostrar topbar */
     @media (max-width: 767px) {
       :host {
         display: block;
@@ -116,17 +107,19 @@ import { ThemeService } from '../../../core/services/theme.service';
       display: flex;
       align-items: center;
       justify-content: space-between;
+      gap: var(--space-3);
       height: var(--header-height);
       padding: 0 16px;
     }
 
-    .topbar-left, .topbar-right {
+    .topbar-left,
+    .topbar-right {
       display: flex;
       align-items: center;
       gap: var(--space-3);
+      min-width: 0;
     }
 
-    /* ─── Hamburger ─────────────────────────────────────── */
     .hamburger {
       display: flex;
       flex-direction: column;
@@ -155,21 +148,30 @@ import { ThemeService } from '../../../core/services/theme.service';
       transition: all 0.3s ease;
     }
 
-    /* ─── Logo (mobile apenas) ──────────────────────────── */
     .logo-container {
       display: flex;
       align-items: center;
       gap: var(--space-2);
       cursor: pointer;
+      min-width: 0;
     }
 
     .logo-icon {
-      width: 32px;
-      height: 32px;
-      background: var(--gradient-primary);
-      border-radius: 9px;
+      width: 34px;
+      height: 34px;
+      border-radius: 10px;
       display: grid;
       place-items: center;
+      overflow: hidden;
+      flex-shrink: 0;
+      box-shadow: 0 4px 10px rgba(5, 27, 97, 0.14);
+    }
+
+    .logo-icon img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+      display: block;
     }
 
     .logo-text {
@@ -178,11 +180,13 @@ import { ThemeService } from '../../../core/services/theme.service';
       font-size: var(--font-size-lg);
       letter-spacing: -0.02em;
       color: var(--color-text-primary);
+      white-space: nowrap;
     }
 
-    .logo-accent { color: var(--color-accent-500); }
+    .logo-accent {
+      color: var(--color-accent-500);
+    }
 
-    /* ─── Business name ─────────────────────────────────── */
     .business-name {
       font-weight: 500;
       font-size: var(--font-size-sm);
@@ -191,14 +195,16 @@ import { ThemeService } from '../../../core/services/theme.service';
     }
 
     @media (min-width: 768px) {
-      .business-name { display: block; }
+      .business-name {
+        display: block;
+      }
     }
 
-    /* ─── Botões da topbar (tema + alertas) ─────────────── */
     .topbar-btn {
       position: relative;
-      width: 40px;
-      height: 40px;
+      width: 44px;
+      height: 44px;
+      flex-shrink: 0;
       border-radius: var(--radius-sm);
       border: 1px solid var(--color-border-card);
       background: var(--color-bg-card);
@@ -206,6 +212,7 @@ import { ThemeService } from '../../../core/services/theme.service';
       display: grid;
       place-items: center;
       cursor: pointer;
+      overflow: visible;
       transition: all var(--motion-fast);
     }
 
@@ -217,10 +224,10 @@ import { ThemeService } from '../../../core/services/theme.service';
 
     .notif-dot {
       position: absolute;
-      top: 8px;
-      right: 8px;
-      width: 8px;
-      height: 8px;
+      top: 9px;
+      right: 10px;
+      width: 10px;
+      height: 10px;
       background: var(--color-danger-500);
       border-radius: 50%;
       border: 2px solid var(--color-background);
@@ -229,10 +236,9 @@ import { ThemeService } from '../../../core/services/theme.service';
 
     @keyframes pulseBadge {
       0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
-      50%       { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+      50% { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
     }
 
-    /* ─── Avatar ────────────────────────────────────────── */
     .avatar {
       width: 36px;
       height: 36px;
@@ -245,6 +251,28 @@ import { ThemeService } from '../../../core/services/theme.service';
       font-weight: 700;
       font-size: var(--font-size-sm);
       cursor: default;
+      flex-shrink: 0;
+    }
+
+    @media (max-width: 430px) {
+      .topbar {
+        padding-inline: 12px;
+      }
+
+      .topbar-left,
+      .topbar-right {
+        gap: var(--space-2);
+      }
+
+      .logo-text {
+        font-size: 1rem;
+      }
+    }
+
+    @media (max-width: 359px) {
+      .avatar {
+        display: none;
+      }
     }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -270,16 +298,18 @@ export class TopbarComponent implements OnInit {
   getInitials(): string {
     const name = this.user()?.name || '';
     if (!name) return 'U';
+
     const parts = name.trim().split(' ');
     if (parts.length >= 2) {
       return (parts[0][0] + parts[parts.length - 1][0]).toUpperCase();
     }
+
     return name.substring(0, 2).toUpperCase();
   }
 
-  goToAlerts() {
+  goToAlerts(): void {
     this.openAlerts.emit();
-    this.router.navigate(['/alerts']);
+    void this.router.navigate(['/alerts']);
   }
 
   toggleTheme(): void {

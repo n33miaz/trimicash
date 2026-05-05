@@ -12,7 +12,11 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     </header>
   `,
   styles: [`
-    :host { display: block; margin-bottom: var(--space-6); }
+    :host {
+      display: block;
+      margin-bottom: var(--space-6);
+    }
+
     .tc-page-header {
       display: flex;
       align-items: center;
@@ -20,6 +24,7 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       flex-wrap: wrap;
       gap: var(--space-4);
     }
+
     .title {
       margin: 0;
       font-family: var(--font-family-display);
@@ -27,7 +32,25 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       font-weight: 700;
       color: var(--color-text-primary);
     }
-    .actions { display: flex; gap: var(--space-2); }
+
+    .actions {
+      display: flex;
+      gap: var(--space-2);
+    }
+
+    @media (max-width: 767px) {
+      .tc-page-header {
+        align-items: stretch;
+      }
+
+      .title {
+        font-size: var(--font-size-2xl);
+      }
+
+      .actions {
+        width: 100%;
+      }
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

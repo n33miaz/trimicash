@@ -1,20 +1,18 @@
-import { ChangeDetectionStrategy, Component, inject, OnInit, signal } from '@angular/core';
-import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { ChangeDetectionStrategy, Component, OnInit, inject, signal } from '@angular/core';
 import { TitleCasePipe } from '@angular/common';
-
-import { SettingsLocalAdapter } from '../../../features/settings/infrastructure/settings-local.adapter';
-import { SeedRunner } from '../../../core/mocks/seed-runner';
-import { CategoriesFacade } from '../../categories/application/categories.facade';
-import { CashFlowFacade } from '../../cash-flow/application/cash-flow.facade';
+import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
 import { AccountsPayableFacade } from '../../accounts-payable/application/accounts-payable.facade';
-import { ToastService } from '../../../shared/components/toast/toast.service';
-
-import { InputComponent } from '../../../shared/components/input/input.component';
+import { CategoriesFacade } from '../../categories/application/categories.facade';
+import { Category } from '../../categories/domain/category.repository';
+import { CashFlowFacade } from '../../cash-flow/application/cash-flow.facade';
+import { SeedRunner } from '../../../core/mocks/seed-runner';
+import { SettingsLocalAdapter } from '../../../features/settings/infrastructure/settings-local.adapter';
 import { ButtonComponent } from '../../../shared/components/button/button.component';
 import { CardComponent } from '../../../shared/components/card/card.component';
-import { TableComponent } from '../../../shared/components/table/table.component';
+import { InputComponent } from '../../../shared/components/input/input.component';
 import { ModalComponent } from '../../../shared/components/modal/modal.component';
-import { Category } from '../../categories/domain/category.repository';
+import { TableComponent } from '../../../shared/components/table/table.component';
+import { ToastService } from '../../../shared/components/toast/toast.service';
 
 @Component({
   selector: 'tc-settings-page',
@@ -31,50 +29,48 @@ import { Category } from '../../categories/domain/category.repository';
   template: `
     <div class="settings-layout">
       <div class="settings-header">
-        <h2 class="display-md">Configurações</h2>
+        <h2 class="display-md">Configuracoes</h2>
       </div>
 
       <div class="settings-grid">
-        <!-- SEÇÃO: Parâmetros do Sistema -->
-        <tc-card title="Parâmetros de Análise" subtitle="Ajuste como o TrimiCash avalia a saúde do seu caixa.">
+        <tc-card title="Parametros de Analise" subtitle="Ajuste como o TrimiCash avalia a saude do seu caixa.">
           <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
             <tc-input
               formControlName="reserveSafetyMarginPct"
-              label="Margem de Segurança da Reserva (%)"
+              label="Margem de Seguranca da Reserva (%)"
               type="number"
-              hint="Percentual extra sugerido além das contas do mês."
+              hint="Percentual extra sugerido alem das contas do mes."
             ></tc-input>
-            
+
             <tc-input
               formControlName="reserveAttentionThresholdPct"
-              label="Limite de Atenção da Reserva (%)"
+              label="Limite de Atencao da Reserva (%)"
               type="number"
-              hint="Quanto a mais da reserva indica que a folga está apertada."
+              hint="Quanto a mais da reserva indica que a folga esta apertada."
             ></tc-input>
 
             <tc-input
               formControlName="minSafetyDays"
-              label="Mínimo de Dias de Segurança"
+              label="Minimo de Dias de Seguranca"
               type="number"
-              hint="Abaixo disso, um alerta crítico será exibido."
+              hint="Abaixo disso, um alerta critico sera exibido."
             ></tc-input>
 
             <div class="form-actions">
               <tc-button type="submit" variant="primary" [disabled]="settingsForm.invalid || !settingsForm.dirty">
-                Salvar Parâmetros
+                Salvar Parametros
               </tc-button>
             </div>
           </form>
         </tc-card>
 
-        <!-- SEÇÃO: Categorias -->
-        <tc-card title="Categorias" subtitle="Gerencie como você organiza suas contas e movimentações.">
+        <tc-card title="Categorias" subtitle="Gerencie como voce organiza suas contas e movimentacoes.">
           <div class="category-add-form">
             <tc-input
               [label]="editingCategory() ? 'Editar Nome' : 'Nova Categoria'"
               [formControl]="categoryNameCtrl"
             ></tc-input>
-            
+
             <div class="color-picker-wrapper">
               <label for="category-color">Cor</label>
               <input id="category-color" type="color" [formControl]="categoryColorCtrl">
@@ -90,7 +86,7 @@ import { Category } from '../../categories/domain/category.repository';
             </div>
           </div>
 
-          <tc-table [columns]="['Cor', 'Nome', 'Ações']">
+          <tc-table [columns]="['Cor', 'Nome', 'Acoes']">
             @for (cat of categoriesFacade.categories(); track cat.id) {
               <tr>
                 <td>
@@ -118,32 +114,30 @@ import { Category } from '../../categories/domain/category.repository';
           </tc-table>
         </tc-card>
 
-        <!-- SEÇÃO: Reset -->
-        <tc-card title="Modo Demonstração" subtitle="Reinicie os dados para testar diferentes cenários.">
+        <tc-card title="Modo Demonstracao" subtitle="Reinicie os dados para testar diferentes cenarios.">
           <p class="body-sm text-secondary" style="margin-bottom: var(--space-4);">
-            Ao resetar, todas as movimentações e configurações atuais serão perdidas e substituídas por dados fictícios para fins de apresentação.
+            Ao resetar, todas as movimentacoes e configuracoes atuais serao perdidas e substituidas por dados ficticios para fins de apresentacao.
           </p>
           <div class="reset-actions">
-            <tc-button variant="danger" (clicked)="openResetModal('healthy')">
-              Carregar Cenário Saudável
+            <tc-button variant="danger" [block]="true" (clicked)="openResetModal('healthy')">
+              Carregar Cenario Saudavel
             </tc-button>
-            <tc-button variant="danger" (clicked)="openResetModal('risk')">
-              Carregar Cenário de Risco
+            <tc-button variant="danger" [block]="true" (clicked)="openResetModal('risk')">
+              Carregar Cenario de Risco
             </tc-button>
           </div>
         </tc-card>
       </div>
     </div>
 
-    <!-- MODAL DE RESET -->
     <tc-modal
       [open]="isResetModalOpen()"
       title="Confirmar Reset"
       (close)="closeResetModal()"
     >
       <p class="body-md" style="margin-bottom: var(--space-4);">
-        Tem certeza que deseja carregar o cenário <strong>{{ selectedScenario() | titlecase }}</strong>? 
-        Esta ação apagará todos os dados atuais da demonstração.
+        Tem certeza que deseja carregar o cenario <strong>{{ selectedScenario() | titlecase }}</strong>?
+        Esta acao apagara todos os dados atuais da demonstracao.
       </p>
       <div style="display: flex; gap: var(--space-3); justify-content: flex-end;">
         <tc-button variant="ghost" (clicked)="closeResetModal()">Cancelar</tc-button>
@@ -157,17 +151,21 @@ import { Category } from '../../categories/domain/category.repository';
       margin: 0 auto;
       padding-bottom: var(--space-8);
     }
+
     .settings-header { margin-bottom: var(--space-6); }
+
     .settings-grid {
       display: flex;
       flex-direction: column;
       gap: var(--space-5);
     }
+
     .form-actions {
       display: flex;
       justify-content: flex-end;
       margin-top: var(--space-4);
     }
+
     .category-add-form {
       display: flex;
       align-items: flex-end;
@@ -175,13 +173,25 @@ import { Category } from '../../categories/domain/category.repository';
       margin-bottom: var(--space-5);
       flex-wrap: wrap;
     }
-    .category-add-form > tc-input { margin-bottom: 0; flex: 1; min-width: 200px; }
+
+    .category-add-form > tc-input {
+      margin-bottom: 0;
+      flex: 1;
+      min-width: 200px;
+    }
+
     .color-picker-wrapper {
       display: flex;
       flex-direction: column;
       gap: var(--space-2);
     }
-    .color-picker-wrapper label { font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); }
+
+    .color-picker-wrapper label {
+      font-size: var(--font-size-sm);
+      font-weight: 500;
+      color: var(--color-text-primary);
+    }
+
     .color-picker-wrapper input {
       height: 44px;
       width: 60px;
@@ -192,53 +202,72 @@ import { Category } from '../../categories/domain/category.repository';
       box-shadow: var(--shadow-sm);
       transition: border-color var(--motion-fast), box-shadow var(--motion-fast);
     }
+
     .color-picker-wrapper input:focus-visible {
       outline: none;
       border-color: var(--color-accent-500);
-      box-shadow: 0 0 0 3px rgba(47,128,237,0.15);
+      box-shadow: 0 0 0 3px rgba(47, 128, 237, 0.15);
     }
+
     .cat-actions { display: flex; gap: var(--space-2); }
+
     .color-swatch {
       width: 32px;
       height: 32px;
       border-radius: var(--radius-sm);
-      border: 1px solid rgba(0,0,0,0.1);
+      border: 1px solid rgba(0, 0, 0, 0.1);
       box-shadow: var(--shadow-sm);
     }
+
     .actions-cell { display: flex; gap: var(--space-2); }
     .reset-actions { display: flex; gap: var(--space-3); flex-wrap: wrap; }
     .text-secondary { color: var(--color-text-secondary); }
     .text-center { text-align: center; }
+
+    @media (max-width: 767px) {
+      .category-add-form {
+        flex-direction: column;
+        align-items: stretch;
+      }
+
+      .cat-actions,
+      .reset-actions {
+        display: grid;
+        grid-template-columns: 1fr;
+        width: 100%;
+      }
+
+      .actions-cell {
+        flex-wrap: wrap;
+      }
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class SettingsPageComponent implements OnInit {
-  private fb = inject(FormBuilder);
-  private settingsAdapter = inject(SettingsLocalAdapter);
-  private seedRunner = inject(SeedRunner);
-  private toast = inject(ToastService);
-  
-  public categoriesFacade = inject(CategoriesFacade);
-  private cashFlowFacade = inject(CashFlowFacade);
-  private payablesFacade = inject(AccountsPayableFacade);
+  private readonly fb = inject(FormBuilder);
+  private readonly settingsAdapter = inject(SettingsLocalAdapter);
+  private readonly seedRunner = inject(SeedRunner);
+  private readonly toast = inject(ToastService);
 
-  // Formulário Settings
-  settingsForm = this.fb.group({
+  readonly categoriesFacade = inject(CategoriesFacade);
+  private readonly cashFlowFacade = inject(CashFlowFacade);
+  private readonly payablesFacade = inject(AccountsPayableFacade);
+
+  readonly settingsForm = this.fb.group({
     reserveSafetyMarginPct: [0, Validators.required],
     reserveAttentionThresholdPct: [0, Validators.required],
     minSafetyDays: [0, Validators.required],
   });
 
-  // Formulário Categorias
-  categoryNameCtrl = this.fb.control('', Validators.required);
-  categoryColorCtrl = this.fb.control('#051B61', Validators.required);
-  editingCategory = signal<Category | null>(null);
+  readonly categoryNameCtrl = this.fb.control('', Validators.required);
+  readonly categoryColorCtrl = this.fb.control('#051B61', Validators.required);
+  readonly editingCategory = signal<Category | null>(null);
 
-  // Modal Reset
-  isResetModalOpen = signal(false);
-  selectedScenario = signal<'healthy' | 'risk'>('healthy');
+  readonly isResetModalOpen = signal(false);
+  readonly selectedScenario = signal<'healthy' | 'risk'>('healthy');
 
-  ngOnInit() {
+  ngOnInit(): void {
     const currentSettings = this.settingsAdapter.settings();
     this.settingsForm.patchValue({
       reserveSafetyMarginPct: currentSettings.reserveSafetyMarginPct,
@@ -253,24 +282,23 @@ export class SettingsPageComponent implements OnInit {
     ]);
   }
 
-  saveSettings() {
+  saveSettings(): void {
     if (this.settingsForm.invalid) return;
+
     const values = this.settingsForm.value;
-    
     this.settingsAdapter.updateSettings({
       reserveSafetyMarginPct: Number(values.reserveSafetyMarginPct),
       reserveAttentionThresholdPct: Number(values.reserveAttentionThresholdPct),
       minSafetyDays: Number(values.minSafetyDays),
     });
-    
+
     this.settingsForm.markAsPristine();
-    this.toast.show('Configurações salvas com sucesso!', 'success');
+    this.toast.show('Configuracoes salvas com sucesso!', 'success');
   }
 
-  // Categoria
-  async saveCategory() {
+  async saveCategory(): Promise<void> {
     if (this.categoryNameCtrl.invalid || this.categoryColorCtrl.invalid) return;
-    
+
     const name = this.categoryNameCtrl.value!;
     const color = this.categoryColorCtrl.value!;
     const currentEdit = this.editingCategory();
@@ -289,53 +317,51 @@ export class SettingsPageComponent implements OnInit {
     }
   }
 
-  editCategory(cat: Category) {
-    this.editingCategory.set(cat);
-    this.categoryNameCtrl.setValue(cat.name);
-    this.categoryColorCtrl.setValue(cat.color);
+  editCategory(category: Category): void {
+    this.editingCategory.set(category);
+    this.categoryNameCtrl.setValue(category.name);
+    this.categoryColorCtrl.setValue(category.color);
   }
 
-  cancelEditCategory() {
+  cancelEditCategory(): void {
     this.editingCategory.set(null);
     this.categoryNameCtrl.setValue('');
     this.categoryColorCtrl.setValue('#051B61');
   }
 
-  async deleteCategory(id: string) {
+  async deleteCategory(id: string): Promise<void> {
     if (this.isCategoryInUse(id)) {
-      this.toast.show('Categoria em uso. Não é possível excluir.', 'error');
+      this.toast.show('Categoria em uso. Nao e possivel excluir.', 'error');
       return;
     }
 
     try {
       await this.categoriesFacade.remove(id);
-      this.toast.show('Categoria excluída.', 'success');
+      this.toast.show('Categoria excluida.', 'success');
     } catch {
       this.toast.show('Erro ao excluir categoria.', 'error');
     }
   }
 
   isCategoryInUse(id: string): boolean {
-    const isUsedInCashFlow = this.cashFlowFacade.movements().some(m => m.categoryId === id);
-    const isUsedInPayables = this.payablesFacade.payables().some(p => p.categoryId === id);
+    const isUsedInCashFlow = this.cashFlowFacade.movements().some(movement => movement.categoryId === id);
+    const isUsedInPayables = this.payablesFacade.payables().some(payable => payable.categoryId === id);
     return isUsedInCashFlow || isUsedInPayables;
   }
 
-  // Reset
-  openResetModal(scenario: 'healthy' | 'risk') {
+  openResetModal(scenario: 'healthy' | 'risk'): void {
     this.selectedScenario.set(scenario);
     this.isResetModalOpen.set(true);
   }
 
-  closeResetModal() {
+  closeResetModal(): void {
     this.isResetModalOpen.set(false);
   }
 
-  confirmReset() {
+  confirmReset(): void {
     this.seedRunner.reseed(this.selectedScenario());
     this.closeResetModal();
     this.toast.show('Dados resetados com sucesso. Recarregando...', 'success');
-    // Em uma demo local simples, forçar refresh da janela atualiza tudo.
     setTimeout(() => window.location.reload(), 1500);
   }
 }

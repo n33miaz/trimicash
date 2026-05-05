@@ -1,13 +1,13 @@
-import { ChangeDetectionStrategy, Component, computed, inject, input, output, OnInit } from '@angular/core';
+import { ChangeDetectionStrategy, Component, OnInit, computed, inject, input, output } from '@angular/core';
 import { FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { CashFlowFacade } from '../../../application/cash-flow.facade';
 import { Movement, MovementType } from '../../../domain/entities/movement.entity';
 import { CategoriesFacade } from '../../../../categories/application/categories.facade';
-import { CashFlowFacade } from '../../../application/cash-flow.facade';
-import { InputComponent } from '../../../../../shared/components/input/input.component';
-import { SelectComponent } from '../../../../../shared/components/select/select.component';
-import { MoneyInputComponent } from '../../../../../shared/components/money-input/money-input.component';
-import { DateInputComponent } from '../../../../../shared/components/date-input/date-input.component';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
+import { DateInputComponent } from '../../../../../shared/components/date-input/date-input.component';
+import { InputComponent } from '../../../../../shared/components/input/input.component';
+import { MoneyInputComponent } from '../../../../../shared/components/money-input/money-input.component';
+import { SelectComponent } from '../../../../../shared/components/select/select.component';
 
 @Component({
   selector: 'tc-movement-form',
@@ -23,31 +23,39 @@ import { ButtonComponent } from '../../../../../shared/components/button/button.
   template: `
     <form [formGroup]="form" (ngSubmit)="onSubmit()">
       <div class="form-row type-selector">
-        <button type="button" 
-                class="type-btn" 
-                [class.active-entrada]="form.get('type')?.value === 'ENTRADA'"
-                (click)="form.get('type')?.setValue('ENTRADA')">
+        <button
+          type="button"
+          class="type-btn"
+          [class.active-entrada]="form.get('type')?.value === 'ENTRADA'"
+          (click)="form.get('type')?.setValue('ENTRADA')">
           Entrada
         </button>
-        <button type="button" 
-                class="type-btn" 
-                [class.active-saida]="form.get('type')?.value === 'SAIDA'"
-                (click)="form.get('type')?.setValue('SAIDA')">
-          Saída
+        <button
+          type="button"
+          class="type-btn"
+          [class.active-saida]="form.get('type')?.value === 'SAIDA'"
+          (click)="form.get('type')?.setValue('SAIDA')">
+          Saida
         </button>
       </div>
 
-      <tc-money-input formControlName="amount" label="Valor" [error]="getError('amount')"></tc-money-input>
-      
+      <tc-money-input
+        formControlName="amount"
+        label="Valor"
+        [hint]="form.get('type')?.value === 'ENTRADA' ? 'Informe o valor que entrou no caixa.' : 'Informe o valor que saiu do caixa.'"
+        [error]="getError('amount')">
+      </tc-money-input>
+
       <tc-date-input formControlName="date" label="Data" [error]="getError('date')"></tc-date-input>
 
-      <tc-select formControlName="categoryId" 
-                 label="Categoria" 
-                 [options]="categoryOptions()" 
-                 [error]="getError('categoryId')">
+      <tc-select
+        formControlName="categoryId"
+        label="Categoria"
+        [options]="categoryOptions()"
+        [error]="getError('categoryId')">
       </tc-select>
 
-      <tc-input formControlName="description" label="Descrição" [error]="getError('description')"></tc-input>
+      <tc-input formControlName="description" label="Descricao" [error]="getError('description')"></tc-input>
 
       <div class="actions">
         <tc-button type="button" variant="secondary" (clicked)="cancelled.emit()">Cancelar</tc-button>
@@ -61,6 +69,7 @@ import { ButtonComponent } from '../../../../../shared/components/button/button.
       gap: var(--space-2);
       margin-bottom: var(--space-4);
     }
+
     .type-btn {
       flex: 1;
       padding: var(--space-2) var(--space-4);
@@ -75,38 +84,47 @@ import { ButtonComponent } from '../../../../../shared/components/button/button.
         border-color var(--motion-fast),
         color var(--motion-fast);
     }
+
     .type-btn.active-entrada {
       background: var(--color-success-50);
       border-color: var(--color-success-500);
       color: var(--color-success-600);
       font-weight: 600;
     }
+
     .type-btn.active-saida {
       background: var(--color-danger-50);
       border-color: var(--color-danger-500);
       color: var(--color-danger-600);
       font-weight: 600;
     }
+
     .actions {
       display: flex;
       justify-content: flex-end;
       gap: var(--space-3);
       margin-top: var(--space-6);
     }
+
+    @media (max-width: 767px) {
+      .actions {
+        flex-direction: column-reverse;
+      }
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class MovementFormComponent implements OnInit {
   movementToEdit = input<Movement | null>(null);
-  
+
   cancelled = output<void>();
   saved = output<void>();
 
-  private fb = inject(FormBuilder);
-  cashFlowFacade = inject(CashFlowFacade);
-  private categoriesFacade = inject(CategoriesFacade);
+  private readonly fb = inject(FormBuilder);
+  readonly cashFlowFacade = inject(CashFlowFacade);
+  private readonly categoriesFacade = inject(CategoriesFacade);
 
-  form = this.fb.group({
+  readonly form = this.fb.group({
     type: this.fb.control<MovementType>('SAIDA', Validators.required),
     amount: this.fb.control<number>(0, [Validators.required, Validators.min(0.01)]),
     date: this.fb.control<Date>(new Date(), Validators.required),
@@ -114,17 +132,16 @@ export class MovementFormComponent implements OnInit {
     description: this.fb.control<string>('', Validators.required)
   });
 
-  categoryOptions = computed(() => {
-    return this.categoriesFacade.categories().map(c => ({
-      label: c.name,
-      value: c.id
+  readonly categoryOptions = computed(() => {
+    return this.categoriesFacade.categories().map(category => ({
+      label: category.name,
+      value: category.id
     }));
   });
 
-  ngOnInit() {
-    // Ensure categories are loaded
+  ngOnInit(): void {
     if (this.categoriesFacade.categories().length === 0) {
-      this.categoriesFacade.load();
+      void this.categoriesFacade.load();
     }
 
     const editItem = this.movementToEdit();
@@ -142,14 +159,14 @@ export class MovementFormComponent implements OnInit {
   getError(controlName: string): string | undefined {
     const control = this.form.get(controlName);
     if (control?.touched && control?.invalid) {
-      if (control.errors?.['required']) return 'Campo obrigatório';
+      if (control.errors?.['required']) return 'Campo obrigatorio';
       if (control.errors?.['min']) return 'Valor deve ser maior que zero';
-      return 'Campo inválido';
+      return 'Campo invalido';
     }
     return undefined;
   }
 
-  async onSubmit() {
+  async onSubmit(): Promise<void> {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
       return;
@@ -173,7 +190,7 @@ export class MovementFormComponent implements OnInit {
       }
       this.saved.emit();
     } catch {
-      // Facade already handles errors
+      // Facade already handles errors.
     }
   }
 }

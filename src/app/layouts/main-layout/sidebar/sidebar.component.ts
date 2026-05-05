@@ -4,10 +4,9 @@ import {
   computed,
   inject,
   OnInit,
-  output,
   signal,
 } from '@angular/core';
-import { RouterLink, RouterLinkActive, Router } from '@angular/router';
+import { RouterLink, RouterLinkActive } from '@angular/router';
 import { AlertsFacade } from '../../../features/alerts/application/alerts.facade';
 import { AUTH_PORT } from '../../../core/tokens/injection-tokens';
 import { ThemeService } from '../../../core/services/theme.service';

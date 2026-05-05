@@ -3,6 +3,10 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
 @Component({
   selector: 'tc-button',
   standalone: true,
+  host: {
+    '[style.display]': 'block() ? "block" : "inline-block"',
+    '[style.width]': 'block() ? "100%" : null',
+  },
   template: `
     <button
       [type]="type()"
@@ -16,8 +20,6 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
     </button>
   `,
   styles: [`
-    :host { display: inline-block; }
-
     .tc-btn {
       display: inline-flex;
       align-items: center;
@@ -30,11 +32,11 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
       cursor: pointer;
       transition:
         background-color var(--motion-fast),
-        border-color     var(--motion-fast),
-        color            var(--motion-fast),
-        opacity          var(--motion-fast),
-        transform        var(--motion-fast),
-        box-shadow       var(--motion-fast);
+        border-color var(--motion-fast),
+        color var(--motion-fast),
+        opacity var(--motion-fast),
+        transform var(--motion-fast),
+        box-shadow var(--motion-fast);
       white-space: nowrap;
     }
 
@@ -52,21 +54,20 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
       cursor: not-allowed;
     }
 
-    /* ─── Sizes ─────────────────────────────────────────── */
     .tc-btn-sm { padding: var(--space-2) var(--space-3); font-size: var(--font-size-sm); }
     .tc-btn-md { padding: var(--space-3) var(--space-4); font-size: var(--font-size-md); }
     .tc-btn-lg { padding: var(--space-4) var(--space-5); font-size: var(--font-size-lg); }
-    
+
     .tc-btn-block {
       width: 100%;
       display: flex;
     }
 
-    /* ─── Variants ───────────────────────────────────────── */
     .tc-btn-primary {
       background: var(--color-accent-500);
       color: white;
     }
+
     .tc-btn-primary:hover:not(:disabled) {
       background: var(--color-accent-600);
       box-shadow: var(--shadow-glow-accent);
@@ -77,6 +78,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
       color: var(--color-text-primary);
       border: 1px solid var(--color-border-card);
     }
+
     .tc-btn-secondary:hover:not(:disabled) {
       background: var(--color-background);
       border-color: var(--color-accent-500);
@@ -87,6 +89,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
       background: transparent;
       color: var(--color-text-primary);
     }
+
     .tc-btn-ghost:hover:not(:disabled) {
       background: var(--color-bg-row-hover);
       color: var(--color-accent-500);
@@ -96,12 +99,12 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
       background: var(--color-danger-500);
       color: white;
     }
+
     .tc-btn-danger:hover:not(:disabled) {
       background: var(--color-danger-600);
       box-shadow: var(--shadow-glow-danger);
     }
 
-    /* ─── Spinner ────────────────────────────────────────── */
     .spinner {
       width: 16px;
       height: 16px;
@@ -112,16 +115,20 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
       flex-shrink: 0;
     }
 
-    @keyframes spin { 100% { transform: rotate(360deg); } }
+    @keyframes spin {
+      100% {
+        transform: rotate(360deg);
+      }
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class ButtonComponent {
-  variant  = input<'primary' | 'secondary' | 'ghost' | 'danger'>('primary');
-  size     = input<'sm' | 'md' | 'lg'>('md');
-  type     = input<'button' | 'submit' | 'reset'>('button');
-  block    = input<boolean>(false);
-  loading  = input<boolean>(false);
+  variant = input<'primary' | 'secondary' | 'ghost' | 'danger'>('primary');
+  size = input<'sm' | 'md' | 'lg'>('md');
+  type = input<'button' | 'submit' | 'reset'>('button');
+  block = input<boolean>(false);
+  loading = input<boolean>(false);
   disabled = input<boolean>(false);
-  clicked  = output<MouseEvent>();
+  clicked = output<MouseEvent>();
 }

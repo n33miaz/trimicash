@@ -7,26 +7,24 @@ import {
   signal,
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
-import { FormsModule, FormBuilder, ReactiveFormsModule, Validators } from '@angular/forms';
+import { FormBuilder, FormsModule, ReactiveFormsModule, Validators } from '@angular/forms';
 import { differenceInDays } from 'date-fns';
-
-import { AccountsPayableFacade } from '../../../application/accounts-payable.facade';
 import { CashFlowFacade } from '../../../../cash-flow/application/cash-flow.facade';
 import { CategoriesFacade } from '../../../../categories/application/categories.facade';
-import { ToastService } from '../../../../../shared/components/toast/toast.service';
+import { AccountsPayableFacade } from '../../../application/accounts-payable.facade';
 import { PayableAccount, PayableStatus, RecurrenceFrequency } from '../../../domain/entities/payable-account.entity';
-
-import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
-import { StatCardComponent } from '../../../../../shared/components/stat-card/stat-card.component';
-import { ButtonComponent } from '../../../../../shared/components/button/button.component';
 import { BadgeComponent } from '../../../../../shared/components/badge/badge.component';
-import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
-import { InputComponent } from '../../../../../shared/components/input/input.component';
-import { SelectComponent } from '../../../../../shared/components/select/select.component';
-import { MoneyInputComponent } from '../../../../../shared/components/money-input/money-input.component';
+import { ButtonComponent } from '../../../../../shared/components/button/button.component';
 import { DateInputComponent } from '../../../../../shared/components/date-input/date-input.component';
 import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
+import { InputComponent } from '../../../../../shared/components/input/input.component';
 import { LoadingStateComponent } from '../../../../../shared/components/loading-state/loading-state.component';
+import { ModalComponent } from '../../../../../shared/components/modal/modal.component';
+import { MoneyInputComponent } from '../../../../../shared/components/money-input/money-input.component';
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
+import { SelectComponent } from '../../../../../shared/components/select/select.component';
+import { StatCardComponent } from '../../../../../shared/components/stat-card/stat-card.component';
+import { ToastService } from '../../../../../shared/components/toast/toast.service';
 import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 
 type StatusFilter = 'TODAS' | PayableStatus;
@@ -54,13 +52,14 @@ type StatusFilter = 'TODAS' | PayableStatus;
   template: `
     <div class="ap-page">
       <tc-page-header title="Contas a Pagar">
-        <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova Conta</tc-button>
+        <div class="page-header-action">
+          <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova Conta</tc-button>
+        </div>
       </tc-page-header>
 
-      <!-- KPIs -->
       <div class="kpis-grid">
         <tc-stat-card
-          label="Total a pagar no mês"
+          label="Total a pagar no mes"
           [value]="totalMes() | brlCurrency"
           tone="warning"
           hint="Contas pendentes e atrasadas"
@@ -69,7 +68,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
           label="Vencendo em 7 dias"
           [value]="vencendo7d() | brlCurrency"
           tone="warning"
-          hint="Pendentes com vencimento em até 7 dias"
+          hint="Pendentes com vencimento em ate 7 dias"
         ></tc-stat-card>
         <tc-stat-card
           label="Atrasadas"
@@ -79,8 +78,6 @@ type StatusFilter = 'TODAS' | PayableStatus;
         ></tc-stat-card>
       </div>
 
-
-      <!-- Tabs de status -->
       <div class="tabs-bar">
         @for (tab of tabs; track tab.value) {
           <button
@@ -91,29 +88,27 @@ type StatusFilter = 'TODAS' | PayableStatus;
         }
       </div>
 
-      <!-- Lista -->
       @if (facade.loading()) {
         <tc-loading-state message="Carregando contas..."></tc-loading-state>
       } @else if (filteredPayables().length === 0) {
         <tc-empty-state
           title="Nenhuma conta encontrada"
-          message="Adicione uma conta a pagar para começar."
+          message="Adicione uma conta a pagar para comecar."
         >
           <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova Conta</tc-button>
         </tc-empty-state>
       } @else {
-        <!-- Desktop table -->
         <div class="table-wrapper desktop-only">
           <table class="tc-table">
             <thead>
               <tr>
-                <th>Descrição</th>
+                <th>Descricao</th>
                 <th class="text-center">Categoria</th>
                 <th class="text-center">Vencimento</th>
-                <th class="text-center">Recorrência</th>
+                <th class="text-center">Recorrencia</th>
                 <th class="text-center">Status</th>
                 <th class="text-right">Valor</th>
-                <th class="text-center">Ações</th>
+                <th class="text-center">Acoes</th>
               </tr>
             </thead>
             <tbody>
@@ -129,7 +124,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
                     @if (p.recurrence !== 'NONE') {
                       <tc-badge tone="info">{{ getRecurrenceLabel(p.recurrence) }}</tc-badge>
                     } @else {
-                      <span class="text-secondary">—</span>
+                      <span class="text-secondary">-</span>
                     }
                   </td>
                   <td class="text-center"><tc-badge [tone]="getStatusTone(p.status)">{{ p.status }}</tc-badge></td>
@@ -151,66 +146,69 @@ type StatusFilter = 'TODAS' | PayableStatus;
           </table>
         </div>
 
-        <!-- Mobile cards -->
         <div class="mobile-cards mobile-only">
           @for (p of filteredPayables(); track p.id) {
             <div class="payable-card" [class.card-overdue]="p.status === 'ATRASADA'">
-              <div class="card-row">
-                <div>
+              <div class="card-row card-top">
+                <div class="card-main">
                   <span class="card-description">{{ p.description }}</span>
-                  <div class="card-meta">
-                    <tc-badge tone="neutral">{{ getCategoryName(p.categoryId) }}</tc-badge>
-                    @if (p.recurrence !== 'NONE') {
-                      <tc-badge tone="info">{{ getRecurrenceLabel(p.recurrence) }}</tc-badge>
-                    }
-                  </div>
+                  <tc-badge [tone]="getStatusTone(p.status)">{{ p.status }}</tc-badge>
                 </div>
                 <span class="card-amount">{{ p.amount | brlCurrency }}</span>
               </div>
-              <div class="card-row card-footer">
+
+              <div class="card-row card-due-row">
                 <div class="card-due">
                   <span [class]="getDueDateClass(p)">{{ p.dueDate | date:'dd/MM/yyyy' }}</span>
                   <span class="due-pill" [class]="getDuePillClass(p)">{{ getDuePillText(p) }}</span>
                 </div>
-                <tc-badge [tone]="getStatusTone(p.status)">{{ p.status }}</tc-badge>
               </div>
+
+              <div class="card-meta">
+                <tc-badge tone="neutral">{{ getCategoryName(p.categoryId) }}</tc-badge>
+                @if (p.recurrence !== 'NONE') {
+                  <tc-badge tone="info">{{ getRecurrenceLabel(p.recurrence) }}</tc-badge>
+                }
+              </div>
+
               <div class="card-actions">
                 @if (p.status === 'PENDENTE' || p.status === 'ATRASADA') {
-                  <tc-button variant="primary" size="sm" (clicked)="openPayModal(p)">Pagar</tc-button>
+                  <tc-button variant="primary" size="sm" [block]="true" (clicked)="openPayModal(p)">Pagar</tc-button>
                 }
-                <tc-button variant="secondary" size="sm" (clicked)="openEditModal(p)">Editar</tc-button>
-                @if (p.status !== 'CANCELADA' && p.status !== 'PAGA') {
-                  <tc-button variant="danger" size="sm" (clicked)="openCancelModal(p)">Cancelar</tc-button>
-                }
+                <div class="secondary-actions">
+                  <tc-button variant="secondary" size="sm" [block]="true" (clicked)="openEditModal(p)">Editar</tc-button>
+                  @if (p.status !== 'CANCELADA' && p.status !== 'PAGA') {
+                    <tc-button variant="danger" size="sm" [block]="true" (clicked)="openCancelModal(p)">Cancelar</tc-button>
+                  }
+                </div>
               </div>
             </div>
           }
         </div>
       }
-
-
     </div>
 
-    <!-- Modal: Criar / Editar conta -->
     <tc-modal
       [open]="isFormModalOpen()"
       [title]="payableToEdit() ? 'Editar Conta' : 'Nova Conta'"
       (close)="closeFormModal()"
     >
       <form [formGroup]="payableForm" (ngSubmit)="savePayable()">
-        <tc-input formControlName="description" label="Descrição" [error]="getFormError('description')"></tc-input>
+        <tc-input formControlName="description" label="Descricao" [error]="getFormError('description')"></tc-input>
         <tc-money-input formControlName="amount" label="Valor" [error]="getFormError('amount')"></tc-money-input>
         <tc-date-input formControlName="dueDate" label="Vencimento" [error]="getFormError('dueDate')"></tc-date-input>
         <tc-select
           formControlName="categoryId"
           label="Categoria"
           [options]="categoryOptions()"
+          [fullWidth]="true"
           [error]="getFormError('categoryId')"
         ></tc-select>
         <tc-select
           formControlName="recurrence"
-          label="Recorrência"
+          label="Recorrencia"
           [options]="recurrenceOptions"
+          [fullWidth]="true"
         ></tc-select>
         <div class="modal-actions" style="margin-top: var(--space-5);">
           <tc-button type="button" variant="ghost" (clicked)="closeFormModal()">Cancelar</tc-button>
@@ -219,7 +217,6 @@ type StatusFilter = 'TODAS' | PayableStatus;
       </form>
     </tc-modal>
 
-    <!-- Modal: Pagar conta -->
     <tc-modal
       [open]="isPayModalOpen()"
       title="Confirmar pagamento"
@@ -231,7 +228,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
           no valor de <strong>{{ payableToPay()!.amount | brlCurrency }}</strong>?
         </p>
         <p class="body-sm text-secondary" style="margin-top: var(--space-2); margin-bottom: var(--space-5);">
-          Uma movimentação de saída será criada no Caixa e o saldo será atualizado.
+          Uma movimentacao de saida sera criada no Caixa e o saldo sera atualizado.
         </p>
         <div class="modal-actions">
           <tc-button variant="ghost" (clicked)="closePayModal()">Cancelar</tc-button>
@@ -240,7 +237,6 @@ type StatusFilter = 'TODAS' | PayableStatus;
       }
     </tc-modal>
 
-    <!-- Modal: Cancelar conta -->
     <tc-modal
       [open]="isCancelModalOpen()"
       title="Cancelar conta"
@@ -272,7 +268,16 @@ type StatusFilter = 'TODAS' | PayableStatus;
       max-width: 100%;
       overflow: hidden;
     }
-    @media (max-width: 768px) { .kpis-grid { grid-template-columns: 1fr; } }
+
+    @media (max-width: 768px) {
+      .kpis-grid {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+      }
+
+      .kpis-grid > *:last-child:nth-child(3) {
+        grid-column: 1 / -1;
+      }
+    }
 
     .tabs-bar {
       display: flex;
@@ -283,7 +288,9 @@ type StatusFilter = 'TODAS' | PayableStatus;
       scrollbar-width: none;
       -ms-overflow-style: none;
     }
+
     .tabs-bar::-webkit-scrollbar { display: none; }
+
     .tab-btn {
       padding: var(--space-3) var(--space-4);
       border: none;
@@ -297,14 +304,15 @@ type StatusFilter = 'TODAS' | PayableStatus;
       white-space: nowrap;
       transition: color var(--motion-fast), border-color var(--motion-fast);
     }
+
     .tab-btn:hover { color: var(--color-accent-500); }
+
     .tab-btn.active {
       color: var(--color-accent-500);
       border-bottom-color: var(--color-accent-500);
       font-weight: 600;
     }
 
-    /* Table */
     .table-wrapper {
       background: var(--color-bg-card);
       border-radius: var(--radius-lg);
@@ -315,10 +323,18 @@ type StatusFilter = 'TODAS' | PayableStatus;
       scrollbar-width: thin;
       scrollbar-color: var(--color-border) transparent;
     }
+
     .table-wrapper::-webkit-scrollbar { height: 4px; }
     .table-wrapper::-webkit-scrollbar-track { background: transparent; }
     .table-wrapper::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
-    .tc-table { width: 100%; border-collapse: collapse; text-align: left; min-width: 700px; }
+
+    .tc-table {
+      width: 100%;
+      border-collapse: collapse;
+      text-align: left;
+      min-width: 700px;
+    }
+
     .tc-table th {
       padding: var(--space-3) var(--space-4);
       background: var(--color-background);
@@ -329,23 +345,25 @@ type StatusFilter = 'TODAS' | PayableStatus;
       letter-spacing: 0.06em;
       border-bottom: 1px solid var(--color-border-card);
     }
+
     .tc-table td {
       padding: var(--space-4);
       border-bottom: 1px solid var(--color-border-card);
       font-size: var(--font-size-sm);
       color: var(--color-text-primary);
     }
+
     .tc-table tr:last-child td { border-bottom: none; }
     .tc-table tbody tr { transition: background var(--motion-fast); }
     .tc-table tbody tr:hover { background: var(--color-bg-row-hover); }
     .row-overdue td:first-child { border-left: 3px solid var(--color-danger-500) !important; }
-    .row-overdue { background: rgba(220,38,38,0.02) !important; }
+    .row-overdue { background: rgba(220, 38, 38, 0.02) !important; }
     .text-right { text-align: right; }
     .text-center { text-align: center; }
     .text-secondary { color: var(--color-text-secondary); font-size: var(--font-size-xs); }
     .amount { font-weight: 700; font-family: var(--font-family-display); }
     .actions-cell { display: flex; gap: var(--space-2); flex-wrap: wrap; justify-content: center; }
-    /* Truncamento com tooltip nativo */
+
     .truncate-cell {
       max-width: 200px;
       white-space: nowrap;
@@ -353,7 +371,6 @@ type StatusFilter = 'TODAS' | PayableStatus;
       text-overflow: ellipsis;
     }
 
-    /* Due date pills */
     .due-pill {
       display: inline-block;
       margin-left: var(--space-2);
@@ -362,14 +379,14 @@ type StatusFilter = 'TODAS' | PayableStatus;
       font-size: var(--font-size-xs);
       font-weight: 600;
     }
+
     .due-overdue { color: var(--color-danger-500); font-weight: 700; }
-    .due-urgent  { color: var(--color-warning-500); }
-    .due-normal  { color: var(--color-text-secondary); }
-    .pill-danger  { background: var(--color-danger-50);  color: var(--color-danger-500);  border: 1px solid rgba(220,38,38,0.2); }
-    .pill-warning { background: var(--color-warning-50); color: var(--color-warning-500); border: 1px solid rgba(245,158,11,0.2); }
+    .due-urgent { color: var(--color-warning-500); }
+    .due-normal { color: var(--color-text-secondary); }
+    .pill-danger { background: var(--color-danger-50); color: var(--color-danger-500); border: 1px solid rgba(220, 38, 38, 0.2); }
+    .pill-warning { background: var(--color-warning-50); color: var(--color-warning-500); border: 1px solid rgba(245, 158, 11, 0.2); }
     .pill-neutral { background: var(--color-background); color: var(--color-text-secondary); border: 1px solid var(--color-border-card); }
 
-    /* Mobile cards */
     .payable-card {
       background: var(--color-bg-card);
       border: 1px solid var(--color-border-card);
@@ -379,26 +396,123 @@ type StatusFilter = 'TODAS' | PayableStatus;
       box-shadow: var(--shadow-card);
       transition: all 0.25s var(--motion-spring);
     }
-    .payable-card:hover { transform: translateY(-2px); box-shadow: var(--shadow-glow-accent); border-color: rgba(47,128,237,0.18); }
-    .card-overdue { border-left: 3px solid var(--color-danger-500); background: rgba(220,38,38,0.02); }
-    .card-overdue:hover { box-shadow: var(--shadow-glow-danger) !important; border-color: rgba(220,38,38,0.3) !important; }
-    .card-row { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-3); }
-    .card-footer { align-items: center; }
-    .card-description { display: block; font-weight: 500; font-size: var(--font-size-sm); margin-bottom: var(--space-2); }
-    .card-meta { display: flex; gap: var(--space-2); flex-wrap: wrap; }
-    .card-amount { font-weight: 700; font-size: var(--font-size-md); font-family: var(--font-family-display); }
-    .card-due { display: flex; align-items: center; gap: var(--space-2); font-size: var(--font-size-xs); }
-    .card-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; margin-top: var(--space-3); }
 
-    /* Responsive */
+    .payable-card:hover {
+      transform: translateY(-2px);
+      box-shadow: var(--shadow-glow-accent);
+      border-color: rgba(47, 128, 237, 0.18);
+    }
+
+    .card-overdue {
+      border-left: 3px solid var(--color-danger-500);
+      background: rgba(220, 38, 38, 0.02);
+    }
+
+    .card-overdue:hover {
+      box-shadow: var(--shadow-glow-danger) !important;
+      border-color: rgba(220, 38, 38, 0.3) !important;
+    }
+
+    .card-row {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      gap: var(--space-3);
+      margin-bottom: var(--space-3);
+    }
+
+    .card-main {
+      min-width: 0;
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      align-items: flex-start;
+    }
+
+    .card-description {
+      display: block;
+      font-weight: 600;
+      font-size: var(--font-size-sm);
+      line-height: 1.4;
+      color: var(--color-text-primary);
+    }
+
+    .card-meta {
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+      margin-top: var(--space-1);
+    }
+
+    .card-amount {
+      font-weight: 800;
+      font-size: var(--font-size-md);
+      font-family: var(--font-family-display);
+      text-align: right;
+      flex-shrink: 0;
+    }
+
+    .card-due-row {
+      align-items: center;
+      margin-bottom: var(--space-3);
+    }
+
+    .card-due {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+      font-size: var(--font-size-xs);
+      color: var(--color-text-secondary);
+    }
+
+    .card-actions {
+      display: flex;
+      flex-direction: column;
+      gap: var(--space-2);
+      margin-top: var(--space-3);
+      padding-top: var(--space-3);
+      border-top: 1px solid var(--color-border-card);
+    }
+
+    .secondary-actions {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: var(--space-2);
+    }
+
     .desktop-only { display: block; }
     .mobile-only { display: none; }
+
     @media (max-width: 768px) {
       .desktop-only { display: none; }
       .mobile-only { display: block; }
+
+      .page-header-action,
+      .page-header-action tc-button {
+        width: 100%;
+      }
     }
 
-    .modal-actions { display: flex; justify-content: flex-end; gap: var(--space-3); }
+    .modal-actions {
+      display: flex;
+      justify-content: flex-end;
+      gap: var(--space-3);
+    }
+
+    @media (max-width: 767px) {
+      .tabs-bar {
+        padding-bottom: var(--space-1);
+      }
+
+      .tab-btn {
+        min-height: 42px;
+      }
+
+      .modal-actions {
+        flex-direction: column-reverse;
+      }
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -410,7 +524,6 @@ export class AccountsPayablePageComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
 
   readonly activeTab = signal<StatusFilter>('TODAS');
-
   readonly isFormModalOpen = signal(false);
   readonly isPayModalOpen = signal(false);
   readonly isCancelModalOpen = signal(false);
@@ -427,13 +540,13 @@ export class AccountsPayablePageComponent implements OnInit {
   ];
 
   readonly recurrenceOptions: { label: string; value: RecurrenceFrequency }[] = [
-    { label: 'Não recorrente', value: 'NONE' },
+    { label: 'Nao recorrente', value: 'NONE' },
     { label: 'Semanal', value: 'WEEKLY' },
     { label: 'Mensal', value: 'MONTHLY' },
     { label: 'Anual', value: 'YEARLY' },
   ];
 
-  payableForm = this.fb.group({
+  readonly payableForm = this.fb.group({
     description: ['', Validators.required],
     amount: [0, [Validators.required, Validators.min(0.01)]],
     dueDate: [new Date(), Validators.required],
@@ -443,32 +556,32 @@ export class AccountsPayablePageComponent implements OnInit {
 
   readonly filteredPayables = computed(() =>
     this.facade.payables()
-      .filter(p => this.activeTab() === 'TODAS' || p.status === this.activeTab())
+      .filter(payable => this.activeTab() === 'TODAS' || payable.status === this.activeTab())
       .sort((a, b) => a.dueDate.getTime() - b.dueDate.getTime())
   );
 
   readonly totalMes = computed(() =>
     this.facade.payables()
-      .filter(p => p.status === 'PENDENTE' || p.status === 'ATRASADA')
-      .reduce((acc, p) => acc + p.amount, 0)
+      .filter(payable => payable.status === 'PENDENTE' || payable.status === 'ATRASADA')
+      .reduce((acc, payable) => acc + payable.amount, 0)
   );
 
   readonly vencendo7d = computed(() => {
     const now = new Date();
     return this.facade.payables()
-      .filter(p => p.status === 'PENDENTE' && differenceInDays(p.dueDate, now) <= 7 && differenceInDays(p.dueDate, now) >= 0)
-      .reduce((acc, p) => acc + p.amount, 0);
+      .filter(payable => payable.status === 'PENDENTE' && differenceInDays(payable.dueDate, now) <= 7 && differenceInDays(payable.dueDate, now) >= 0)
+      .reduce((acc, payable) => acc + payable.amount, 0);
   });
 
   readonly totalAtrasadas = computed(() =>
-    this.facade.overdue().reduce((acc, p) => acc + p.amount, 0)
+    this.facade.overdue().reduce((acc, payable) => acc + payable.amount, 0)
   );
 
   readonly categoryOptions = computed(() =>
-    this.categoriesFacade.categories().map(c => ({ label: c.name, value: c.id }))
+    this.categoriesFacade.categories().map(category => ({ label: category.name, value: category.id }))
   );
 
-  async ngOnInit() {
+  async ngOnInit(): Promise<void> {
     await Promise.all([
       this.facade.load(),
       this.cashFlowFacade.load(),
@@ -477,7 +590,7 @@ export class AccountsPayablePageComponent implements OnInit {
   }
 
   getCategoryName(id: string): string {
-    return this.categoriesFacade.categories().find(c => c.id === id)?.name ?? '—';
+    return this.categoriesFacade.categories().find(category => category.id === id)?.name ?? '-';
   }
 
   getStatusTone(status: PayableStatus): 'success' | 'warning' | 'danger' | 'neutral' {
@@ -489,35 +602,38 @@ export class AccountsPayablePageComponent implements OnInit {
     }
   }
 
-  getRecurrenceLabel(r: RecurrenceFrequency): string {
-    switch (r) {
+  getRecurrenceLabel(recurrence: RecurrenceFrequency): string {
+    switch (recurrence) {
       case 'WEEKLY': return 'Semanal';
       case 'MONTHLY': return 'Mensal';
       case 'YEARLY': return 'Anual';
-      default: return '—';
+      default: return '-';
     }
   }
 
-  getDuePillText(p: PayableAccount): string {
-    if (p.status === 'PAGA' || p.status === 'CANCELADA') return '';
-    const diff = differenceInDays(p.dueDate, new Date());
+  getDuePillText(payable: PayableAccount): string {
+    if (payable.status === 'PAGA' || payable.status === 'CANCELADA') return '';
+
+    const diff = differenceInDays(payable.dueDate, new Date());
     if (diff < 0) return `Atrasada ${Math.abs(diff)}d`;
     if (diff === 0) return 'Vence hoje';
     return `Vence em ${diff}d`;
   }
 
-  getDuePillClass(p: PayableAccount): string {
-    if (p.status === 'PAGA' || p.status === 'CANCELADA') return '';
-    const diff = differenceInDays(p.dueDate, new Date());
+  getDuePillClass(payable: PayableAccount): string {
+    if (payable.status === 'PAGA' || payable.status === 'CANCELADA') return '';
+
+    const diff = differenceInDays(payable.dueDate, new Date());
     if (diff < 0) return 'pill-danger';
     if (diff <= 2) return 'pill-danger';
     if (diff <= 7) return 'pill-warning';
     return 'pill-neutral';
   }
 
-  getDueDateClass(p: PayableAccount): string {
-    if (p.status === 'ATRASADA') return 'due-overdue';
-    const diff = differenceInDays(p.dueDate, new Date());
+  getDueDateClass(payable: PayableAccount): string {
+    if (payable.status === 'ATRASADA') return 'due-overdue';
+
+    const diff = differenceInDays(payable.dueDate, new Date());
     if (diff <= 2) return 'due-urgent';
     return 'due-normal';
   }
@@ -525,13 +641,13 @@ export class AccountsPayablePageComponent implements OnInit {
   getFormError(field: string): string | undefined {
     const control = this.payableForm.get(field);
     if (control?.touched && control?.invalid) {
-      if (control.errors?.['required']) return 'Campo obrigatório';
+      if (control.errors?.['required']) return 'Campo obrigatorio';
       if (control.errors?.['min']) return 'Valor deve ser maior que zero';
     }
     return undefined;
   }
 
-  openCreateModal() {
+  openCreateModal(): void {
     this.payableToEdit.set(null);
     this.payableForm.reset({
       description: '',
@@ -543,28 +659,29 @@ export class AccountsPayablePageComponent implements OnInit {
     this.isFormModalOpen.set(true);
   }
 
-  openEditModal(p: PayableAccount) {
-    this.payableToEdit.set(p);
+  openEditModal(payable: PayableAccount): void {
+    this.payableToEdit.set(payable);
     this.payableForm.patchValue({
-      description: p.description,
-      amount: p.amount,
-      dueDate: p.dueDate,
-      categoryId: p.categoryId,
-      recurrence: p.recurrence,
+      description: payable.description,
+      amount: payable.amount,
+      dueDate: payable.dueDate,
+      categoryId: payable.categoryId,
+      recurrence: payable.recurrence,
     });
     this.isFormModalOpen.set(true);
   }
 
-  closeFormModal() {
+  closeFormModal(): void {
     this.isFormModalOpen.set(false);
     this.payableToEdit.set(null);
   }
 
-  async savePayable() {
+  async savePayable(): Promise<void> {
     if (this.payableForm.invalid) {
       this.payableForm.markAllAsTouched();
       return;
     }
+
     const val = this.payableForm.value;
     const data = {
       description: val.description as string,
@@ -590,21 +707,22 @@ export class AccountsPayablePageComponent implements OnInit {
     }
   }
 
-  openPayModal(p: PayableAccount) {
-    this.payableToPay.set(p);
+  openPayModal(payable: PayableAccount): void {
+    this.payableToPay.set(payable);
     this.isPayModalOpen.set(true);
   }
 
-  closePayModal() {
+  closePayModal(): void {
     this.isPayModalOpen.set(false);
     this.payableToPay.set(null);
   }
 
-  async confirmPay() {
-    const p = this.payableToPay();
-    if (!p) return;
+  async confirmPay(): Promise<void> {
+    const payable = this.payableToPay();
+    if (!payable) return;
+
     try {
-      await this.facade.pay(p.id);
+      await this.facade.pay(payable.id);
       this.toast.show('Conta paga. Saldo atualizado.', 'success');
       this.closePayModal();
     } catch {
@@ -612,25 +730,27 @@ export class AccountsPayablePageComponent implements OnInit {
     }
   }
 
-  openCancelModal(p: PayableAccount) {
-    this.payableToCancel.set(p);
+  openCancelModal(payable: PayableAccount): void {
+    this.payableToCancel.set(payable);
     this.isCancelModalOpen.set(true);
   }
 
-  closeCancelModal() {
+  closeCancelModal(): void {
     this.isCancelModalOpen.set(false);
     this.payableToCancel.set(null);
   }
 
-  async confirmCancel() {
-    const p = this.payableToCancel();
-    if (!p) return;
+  async confirmCancel(): Promise<void> {
+    const payable = this.payableToCancel();
+    if (!payable) return;
+
     try {
-      await this.facade.cancel(p.id);
+      await this.facade.cancel(payable.id);
       this.toast.show('Conta cancelada.', 'success');
-      this.closeCancelModal();
     } catch {
       this.toast.show('Erro ao cancelar conta.', 'error');
+    } finally {
+      this.closeCancelModal();
     }
   }
 }

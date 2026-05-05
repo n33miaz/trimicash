@@ -181,6 +181,31 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
     .tone-danger  .value { color: var(--color-danger-500); }
     .tone-warning .value { color: var(--color-warning-500); }
     .tone-primary .value { color: var(--color-accent-500); }
+
+    @media (max-width: 767px) {
+      .tc-stat-card {
+        padding: 18px;
+      }
+
+      .card-header {
+        margin-bottom: 12px;
+      }
+
+      .card-icon-wrapper {
+        width: 36px;
+        height: 36px;
+        border-radius: 10px;
+      }
+
+      .label {
+        white-space: normal;
+        line-height: 1.35;
+      }
+
+      .value {
+        font-size: clamp(1.15rem, 4.6vw, 1.55rem);
+      }
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })

@@ -27,34 +27,56 @@ test('fluxo principal da demo: criar e pagar conta atualiza reserva, saldo e cai
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
 
+  await page.addInitScript(() => {
+    localStorage.setItem('trimicash:userName', 'Teste Demo');
+    localStorage.setItem('trimicash:demoCredentials', JSON.stringify({
+      name: 'Teste Demo',
+      email: 'teste.demo@gmail.com',
+      password: 'teste-demo',
+    }));
+  });
+
   await page.goto('/?seed=healthy');
 
-  await expect(page.getByRole('button', { name: /Entrar na Demo/i })).toBeVisible();
-  await page.getByRole('button', { name: /Entrar na Demo/i }).click();
+  const emailInput = page.getByLabel('E-mail');
+  const passwordInput = page.getByLabel('Senha');
+  if ((await emailInput.inputValue()) === '') {
+    await emailInput.fill('teste.demo@gmail.com');
+  }
+  if ((await passwordInput.inputValue()) === '') {
+    await passwordInput.fill('teste-demo');
+  }
+
+  const loginButton = page.getByRole('button', { name: /^Entrar$/i });
+  await expect(loginButton).toBeEnabled();
+  await loginButton.click();
 
   await expect(page.getByText('Reserva recomendada')).toBeVisible();
   const reserveBefore = await readStatValue(page, 'Reserva recomendada');
   const balanceBefore = await readStatValue(page, 'Saldo atual');
 
-  await page.getByRole('link', { name: /Contas/i }).click();
+  await page.goto('/accounts-payable');
   await expect(page.getByRole('heading', { name: /Contas a Pagar/i })).toBeVisible();
   await page.getByRole('button', { name: /\+ Nova Conta/i }).first().click();
 
-  await page.getByLabel('Descrição').fill(payableDescription);
-  await page.getByLabel('Valor').fill('50000');
-  await page.getByLabel('Vencimento').fill(formatDateInput(tomorrow));
-  await page.getByLabel('Categoria').selectOption({ label: 'Outros' });
-  await page.getByLabel('Recorrência').selectOption('NONE');
-  await page.getByRole('button', { name: /^Salvar$/i }).click();
+  const accountDialog = page.getByRole('dialog', { name: /Nova Conta/i });
+  await accountDialog.getByLabel(/Descri/i).fill(payableDescription);
+  await accountDialog.getByLabel(/Valor/i).fill('50000');
+  await accountDialog.getByLabel(/Vencimento/i).fill(formatDateInput(tomorrow));
+  const categoryTrigger = accountDialog.getByRole('combobox', { name: /Categoria/i });
+  await categoryTrigger.focus();
+  await categoryTrigger.press('End');
+  await categoryTrigger.press('Enter');
+  await accountDialog.getByRole('button', { name: /^Salvar$/i }).click();
 
   await expect(page.getByText('Conta criada.')).toBeVisible();
 
-  await page.getByRole('link', { name: /Dashboard/i }).click();
+  await page.goto('/');
   await expect(page.getByText('Reserva recomendada')).toBeVisible();
   const reserveAfterCreate = await readStatValue(page, 'Reserva recomendada');
   expect(reserveAfterCreate).toBeGreaterThan(reserveBefore);
 
-  await page.getByRole('link', { name: /Contas/i }).click();
+  await page.goto('/accounts-payable');
   const payableItem = page.locator('tr:visible, .payable-card:visible').filter({ hasText: payableDescription }).first();
   await expect(payableItem).toBeVisible();
   await payableItem.getByRole('button', { name: /^Pagar$/i }).click();
@@ -62,16 +84,16 @@ test('fluxo principal da demo: criar e pagar conta atualiza reserva, saldo e cai
 
   await expect(page.getByText('Conta paga. Saldo atualizado.')).toBeVisible();
 
-  await page.getByRole('link', { name: /Dashboard/i }).click();
+  await page.goto('/');
   const reserveAfterPay = await readStatValue(page, 'Reserva recomendada');
   const balanceAfterPay = await readStatValue(page, 'Saldo atual');
   expect(reserveAfterPay).toBeLessThan(reserveAfterCreate);
   expect(balanceAfterPay).toBe(balanceBefore - 500);
 
-  await page.getByRole('link', { name: /^Caixa$/i }).click();
-  await expect(page.getByText(`Pagamento: ${payableDescription}`)).toBeVisible();
+  await page.goto('/cash-flow');
+  await expect(page.locator('tr:visible, .movement-card:visible').filter({ hasText: `Pagamento: ${payableDescription}` }).first()).toBeVisible();
 
-  await page.getByRole('link', { name: /Alertas/i }).click();
+  await page.goto('/alerts');
   await expect(page.getByRole('heading', { name: /Alertas e Avisos/i })).toBeVisible();
   await expect(page.locator('.alerts-page').getByText(payableDescription)).not.toBeVisible();
 });

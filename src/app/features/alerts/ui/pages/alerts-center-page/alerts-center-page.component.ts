@@ -6,14 +6,11 @@ import {
 } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { Router } from '@angular/router';
-
 import { AlertsFacade } from '../../../application/alerts.facade';
 import { AppAlert } from '../../../../../shared/types/alert.type';
-
-import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
-import { BadgeComponent } from '../../../../../shared/components/badge/badge.component';
 import { EmptyStateComponent } from '../../../../../shared/components/empty-state/empty-state.component';
+import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 
 @Component({
   selector: 'tc-alerts-center-page',
@@ -28,20 +25,22 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
     <div class="alerts-page">
       <tc-page-header title="Alertas e Avisos">
         @if (hasUnread()) {
-          <tc-button variant="secondary" (clicked)="markAllAsRead()">Marcar Como Lidos</tc-button>
+          <div class="header-action">
+            <tc-button variant="secondary" [block]="true" (clicked)="markAllAsRead()">Marcar Como Lidos</tc-button>
+          </div>
         }
       </tc-page-header>
 
       @if (alertsFacade.alerts().length === 0) {
         <tc-empty-state
           title="Nenhum alerta"
-          message="Seu caixa está saudável e não há pendências críticas."
+          message="Seu caixa esta saudavel e nao ha pendencias criticas."
         ></tc-empty-state>
       } @else {
         <div class="alerts-list" aria-live="polite">
           @if (criticalAlerts().length > 0) {
             <div class="alert-group">
-              <h3 class="group-title text-danger">Críticos</h3>
+              <h3 class="group-title text-danger">Criticos</h3>
               @for (alert of criticalAlerts(); track alert.id) {
                 <div class="alert-card card-critical" [class.unread]="!alert.isRead">
                   <div class="alert-icon">
@@ -131,6 +130,7 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
     }
 
     .alert-group { margin-bottom: var(--space-6); }
+
     .group-title {
       font-family: var(--font-family-display);
       font-size: var(--font-size-md);
@@ -142,9 +142,10 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
       align-items: center;
       gap: var(--space-2);
     }
-    .text-danger  { color: var(--color-danger-500); }
+
+    .text-danger { color: var(--color-danger-500); }
     .text-warning { color: var(--color-warning-500); }
-    .text-info    { color: var(--color-accent-500); }
+    .text-info { color: var(--color-accent-500); }
 
     .alert-card {
       display: flex;
@@ -158,35 +159,37 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
       position: relative;
       transition: all 0.25s var(--motion-spring);
     }
+
     .alert-card:hover { transform: translateY(-2px); }
     .alert-card.unread { border-left: 3px solid transparent; }
     .card-critical.unread { border-left-color: var(--color-danger-500); }
-    .card-critical:hover  { box-shadow: var(--shadow-glow-danger); border-color: rgba(220,38,38,0.2); }
-    .card-warning.unread  { border-left-color: var(--color-warning-500); }
-    .card-warning:hover   { box-shadow: var(--shadow-glow-warning); border-color: rgba(245,158,11,0.2); }
-    .card-info.unread     { border-left-color: var(--color-accent-500); }
-    .card-info:hover      { box-shadow: var(--shadow-glow-accent); border-color: rgba(47,128,237,0.2); }
+    .card-critical:hover { box-shadow: var(--shadow-glow-danger); border-color: rgba(220, 38, 38, 0.2); }
+    .card-warning.unread { border-left-color: var(--color-warning-500); }
+    .card-warning:hover { box-shadow: var(--shadow-glow-warning); border-color: rgba(245, 158, 11, 0.2); }
+    .card-info.unread { border-left-color: var(--color-accent-500); }
+    .card-info:hover { box-shadow: var(--shadow-glow-accent); border-color: rgba(47, 128, 237, 0.2); }
 
-    /* Unread dot */
     .alert-card.unread::after {
       content: '';
       position: absolute;
-      top: 14px; right: 14px;
-      width: 8px; height: 8px;
+      top: 14px;
+      right: 14px;
+      width: 8px;
+      height: 8px;
       border-radius: 50%;
       background: var(--color-danger-500);
       box-shadow: 0 0 0 2px var(--color-bg-card);
       animation: pulseDot 2s ease-in-out infinite;
     }
+
     .card-warning.unread::after { background: var(--color-warning-500); }
-    .card-info.unread::after    { background: var(--color-accent-500); }
+    .card-info.unread::after { background: var(--color-accent-500); }
 
     @keyframes pulseDot {
       0%, 100% { transform: scale(1); opacity: 1; }
-      50%       { transform: scale(1.3); opacity: 0.7; }
+      50% { transform: scale(1.3); opacity: 0.7; }
     }
 
-    /* Ícone com fundo circular */
     .alert-icon {
       flex-shrink: 0;
       width: 44px;
@@ -195,16 +198,61 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
       display: grid;
       place-items: center;
     }
-    .card-critical .alert-icon { color: var(--color-danger-500);  background: rgba(220,38,38,0.1); }
-    .card-warning  .alert-icon { color: var(--color-warning-500); background: rgba(245,158,11,0.1); }
-    .card-info     .alert-icon { color: var(--color-accent-500);  background: rgba(47,128,237,0.1); }
+
+    .card-critical .alert-icon { color: var(--color-danger-500); background: rgba(220, 38, 38, 0.1); }
+    .card-warning .alert-icon { color: var(--color-warning-500); background: rgba(245, 158, 11, 0.1); }
+    .card-info .alert-icon { color: var(--color-accent-500); background: rgba(47, 128, 237, 0.1); }
 
     .alert-content { flex: 1; min-width: 0; }
-    .alert-header { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: var(--space-1); gap: var(--space-3); }
-    .alert-title { margin: 0; font-weight: 600; font-size: var(--font-size-md); color: var(--color-text-primary); }
-    .alert-time { font-size: var(--font-size-xs); color: var(--color-text-muted); white-space: nowrap; }
-    .alert-message { margin: 0 0 var(--space-3); font-size: var(--font-size-sm); color: var(--color-text-secondary); line-height: 1.5; }
-    .alert-actions { display: flex; gap: var(--space-2); flex-wrap: wrap; }
+
+    .alert-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: var(--space-1);
+      gap: var(--space-3);
+    }
+
+    .alert-title {
+      margin: 0;
+      font-weight: 600;
+      font-size: var(--font-size-md);
+      color: var(--color-text-primary);
+    }
+
+    .alert-time {
+      font-size: var(--font-size-xs);
+      color: var(--color-text-muted);
+      white-space: nowrap;
+    }
+
+    .alert-message {
+      margin: 0 0 var(--space-3);
+      font-size: var(--font-size-sm);
+      color: var(--color-text-secondary);
+      line-height: 1.5;
+    }
+
+    .alert-actions {
+      display: flex;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+    }
+
+    @media (max-width: 767px) {
+      .header-action {
+        width: 100%;
+      }
+
+      .alert-card {
+        gap: var(--space-3);
+      }
+
+      .alert-header {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -212,25 +260,22 @@ export class AlertsCenterPageComponent {
   readonly alertsFacade = inject(AlertsFacade);
   private readonly router = inject(Router);
 
-  readonly criticalAlerts = computed(() => this.alertsFacade.alerts().filter(a => a.severity === 'CRITICAL'));
-  readonly warningAlerts = computed(() => this.alertsFacade.alerts().filter(a => a.severity === 'WARNING'));
-  readonly infoAlerts = computed(() => this.alertsFacade.alerts().filter(a => a.severity === 'INFO'));
-  
+  readonly criticalAlerts = computed(() => this.alertsFacade.alerts().filter(alert => alert.severity === 'CRITICAL'));
+  readonly warningAlerts = computed(() => this.alertsFacade.alerts().filter(alert => alert.severity === 'WARNING'));
+  readonly infoAlerts = computed(() => this.alertsFacade.alerts().filter(alert => alert.severity === 'INFO'));
   readonly hasUnread = computed(() => this.alertsFacade.unreadCount() > 0);
 
-  markAllAsRead() {
+  markAllAsRead(): void {
     this.alertsFacade.markAllAsRead();
   }
 
-  handleAction(alert: AppAlert) {
+  handleAction(alert: AppAlert): void {
     this.alertsFacade.markAsRead(alert.id);
-    
-    // Roteamento contextual dependendo do alerta
+
     if (alert.code.startsWith('ALR-VENC') || alert.code === 'ALR-ATRASO') {
-      // Idealmente passar query params de filtro, mas para demo apenas navegamos
-      this.router.navigate(['/accounts-payable']);
+      void this.router.navigate(['/accounts-payable']);
     } else {
-      this.router.navigate(['/']);
+      void this.router.navigate(['/']);
     }
   }
 }
