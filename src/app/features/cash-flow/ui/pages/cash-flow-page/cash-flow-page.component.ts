@@ -173,7 +173,7 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
     <!-- Modal: Criar / Editar -->
     <tc-modal
       [open]="isFormModalOpen()"
-      [title]="movementToEdit() ? 'Editar movimentação' : 'Nova movimentação'"
+      [title]="movementToEdit() ? 'Editar Movimentação' : 'Nova Movimentação'"
       (close)="closeFormModal()"
     >
       <tc-movement-form
@@ -250,8 +250,10 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
       color: #fff;
       box-shadow: var(--shadow-glow-accent);
     }
-    .filter-select tc-select {
+    .filter-select {
+      margin-left: auto;
       margin-bottom: 0;
+      min-width: 200px;
     }
     ::ng-deep .filter-select select {
       padding: var(--space-2) var(--space-3) !important;
@@ -259,6 +261,7 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
       background: var(--color-bg-card) !important;
       box-shadow: none !important;
       font-size: var(--font-size-sm) !important;
+      height: 38px;
     }
 
     /* Table */
@@ -332,6 +335,7 @@ import { MovementFormComponent } from '../../components/movement-form/movement-f
     @media (max-width: 768px) {
       .desktop-only { display: none; }
       .mobile-only { display: block; }
+      .filter-select { margin-left: 0; width: 100%; min-width: 100%; }
     }
 
     .modal-actions { display: flex; justify-content: flex-end; gap: var(--space-3); }

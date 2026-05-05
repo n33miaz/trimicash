@@ -28,7 +28,7 @@ import { EmptyStateComponent } from '../../../../../shared/components/empty-stat
     <div class="alerts-page">
       <tc-page-header title="Alertas e Avisos">
         @if (hasUnread()) {
-          <tc-button variant="secondary" (clicked)="markAllAsRead()">Marcar todos como lidos</tc-button>
+          <tc-button variant="secondary" (clicked)="markAllAsRead()">Marcar Como Lidos</tc-button>
         }
       </tc-page-header>
 

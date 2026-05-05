@@ -54,7 +54,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
   template: `
     <div class="ap-page">
       <tc-page-header title="Contas a Pagar">
-        <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova conta</tc-button>
+        <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova Conta</tc-button>
       </tc-page-header>
 
       <!-- KPIs -->
@@ -99,7 +99,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
           title="Nenhuma conta encontrada"
           message="Adicione uma conta a pagar para começar."
         >
-          <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova conta</tc-button>
+          <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova Conta</tc-button>
         </tc-empty-state>
       } @else {
         <!-- Desktop table -->
@@ -194,7 +194,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
     <!-- Modal: Criar / Editar conta -->
     <tc-modal
       [open]="isFormModalOpen()"
-      [title]="payableToEdit() ? 'Editar conta' : 'Nova conta a pagar'"
+      [title]="payableToEdit() ? 'Editar Conta' : 'Nova Conta'"
       (close)="closeFormModal()"
     >
       <form [formGroup]="payableForm" (ngSubmit)="savePayable()">

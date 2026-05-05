@@ -38,7 +38,7 @@ test('fluxo principal da demo: criar e pagar conta atualiza reserva, saldo e cai
 
   await page.getByRole('link', { name: /Contas/i }).click();
   await expect(page.getByRole('heading', { name: /Contas a Pagar/i })).toBeVisible();
-  await page.getByRole('button', { name: /\+ Nova conta/i }).first().click();
+  await page.getByRole('button', { name: /\+ Nova Conta/i }).first().click();
 
   await page.getByLabel('Descrição').fill(payableDescription);
   await page.getByLabel('Valor').fill('50000');
