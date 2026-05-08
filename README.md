@@ -1,6 +1,6 @@
 # TrimiCash
 
-Demo frontend para micro e pequenos empreendedores acompanharem caixa, contas a pagar, reserva recomendada, saldo projetado e alertas financeiros.
+Demo frontend para micro e pequenos empreendedores acompanharem caixa, contas a pagar e receber, reserva recomendada, saldo projetado e alertas financeiros.
 
 ## Stack
 
@@ -73,10 +73,3 @@ A demo sobe sem backend. Os dados são populados automaticamente no primeiro ace
 ## Limites da Fase 1
 
 Esta entrega é uma demo navegável e mockada. Não inclui backend, banco real, autenticação real, integração bancária, notificações externas, exportação de relatórios, multiusuário ou permissões.
-
-## Documentação
-
-- Arquitetura: [`docs/architecture.md`](./docs/architecture.md)
-- Contexto de domínio: [`docs/domain_context.md`](./docs/domain_context.md)
-- Escopo da Fase 1: [`docs/planning/phase_1_frontend_mock.md`](./docs/planning/phase_1_frontend_mock.md)
-- Roteiro de apresentação: [`docs/demo_script.md`](./docs/demo_script.md)

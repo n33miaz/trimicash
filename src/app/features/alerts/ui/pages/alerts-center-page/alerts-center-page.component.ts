@@ -26,7 +26,7 @@ import { PageHeaderComponent } from '../../../../../shared/components/page-heade
       <tc-page-header title="Alertas e Avisos">
         @if (hasUnread()) {
           <div class="header-action">
-            <tc-button variant="secondary" (clicked)="markAllAsRead()">Marcar Como Lidos</tc-button>
+            <tc-button variant="secondary" (clicked)="markAllAsRead()">Ler Todos</tc-button>
           </div>
         }
       </tc-page-header>

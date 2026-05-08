@@ -119,7 +119,9 @@ type StatusFilter = 'TODAS' | ReceivableStatus;
                   <td class="text-center"><tc-badge tone="neutral">{{ getCategoryName(r.categoryId) }}</tc-badge></td>
                   <td class="text-center">
                     <span [class]="getDueDateClass(r)">{{ r.dueDate | date:'dd/MM/yyyy' }}</span>
-                    <span class="due-pill" [class]="getDuePillClass(r)">{{ getDuePillText(r) }}</span>
+                    @if (getDuePillText(r)) {
+                      <span class="due-pill" [class]="getDuePillClass(r)">{{ getDuePillText(r) }}</span>
+                    }
                   </td>
                   <td class="text-center">
                     @if (r.recurrence !== 'NONE') {

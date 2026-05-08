@@ -203,8 +203,8 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
     }
 
     .period-selector {
-      width: 350px !important;
-      min-width: 350px !important;
+      width: 200px !important;
+      min-width: 200px !important;
     }
 
     .period-selector tc-select {
@@ -221,6 +221,10 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
     @media (max-width: 1024px) {
       .kpi-grid {
         grid-template-columns: repeat(2, 1fr);
+      }
+      .period-selector {
+        width: 100% !important;
+        min-width: 100% !important;
       }
     }
 

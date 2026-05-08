@@ -44,8 +44,15 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
   template: `
     <div class="cash-flow-page">
       <tc-page-header title="Caixa">
-        <div class="page-header-action" style="display: flex; gap: var(--space-3);">
-          <tc-button variant="secondary" (clicked)="openExportModal()">Exportar Excel</tc-button>
+        <div class="page-header-action">
+          <tc-button variant="secondary" (clicked)="openExportModal()" title="Exportar Excel">
+            <span class="btn-text">Exportar Excel</span>
+            <svg class="btn-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            </svg>
+          </tc-button>
           <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova Movimentação</tc-button>
         </div>
       </tc-page-header>
@@ -455,8 +462,13 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       gap: var(--space-2);
     }
 
-    .desktop-only { display: block; }
-    .mobile-only { display: none; }
+    .page-header-action {
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+    }
+
+    .btn-icon { display: none; }
 
     @media (max-width: 768px) {
       .desktop-only { display: none; }
@@ -485,10 +497,32 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       }
 
       .page-header-action {
-        margin-left: auto;
+        width: 100%;
+        gap: var(--space-2);
+      }
+
+      .page-header-action tc-button:first-child {
+        width: 44px;
+        min-width: 44px;
+        padding: 0;
+      }
+
+      .page-header-action tc-button:first-child .btn-text {
+        display: none;
+      }
+
+      .page-header-action tc-button:first-child .btn-icon {
+        display: block;
+      }
+
+      .page-header-action tc-button:last-child {
+        flex: 1;
+      }
+
+      .page-header-action tc-button:last-child ::ng-deep .tc-btn {
+        width: 100%;
       }
     }
-
     .modal-actions {
       display: flex;
       justify-content: flex-end;
