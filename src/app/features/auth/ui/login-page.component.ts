@@ -48,14 +48,14 @@ import { WelcomeModalComponent } from './components/welcome-modal.component';
           formControlName="email"
           label="E-mail"
           type="email"
-          [error]="showError('email') ? 'E-mail invalido' : ''"
+          [error]="showError('email') ? 'E-mail inválido' : ''"
         ></tc-input>
 
         <tc-input
           formControlName="password"
           label="Senha"
           type="password"
-          [error]="showError('password') ? 'Senha e obrigatoria' : ''"
+          [error]="showError('password') ? 'Senha é obrigatória' : ''"
         ></tc-input>
 
         @if (error()) {

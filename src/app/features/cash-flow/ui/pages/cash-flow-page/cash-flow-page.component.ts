@@ -44,7 +44,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
     <div class="cash-flow-page">
       <tc-page-header title="Caixa">
         <div class="page-header-action">
-          <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova movimentacao</tc-button>
+          <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova movimentação</tc-button>
         </div>
       </tc-page-header>
 
@@ -56,7 +56,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
           hint=" "
         ></tc-stat-card>
         <tc-stat-card
-          label="Saidas"
+          label="Saídas"
           [value]="totalSaidas() | brlCurrency"
           tone="danger"
           hint=" "
@@ -65,7 +65,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
           label="Saldo atual"
           [value]="cashFlowFacade.currentBalance() | brlCurrency"
           [tone]="cashFlowFacade.currentBalance() >= 0 ? 'success' : 'danger'"
-          hint="Entradas - Saidas"
+          hint="Entradas - Saídas"
         ></tc-stat-card>
       </div>
 
@@ -90,13 +90,13 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       </div>
 
       @if (cashFlowFacade.loading()) {
-        <tc-loading-state message="Carregando movimentacoes..."></tc-loading-state>
+        <tc-loading-state message="Carregando movimentações..."></tc-loading-state>
       } @else if (filteredMovements().length === 0) {
         <tc-empty-state
-          title="Nenhuma movimentacao"
-          message="Adicione sua primeira movimentacao de caixa."
+          title="Nenhuma movimentação"
+          message="Adicione sua primeira movimentação de caixa."
         >
-          <tc-button variant="primary" (clicked)="openCreateModal()">+ Adicionar movimentacao</tc-button>
+          <tc-button variant="primary" (clicked)="openCreateModal()">+ Adicionar movimentação</tc-button>
         </tc-empty-state>
       } @else {
         <div class="table-wrapper desktop-only">
@@ -104,11 +104,11 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
             <thead>
               <tr>
                 <th class="text-center">Data</th>
-                <th>Descricao</th>
+                <th>Descrição</th>
                 <th class="text-center">Categoria</th>
                 <th class="text-center">Tipo</th>
                 <th class="text-right">Valor</th>
-                <th class="text-center">Acoes</th>
+                <th class="text-center">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -121,7 +121,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
                   </td>
                   <td class="text-center">
                     <tc-badge [tone]="m.type === 'ENTRADA' ? 'success' : 'danger'">
-                      {{ m.type === 'ENTRADA' ? 'Entrada' : 'Saida' }}
+                      {{ m.type === 'ENTRADA' ? 'Entrada' : 'Saída' }}
                     </tc-badge>
                   </td>
                   <td class="text-right amount" [class.amount-entrada]="m.type === 'ENTRADA'" [class.amount-saida]="m.type === 'SAIDA'">
@@ -155,7 +155,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
                 <div class="movement-card-row movement-card-row-meta">
                   <div class="movement-meta">
                     <tc-badge [tone]="m.type === 'ENTRADA' ? 'success' : 'danger'">
-                      {{ m.type === 'ENTRADA' ? 'Entrada' : 'Saida' }}
+                      {{ m.type === 'ENTRADA' ? 'Entrada' : 'Saída' }}
                     </tc-badge>
                     <tc-badge tone="neutral">{{ getCategoryName(m.categoryId) }}</tc-badge>
                   </div>
@@ -177,7 +177,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 
     <tc-modal
       [open]="isFormModalOpen()"
-      [title]="movementToEdit() ? 'Editar Movimentacao' : 'Nova Movimentacao'"
+      [title]="movementToEdit() ? 'Editar Movimentação' : 'Nova Movimentação'"
       (close)="closeFormModal()"
     >
       <tc-movement-form
@@ -189,11 +189,11 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 
     <tc-modal
       [open]="isDeleteModalOpen()"
-      title="Confirmar exclusao"
+      title="Confirmar exclusão"
       (close)="closeDeleteModal()"
     >
       <p class="body-md" style="margin-bottom: var(--space-5);">
-        Tem certeza que deseja excluir a movimentacao <strong>{{ movementToDelete()?.description }}</strong>?
+        Tem certeza de que deseja excluir a movimentação <strong>{{ movementToDelete()?.description }}</strong>?
       </p>
       <div class="modal-actions">
         <tc-button variant="ghost" [block]="true" (clicked)="closeDeleteModal()">Cancelar</tc-button>
@@ -506,7 +506,7 @@ export class CashFlowPageComponent implements OnInit {
   readonly typeOptions = [
     { label: 'Todos', value: 'ALL' as const },
     { label: 'Entradas', value: 'ENTRADA' as const },
-    { label: 'Saidas', value: 'SAIDA' as const },
+    { label: 'Saídas', value: 'SAIDA' as const },
   ];
 
   readonly categoryOptions = computed(() => {
@@ -563,7 +563,7 @@ export class CashFlowPageComponent implements OnInit {
 
   onSaved(): void {
     this.closeFormModal();
-    this.toast.show('Movimentacao salva com sucesso!', 'success');
+    this.toast.show('Movimenta??o salva com sucesso!', 'success');
   }
 
   openDeleteModal(movement: Movement): void {
@@ -582,10 +582,10 @@ export class CashFlowPageComponent implements OnInit {
 
     try {
       await this.cashFlowFacade.remove(movement.id);
-      this.toast.show('Movimentacao excluida.', 'success');
+      this.toast.show('Movimenta??o exclu?da.', 'success');
       this.closeDeleteModal();
     } catch {
-      this.toast.show('Erro ao excluir movimentacao.', 'error');
+      this.toast.show('Erro ao excluir movimentação.', 'error');
     }
   }
 }

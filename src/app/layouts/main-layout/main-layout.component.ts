@@ -36,21 +36,21 @@ const INTRO_MODAL_STORAGE_KEY = 'trimicash:intro-modal-seen';
       <div class="intro-copy">
         <p class="body-md">
           Este sistema organiza <strong>Caixa</strong>, <strong>Contas a Pagar</strong>, <strong>Dashboard</strong>,
-          <strong>Alertas</strong> e <strong>Categorias</strong> em um fluxo simples de uso diario.
+          <strong>Alertas</strong> e <strong>Categorias</strong> em um fluxo simples de uso diário.
         </p>
 
         <div class="intro-list">
           <div class="intro-item">
             <strong>Como funciona</strong>
-            <span>Cadastre categorias, registre entradas e saídas e acompanhe vencimentos para alimentar indicadores e alertas.</span>
+            <span>Cadastre categorias, registre entradas e saídas e acompanhe vencimentos para alimentar indicadores e alertas.</span>
           </div>
           <div class="intro-item">
-            <strong>Limitações desta versão</strong>
-            <span>Os dados ficam apenas neste navegador e neste aparelho. Nao existe sincronização, multiusuario nem backend real.</span>
+            <strong>Limitações desta versão</strong>
+            <span>Os dados ficam apenas neste navegador e neste aparelho. Não existe sincronização, multiusuário nem backend real.</span>
           </div>
           <div class="intro-item">
-            <strong>Personalização</strong>
-            <span>Voce pode ajustar parametros, categorias e cenarios em <strong>Configurações</strong>.</span>
+            <strong>Personalização</strong>
+            <span>Você pode ajustar parâmetros, categorias e cenários em <strong>Configurações</strong>.</span>
           </div>
         </div>
       </div>

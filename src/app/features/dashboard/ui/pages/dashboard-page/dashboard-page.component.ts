@@ -115,7 +115,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 
           <div class="panel-content">
             @if (dashboard.upcomingPayables().length === 0) {
-              <div class="empty-list">Nenhuma conta pendente proxima.</div>
+              <div class="empty-list">Nenhuma conta pendente próxima.</div>
             } @else {
               <ul class="item-list">
                 @for (p of dashboard.upcomingPayables(); track p.id) {
@@ -497,8 +497,8 @@ export class DashboardPageComponent implements OnInit {
 
   readonly greeting = computed(() => {
     const user = this.authPort.current();
-    if (!user) return 'Ola.';
-    return `Ola, ${user.name}.`;
+    if (!user) return 'Olá.';
+    return `Olá, ${user.name}.`;
   });
 
   readonly criticalAlerts = computed(() => {
@@ -510,11 +510,11 @@ export class DashboardPageComponent implements OnInit {
   readonly unreadAlertsCount = computed(() => this.alertsFacade.unreadCount());
 
   readonly periodOptions = [
-    { value: 'CURRENT_MONTH', label: 'Este Mes' },
-    { value: 'NEXT_7', label: 'Proximos 7 Dias' },
-    { value: 'NEXT_15', label: 'Proximos 15 Dias' },
-    { value: 'NEXT_30', label: 'Proximos 30 Dias' },
-    { value: 'END_OF_MONTH', label: 'Ate o Fim do Mes' },
+    { value: 'CURRENT_MONTH', label: 'Este Mês' },
+    { value: 'NEXT_7', label: 'Próximos 7 Dias' },
+    { value: 'NEXT_15', label: 'Próximos 15 Dias' },
+    { value: 'NEXT_30', label: 'Próximos 30 Dias' },
+    { value: 'END_OF_MONTH', label: 'Até o Fim do Mês' },
   ];
 
   async ngOnInit(): Promise<void> {
@@ -534,9 +534,9 @@ export class DashboardPageComponent implements OnInit {
 
   getHealthLabel(status: 'HEALTHY' | 'ATTENTION' | 'DEFICIT'): string {
     switch (status) {
-      case 'HEALTHY': return 'Saudavel';
-      case 'ATTENTION': return 'Atencao';
-      case 'DEFICIT': return 'Deficit';
+      case 'HEALTHY': return 'Saudável';
+      case 'ATTENTION': return 'Atenção';
+      case 'DEFICIT': return 'Déficit';
     }
   }
 

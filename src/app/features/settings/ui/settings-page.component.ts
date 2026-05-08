@@ -28,36 +28,36 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
   template: `
     <div class="settings-layout">
       <div class="settings-header">
-        <h2 class="display-md">Configuracoes</h2>
+        <h2 class="display-md">Configurações</h2>
       </div>
 
       <div class="settings-grid">
-        <tc-card title="Parametros de Analise" subtitle="Ajuste como avaliamos a saude financeira">
+        <tc-card title="Parâmetros de Análise" subtitle="Ajuste como avaliamos a saúde financeira">
           <form [formGroup]="settingsForm" (ngSubmit)="saveSettings()">
             <tc-input
               formControlName="reserveSafetyMarginPct"
-              label="Margem de Seguranca da Reserva (%)"
+              label="Margem de Segurança da Reserva (%)"
               type="number"
-              hint="Percentual extra sugerido alem das contas do mes."
+              hint="Percentual extra sugerido além das contas do mês."
             ></tc-input>
 
             <tc-input
               formControlName="reserveAttentionThresholdPct"
-              label="Limite de Atencao da Reserva (%)"
+              label="Limite de Atenção da Reserva (%)"
               type="number"
-              hint="Quanto a mais da reserva indica que a folga esta apertada."
+              hint="Quanto a mais da reserva indica que a folga está apertada."
             ></tc-input>
 
             <tc-input
               formControlName="minSafetyDays"
-              label="Minimo de Dias de Seguranca"
+              label="Mínimo de Dias de Segurança"
               type="number"
-              hint="Abaixo disso, um alerta critico sera exibido."
+              hint="Abaixo disso, um alerta crítico será exibido."
             ></tc-input>
 
             <div class="form-actions">
               <tc-button type="submit" variant="primary" [block]="true" [disabled]="settingsForm.invalid || !settingsForm.dirty">
-                Salvar Parametros
+                Salvar Parâmetros
               </tc-button>
             </div>
           </form>
@@ -87,7 +87,7 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
             </div>
           </div>
 
-          <tc-table [columns]="['Cor', 'Nome', 'Acoes']">
+          <tc-table [columns]="['Cor', 'Nome', 'Ações']">
             @for (cat of categoriesFacade.categories(); track cat.id) {
               <tr class="category-row">
                 <td class="col-color">
@@ -102,7 +102,7 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
                       size="sm"
                       (clicked)="deleteCategory(cat.id)"
                       [disabled]="isCategoryInUse(cat.id)"
-                      [attr.title]="isCategoryInUse(cat.id) ? 'Categoria em uso em movimentacoes ou contas.' : null"
+                      [attr.title]="isCategoryInUse(cat.id) ? 'Categoria em uso em movimentações ou contas.' : null"
                     >Excluir</tc-button>
                   </div>
                 </td>
@@ -115,7 +115,7 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
           </tc-table>
         </tc-card>
 
-        <tc-card title="Modo Demonstração" subtitle="Troque rapidamente o estado atual do sistema.">
+        <tc-card title="Modo Demonstração" subtitle="Troque rapidamente o estado atual do sistema.">
           <div class="reset-actions">
             <tc-button variant="success" [block]="true" (clicked)="openResetModal('healthy')">
               Cenário Saudável
@@ -133,18 +133,18 @@ import { ToastService } from '../../../shared/components/toast/toast.service';
 
     <tc-modal
       [open]="isResetModalOpen()"
-      title="Aviso de Substituicao"
+      title="Aviso de Substituição"
       (close)="closeResetModal()"
     >
       <p class="body-md" style="margin-bottom: var(--space-4);">
-        Voce vai carregar o cenario <strong>{{ getScenarioLabel(selectedScenario()) }}</strong>.
+        Você vai carregar o cenário <strong>{{ getScenarioLabel(selectedScenario()) }}</strong>.
       </p>
       <p class="body-sm text-secondary" style="margin-bottom: var(--space-5);">
-        Todos os dados atuais da demonstracao serao apagados antes da troca.
+        Todos os dados atuais da demonstração serão apagados antes da troca.
         @if (selectedScenario() === 'blank') {
-          O sistema ficara sem dados ficticios.
+          O sistema ficará sem dados fictícios.
         } @else {
-          O sistema sera preenchido novamente com dados ficticios desse cenario.
+          O sistema será preenchido novamente com dados fictícios desse cenário.
         }
       </p>
       <div class="reset-modal-actions">
@@ -371,7 +371,7 @@ export class SettingsPageComponent implements OnInit {
     });
 
     this.settingsForm.markAsPristine();
-    this.toast.show('Configuracoes salvas com sucesso!', 'success');
+    this.toast.show('Configurações salvas com sucesso!', 'success');
   }
 
   async saveCategory(): Promise<void> {
@@ -409,13 +409,13 @@ export class SettingsPageComponent implements OnInit {
 
   async deleteCategory(id: string): Promise<void> {
     if (this.isCategoryInUse(id)) {
-      this.toast.show('Categoria em uso. Nao e possivel excluir.', 'error');
+      this.toast.show('Categoria em uso. Não é possível excluir.', 'error');
       return;
     }
 
     try {
       await this.categoriesFacade.remove(id);
-      this.toast.show('Categoria excluida.', 'success');
+      this.toast.show('Categoria excluída.', 'success');
     } catch {
       this.toast.show('Erro ao excluir categoria.', 'error');
     }
@@ -439,18 +439,18 @@ export class SettingsPageComponent implements OnInit {
   confirmReset(): void {
     this.seedRunner.reseed(this.selectedScenario());
     this.closeResetModal();
-    this.toast.show('Dados resetados com sucesso. Recarregando...', 'success');
+    this.toast.show('Dados redefinidos com sucesso. Recarregando...', 'success');
     setTimeout(() => window.location.reload(), 1500);
   }
 
   getScenarioLabel(scenario: SeedScenario): string {
     switch (scenario) {
       case 'healthy':
-        return 'Cenario Saudavel';
+        return 'Cenário Saudável';
       case 'risk':
-        return 'Cenario de Risco';
+        return 'Cenário de Risco';
       case 'blank':
-        return 'Cenario em Branco';
+        return 'Cenário em Branco';
     }
   }
 }

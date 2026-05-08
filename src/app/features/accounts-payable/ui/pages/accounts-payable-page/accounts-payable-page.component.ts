@@ -94,7 +94,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
       } @else if (filteredPayables().length === 0) {
         <tc-empty-state
           title="Nenhuma conta encontrada"
-          message="Adicione uma conta a pagar para comecar."
+          message="Adicione uma conta a pagar para começar."
         >
           <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova Conta</tc-button>
         </tc-empty-state>
@@ -103,13 +103,13 @@ type StatusFilter = 'TODAS' | PayableStatus;
           <table class="tc-table">
             <thead>
               <tr>
-                <th>Descricao</th>
+                <th>Descrição</th>
                 <th class="text-center">Categoria</th>
                 <th class="text-center">Vencimento</th>
-                <th class="text-center">Recorrencia</th>
+                <th class="text-center">Recorrência</th>
                 <th class="text-center">Status</th>
                 <th class="text-right">Valor</th>
-                <th class="text-center">Acoes</th>
+                <th class="text-center">Ações</th>
               </tr>
             </thead>
             <tbody>
@@ -204,15 +204,15 @@ type StatusFilter = 'TODAS' | PayableStatus;
             </svg>
           </div>
           <h3>Cadastre uma categoria primeiro</h3>
-          <p>Para criar uma conta a pagar, voce precisa ter pelo menos uma categoria disponivel em Configuracoes.</p>
+          <p>Para criar uma conta a pagar, você precisa ter pelo menos uma categoria disponível em Configurações.</p>
           <div class="modal-actions blocked-form-actions">
             <tc-button type="button" variant="ghost" [block]="true" (clicked)="closeFormModal()">Cancelar</tc-button>
-            <tc-button type="button" variant="primary" [block]="true" (clicked)="goToSettings()">Ir para Configuracoes</tc-button>
+            <tc-button type="button" variant="primary" [block]="true" (clicked)="goToSettings()">Ir para Configurações</tc-button>
           </div>
         </div>
       } @else {
         <form [formGroup]="payableForm" (ngSubmit)="savePayable()">
-          <tc-input formControlName="description" label="Descricao" [error]="getFormError('description')"></tc-input>
+          <tc-input formControlName="description" label="Descrição" [error]="getFormError('description')"></tc-input>
           <tc-money-input formControlName="amount" label="Valor" [error]="getFormError('amount')"></tc-money-input>
           <tc-date-input formControlName="dueDate" label="Vencimento" [error]="getFormError('dueDate')"></tc-date-input>
           <tc-select
@@ -224,7 +224,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
           ></tc-select>
           <tc-select
             formControlName="recurrence"
-            label="Recorrencia"
+            label="Recorrência"
             [options]="recurrenceOptions"
             [fullWidth]="true"
           ></tc-select>
@@ -247,7 +247,7 @@ type StatusFilter = 'TODAS' | PayableStatus;
           no valor de <strong>{{ payableToPay()!.amount | brlCurrency }}</strong>?
         </p>
         <p class="body-sm text-secondary" style="margin-top: var(--space-2); margin-bottom: var(--space-5);">
-          Uma movimentacao de saida sera criada no Caixa e o saldo sera atualizado.
+          Uma movimentação de saída será criada no Caixa e o saldo será atualizado.
         </p>
         <div class="modal-actions">
           <tc-button variant="ghost" [block]="true" (clicked)="closePayModal()">Cancelar</tc-button>
@@ -593,7 +593,7 @@ export class AccountsPayablePageComponent implements OnInit {
   ];
 
   readonly recurrenceOptions: { label: string; value: RecurrenceFrequency }[] = [
-    { label: 'Nao recorrente', value: 'NONE' },
+    { label: 'Não recorrente', value: 'NONE' },
     { label: 'Semanal', value: 'WEEKLY' },
     { label: 'Mensal', value: 'MONTHLY' },
     { label: 'Anual', value: 'YEARLY' },
@@ -696,7 +696,7 @@ export class AccountsPayablePageComponent implements OnInit {
   getFormError(field: string): string | undefined {
     const control = this.payableForm.get(field);
     if (control?.touched && control?.invalid) {
-      if (control.errors?.['required']) return 'Campo obrigatorio';
+      if (control.errors?.['required']) return 'Campo obrigatório';
       if (control.errors?.['min']) return 'Valor deve ser maior que zero';
     }
     return undefined;

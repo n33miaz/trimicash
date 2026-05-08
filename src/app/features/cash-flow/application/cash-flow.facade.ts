@@ -43,7 +43,7 @@ export class CashFlowFacade {
       const data = await this.listUseCase.execute(period);
       this._movements.set(data);
     } catch (err: unknown) {
-      this._error.set(errorMessage(err, 'Erro ao carregar movimentacoes'));
+      this._error.set(errorMessage(err, 'Erro ao carregar movimentações'));
     } finally {
       this._loading.set(false);
     }
@@ -56,7 +56,7 @@ export class CashFlowFacade {
       const created = await this.createUseCase.execute(input);
       this._movements.update(m => [...m, created]);
     } catch (err: unknown) {
-      this._error.set(errorMessage(err, 'Erro ao criar movimentacao'));
+      this._error.set(errorMessage(err, 'Erro ao criar movimentação'));
       throw err;
     } finally {
       this._loading.set(false);
@@ -70,7 +70,7 @@ export class CashFlowFacade {
       const updated = await this.updateUseCase.execute(id, patch);
       this._movements.update(m => m.map(item => item.id === id ? updated : item));
     } catch (err: unknown) {
-      this._error.set(errorMessage(err, 'Erro ao atualizar movimentacao'));
+      this._error.set(errorMessage(err, 'Erro ao atualizar movimentação'));
       throw err;
     } finally {
       this._loading.set(false);
@@ -84,7 +84,7 @@ export class CashFlowFacade {
       await this.deleteUseCase.execute(id);
       this._movements.update(m => m.filter(item => item.id !== id));
     } catch (err: unknown) {
-      this._error.set(errorMessage(err, 'Erro ao remover movimentacao'));
+      this._error.set(errorMessage(err, 'Erro ao remover movimentação'));
       throw err;
     } finally {
       this._loading.set(false);

@@ -32,10 +32,10 @@ import { SelectComponent } from '../../../../../shared/components/select/select.
           </svg>
         </div>
         <h3>Cadastre uma categoria primeiro</h3>
-        <p>Para registrar uma movimentacao, voce precisa ter pelo menos uma categoria disponivel em Configuracoes.</p>
+        <p>Para registrar uma movimentação, você precisa ter pelo menos uma categoria disponível em Configurações.</p>
         <div class="actions actions-blocked">
           <tc-button type="button" variant="secondary" (clicked)="cancelled.emit()">Cancelar</tc-button>
-          <tc-button type="button" variant="primary" (clicked)="goToSettings()">Ir para Configuracoes</tc-button>
+          <tc-button type="button" variant="primary" (clicked)="goToSettings()">Ir para Configurações</tc-button>
         </div>
       </div>
     } @else {
@@ -53,7 +53,7 @@ import { SelectComponent } from '../../../../../shared/components/select/select.
             class="type-btn"
             [class.active-saida]="form.get('type')?.value === 'SAIDA'"
             (click)="form.get('type')?.setValue('SAIDA')">
-            Saida
+            Saída
           </button>
         </div>
 
@@ -73,7 +73,7 @@ import { SelectComponent } from '../../../../../shared/components/select/select.
           [error]="getError('categoryId')">
         </tc-select>
 
-        <tc-input formControlName="description" label="Descricao" [error]="getError('description')"></tc-input>
+        <tc-input formControlName="description" label="Descrição" [error]="getError('description')"></tc-input>
 
         <div class="actions">
           <tc-button type="button" variant="secondary" (clicked)="cancelled.emit()">Cancelar</tc-button>
@@ -219,9 +219,9 @@ export class MovementFormComponent implements OnInit {
   getError(controlName: string): string | undefined {
     const control = this.form.get(controlName);
     if (control?.touched && control?.invalid) {
-      if (control.errors?.['required']) return 'Campo obrigatorio';
+      if (control.errors?.['required']) return 'Campo obrigatório';
       if (control.errors?.['min']) return 'Valor deve ser maior que zero';
-      return 'Campo invalido';
+      return 'Campo inválido';
     }
     return undefined;
   }
