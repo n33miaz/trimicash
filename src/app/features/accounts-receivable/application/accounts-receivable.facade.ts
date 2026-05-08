@@ -13,6 +13,7 @@ import { CancelReceivableUseCase } from './cancel-receivable.usecase';
 import { ListReceivablesUseCase } from './list-receivables.usecase';
 import { ReceiveReceivableUseCase } from './receive-receivable.usecase';
 import type { Period } from '../../../shared/types/period.type';
+import { generateInstallments } from '../../../core/utils/installment-generator.util';
 
 function errorMessage(err: unknown, fallback: string): string {
   return err instanceof Error ? err.message : fallback;
@@ -70,8 +71,27 @@ export class AccountsReceivableFacade {
     const previous = this._receivables();
     this._error.set(null);
     try {
-      const created = await this.createUseCase.execute(input);
-      this._receivables.update(list => [...list, created]);
+      if (input.recurrence === 'INSTALLMENT' && input.totalInstallments && input.totalInstallments > 1) {
+        const drafts = generateInstallments({
+          description: input.description,
+          totalAmount: input.amount,
+          totalInstallments: input.totalInstallments,
+          firstDueDate: input.dueDate,
+          categoryId: input.categoryId,
+          recurrence: 'INSTALLMENT'
+        });
+        
+        const payloads = drafts.map(draft => ({
+          ...draft,
+          status: 'PENDENTE'
+        } as Omit<ReceivableAccount, 'id'>));
+        
+        const created = await Promise.all(payloads.map(i => this.createUseCase.execute(i)));
+        this._receivables.update(list => [...list, ...created]);
+      } else {
+        const created = await this.createUseCase.execute(input);
+        this._receivables.update(list => [...list, created]);
+      }
     } catch (err: unknown) {
       this._receivables.set(previous);
       this._error.set(errorMessage(err, 'Erro ao criar conta a receber'));

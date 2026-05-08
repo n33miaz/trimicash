@@ -470,9 +470,12 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 
     .btn-icon { display: none; }
 
+    .desktop-only { display: block !important; }
+    .mobile-only { display: none !important; }
+
     @media (max-width: 768px) {
-      .desktop-only { display: none; }
-      .mobile-only { display: block; }
+      .desktop-only { display: none !important; }
+      .mobile-only { display: block !important; }
 
       .filters-bar {
         flex-direction: column;

@@ -4,7 +4,7 @@
  * Análogo ao PayPayableService — gera Movement de ENTRADA.
  */
 
-import { addWeeks, addMonths, addYears } from 'date-fns';
+import { addDays, addWeeks, addMonths, addYears } from 'date-fns';
 import type { ReceivableAccount } from '../entities/receivable-account.entity';
 import type { Movement } from '../../../cash-flow/domain/entities/movement.entity';
 import { DomainError } from '../../../accounts-payable/domain/errors/domain-error';
@@ -40,10 +40,13 @@ export class ReceiveAccountService {
 
     let nextRecurrenceDraft: Omit<ReceivableAccount, 'id' | 'status'> | undefined;
 
-    if (receivable.recurrence !== 'NONE') {
+    // INSTALLMENT: parcelas já foram criadas em lote no facade.create(),
+    // então NÃO devemos gerar uma próxima ocorrência ao receber.
+    if (receivable.recurrence !== 'NONE' && receivable.recurrence !== 'INSTALLMENT') {
       let nextDueDate = receivable.dueDate;
 
       switch (receivable.recurrence) {
+        case 'DAILY':   nextDueDate = addDays(receivable.dueDate, 1);   break;
         case 'WEEKLY':  nextDueDate = addWeeks(receivable.dueDate, 1);  break;
         case 'MONTHLY': nextDueDate = addMonths(receivable.dueDate, 1); break;
         case 'YEARLY':  nextDueDate = addYears(receivable.dueDate, 1);  break;

@@ -7,6 +7,7 @@ import { CancelPayableUseCase } from './cancel-payable.usecase';
 import { ListPayablesUseCase } from './list-payables.usecase';
 import { PayPayableUseCase } from './pay-payable.usecase';
 import { Period } from '../../../shared/types/period.type';
+import { generateInstallments } from '../../../core/utils/installment-generator.util';
 
 function errorMessage(err: unknown, fallback: string): string {
   return err instanceof Error ? err.message : fallback;
@@ -59,8 +60,27 @@ export class AccountsPayableFacade {
     this._loading.set(true);
     this._error.set(null);
     try {
-      const created = await this.createUseCase.execute(input);
-      this._payables.update(p => [...p, created]);
+      if (input.recurrence === 'INSTALLMENT' && input.totalInstallments && input.totalInstallments > 1) {
+        const drafts = generateInstallments({
+          description: input.description,
+          totalAmount: input.amount,
+          totalInstallments: input.totalInstallments,
+          firstDueDate: input.dueDate,
+          categoryId: input.categoryId,
+          recurrence: 'INSTALLMENT'
+        });
+        
+        const createdPromises = drafts.map(draft => this.createUseCase.execute({
+          ...draft,
+          status: 'PENDENTE'
+        } as Omit<PayableAccount, 'id'>));
+        
+        const created = await Promise.all(createdPromises);
+        this._payables.update(p => [...p, ...created]);
+      } else {
+        const created = await this.createUseCase.execute(input);
+        this._payables.update(p => [...p, created]);
+      }
     } catch (err: unknown) {
       this._error.set(errorMessage(err, 'Erro ao criar conta'));
       throw err;

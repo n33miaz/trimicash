@@ -76,8 +76,8 @@ import { SelectComponent } from '../../../../../shared/components/select/select.
         <tc-input formControlName="description" label="Descrição" [error]="getError('description')"></tc-input>
 
         <div class="actions">
-          <tc-button type="button" variant="secondary" (clicked)="cancelled.emit()">Cancelar</tc-button>
-          <tc-button type="submit" variant="primary" [loading]="cashFlowFacade.loading()">Salvar</tc-button>
+          <tc-button type="button" variant="ghost" [block]="true" (clicked)="cancelled.emit()">Cancelar</tc-button>
+          <tc-button type="submit" variant="primary" [block]="true" [loading]="cashFlowFacade.loading()">Salvar</tc-button>
         </div>
       </form>
     }
@@ -166,6 +166,9 @@ import { SelectComponent } from '../../../../../shared/components/select/select.
     @media (max-width: 767px) {
       .actions {
         flex-direction: column-reverse;
+      }
+      .actions > * {
+        width: 100%;
       }
     }
   `],

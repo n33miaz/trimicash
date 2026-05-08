@@ -11,7 +11,7 @@ export type PayableStatus = 'PENDENTE' | 'PAGA' | 'ATRASADA' | 'CANCELADA';
  * Frequência de recorrência de gastos fixos (RN-003.2).
  * NONE = não recorrente.
  */
-export type RecurrenceFrequency = 'NONE' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+export type RecurrenceFrequency = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' | 'INSTALLMENT';
 
 /**
  * PayableAccount — compromisso futuro ou pendente que ainda precisa ser pago.
@@ -45,4 +45,10 @@ export interface PayableAccount {
   paidAt?: Date;
   /** ID da Movement gerada ao pagar */
   paidMovementId?: string;
+  /** ID que agrupa todas as parcelas de um mesmo parcelamento */
+  installmentGroupId?: string;
+  /** Número da parcela (ex: 2) */
+  installmentNumber?: number;
+  /** Total de parcelas (ex: 6) */
+  totalInstallments?: number;
 }

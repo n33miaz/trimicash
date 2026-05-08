@@ -47,7 +47,7 @@ export function generateInstallments(input: InstallmentInput): InstallmentDraft[
   return Array.from({ length: totalInstallments }, (_, i) => {
     const isLast = i === totalInstallments - 1;
     return {
-      description: `${description} (${i + 1}/${totalInstallments})`,
+      description,
       amount: isLast ? lastAmount : baseAmount,
       dueDate: addMonths(firstDueDate, i),
       categoryId,

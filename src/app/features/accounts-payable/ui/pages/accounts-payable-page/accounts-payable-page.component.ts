@@ -124,7 +124,12 @@ type StatusFilter = 'TODAS' | PayableStatus;
                     }
                   </td>
                   <td class="text-center">
-                    @if (p.recurrence !== 'NONE') {
+                    @if (p.recurrence === 'INSTALLMENT') {
+                      <div style="display: flex; gap: 6px; justify-content: center; align-items: center;">
+                        <tc-badge tone="info">Parcelado</tc-badge>
+                        <tc-badge tone="accent">{{ getInstallmentLabel(p) }}</tc-badge>
+                      </div>
+                    } @else if (p.recurrence !== 'NONE') {
                       <tc-badge tone="info">{{ getRecurrenceLabel(p.recurrence) }}</tc-badge>
                     } @else {
                       <span class="text-secondary">-</span>
@@ -158,14 +163,21 @@ type StatusFilter = 'TODAS' | PayableStatus;
               </div>
 
               <div class="card-row card-status-row">
-                <tc-badge [tone]="getStatusTone(p.status)">{{ p.status }}</tc-badge>
+                <div style="display: flex; gap: 4px; align-items: center;">
+                  <tc-badge [tone]="getStatusTone(p.status)">{{ p.status }}</tc-badge>
+                  @if (p.recurrence === 'INSTALLMENT') {
+                    <tc-badge tone="accent">{{ getInstallmentLabel(p) }}</tc-badge>
+                  }
+                </div>
                 <span [class]="getDueDateClass(p)">{{ p.dueDate | date:'dd/MM/yyyy' }}</span>
               </div>
 
               <div class="card-row card-meta-row">
                 <div class="card-meta">
                   <tc-badge tone="neutral">{{ getCategoryName(p.categoryId) }}</tc-badge>
-                  @if (p.recurrence !== 'NONE') {
+                  @if (p.recurrence === 'INSTALLMENT') {
+                    <tc-badge tone="info">Parcelado</tc-badge>
+                  } @else if (p.recurrence !== 'NONE') {
                     <tc-badge tone="info">{{ getRecurrenceLabel(p.recurrence) }}</tc-badge>
                   }
                 </div>
@@ -230,6 +242,14 @@ type StatusFilter = 'TODAS' | PayableStatus;
             [options]="recurrenceOptions"
             [fullWidth]="true"
           ></tc-select>
+          @if (payableForm.get('recurrence')?.value === 'INSTALLMENT') {
+            <tc-input
+              type="number"
+              formControlName="totalInstallments"
+              label="Número de Parcelas"
+              [error]="getFormError('totalInstallments')"
+            ></tc-input>
+          }
           <div class="modal-actions" style="margin-top: var(--space-5);">
             <tc-button type="button" variant="ghost" [block]="true" (clicked)="closeFormModal()">Cancelar</tc-button>
             <tc-button type="submit" variant="primary" [block]="true" [loading]="facade.loading()" [disabled]="payableForm.invalid">Salvar</tc-button>
@@ -496,12 +516,12 @@ type StatusFilter = 'TODAS' | PayableStatus;
       gap: var(--space-2);
     }
 
-    .desktop-only { display: block; }
-    .mobile-only { display: none; }
+    .desktop-only { display: block !important; }
+    .mobile-only { display: none !important; }
 
     @media (max-width: 768px) {
-      .desktop-only { display: none; }
-      .mobile-only { display: block; }
+      .desktop-only { display: none !important; }
+      .mobile-only { display: block !important; }
       .page-header-action {
         margin-left: auto;
       }
@@ -596,9 +616,11 @@ export class AccountsPayablePageComponent implements OnInit {
 
   readonly recurrenceOptions: { label: string; value: RecurrenceFrequency }[] = [
     { label: 'Não recorrente', value: 'NONE' },
+    { label: 'Diária', value: 'DAILY' },
     { label: 'Semanal', value: 'WEEKLY' },
     { label: 'Mensal', value: 'MONTHLY' },
     { label: 'Anual', value: 'YEARLY' },
+    { label: 'Parcelamento', value: 'INSTALLMENT' },
   ];
 
   readonly payableForm = this.fb.group({
@@ -607,6 +629,7 @@ export class AccountsPayablePageComponent implements OnInit {
     dueDate: [new Date(), Validators.required],
     categoryId: ['', Validators.required],
     recurrence: this.fb.control<RecurrenceFrequency>('NONE'),
+    totalInstallments: [null as number | null, [Validators.min(2)]],
   });
 
   readonly filteredPayables = computed(() =>
@@ -661,11 +684,20 @@ export class AccountsPayablePageComponent implements OnInit {
 
   getRecurrenceLabel(recurrence: RecurrenceFrequency): string {
     switch (recurrence) {
+      case 'DAILY': return 'Diária';
       case 'WEEKLY': return 'Semanal';
       case 'MONTHLY': return 'Mensal';
       case 'YEARLY': return 'Anual';
+      case 'INSTALLMENT': return 'Parcelado';
       default: return '-';
     }
+  }
+
+  getInstallmentLabel(p: PayableAccount): string {
+    if (p.recurrence === 'INSTALLMENT' && p.installmentNumber && p.totalInstallments) {
+      return `${p.installmentNumber}/${p.totalInstallments}`;
+    }
+    return '';
   }
 
   getDuePillText(payable: PayableAccount): string {
@@ -699,7 +731,7 @@ export class AccountsPayablePageComponent implements OnInit {
     const control = this.payableForm.get(field);
     if (control?.touched && control?.invalid) {
       if (control.errors?.['required']) return 'Campo obrigatório';
-      if (control.errors?.['min']) return 'Valor deve ser maior que zero';
+      if (control.errors?.['min']) return field === 'totalInstallments' ? 'Mínimo de 2 parcelas' : 'Valor deve ser maior que zero';
     }
     return undefined;
   }
@@ -712,6 +744,7 @@ export class AccountsPayablePageComponent implements OnInit {
       dueDate: new Date(),
       categoryId: '',
       recurrence: 'NONE',
+      totalInstallments: null,
     });
     this.isFormModalOpen.set(true);
   }
@@ -724,6 +757,7 @@ export class AccountsPayablePageComponent implements OnInit {
       dueDate: payable.dueDate,
       categoryId: payable.categoryId,
       recurrence: payable.recurrence,
+      totalInstallments: payable.totalInstallments ?? null,
     });
     this.isFormModalOpen.set(true);
   }
@@ -750,6 +784,7 @@ export class AccountsPayablePageComponent implements OnInit {
       dueDate: val.dueDate as Date,
       categoryId: val.categoryId as string,
       recurrence: (val.recurrence ?? 'NONE') as RecurrenceFrequency,
+      totalInstallments: val.totalInstallments ? Number(val.totalInstallments) : undefined,
       status: 'PENDENTE' as const,
     };
 

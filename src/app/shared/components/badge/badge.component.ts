@@ -59,9 +59,22 @@ import { ChangeDetectionStrategy, Component, input } from '@angular/core';
       color: #9dc6ff;
       border-color: color-mix(in srgb, var(--color-accent-500) 34%, transparent);
     }
+
+    .tc-badge-accent {
+      background: linear-gradient(135deg, #6366f1 0%, #818cf8 100%);
+      color: #fff;
+      border: 1px solid rgba(99, 102, 241, 0.3);
+      font-weight: 700;
+      letter-spacing: 0.04em;
+    }
+
+    :host-context([data-theme="dark"]) .tc-badge-accent {
+      background: linear-gradient(135deg, #4f46e5 0%, #6366f1 100%);
+      border-color: rgba(99, 102, 241, 0.5);
+    }
   `],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class BadgeComponent {
-  tone = input<'neutral' | 'success' | 'warning' | 'danger' | 'info'>('neutral');
+  tone = input<'neutral' | 'success' | 'warning' | 'danger' | 'info' | 'accent'>('neutral');
 }

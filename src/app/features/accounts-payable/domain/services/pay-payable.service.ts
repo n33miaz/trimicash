@@ -2,7 +2,7 @@
  * pay-payable.service.ts — TrimiCash
  * Serviço responsável por efetuar o pagamento de uma conta (RN-002.4 e RN-003.4).
  */
-import { addWeeks, addMonths, addYears } from 'date-fns';
+import { addDays, addWeeks, addMonths, addYears } from 'date-fns';
 import { PayableAccount } from '../entities/payable-account.entity';
 import type { Movement } from '../../../cash-flow/domain/entities/movement.entity';
 import { DomainError } from '../errors/domain-error';
@@ -39,10 +39,15 @@ export class PayPayableService {
 
     let nextRecurrenceDraft: Omit<PayableAccount, 'id' | 'status'> | undefined;
 
-    if (payable.recurrence !== 'NONE') {
+    // INSTALLMENT: parcelas já foram criadas em lote no facade.create(),
+    // então NÃO devemos gerar uma próxima ocorrência ao pagar.
+    if (payable.recurrence !== 'NONE' && payable.recurrence !== 'INSTALLMENT') {
       let nextDueDate = payable.dueDate;
       
       switch (payable.recurrence) {
+        case 'DAILY':
+          nextDueDate = addDays(payable.dueDate, 1);
+          break;
         case 'WEEKLY':
           nextDueDate = addWeeks(payable.dueDate, 1);
           break;

@@ -8,7 +8,7 @@
 export type ReceivableStatus = 'PENDENTE' | 'RECEBIDA' | 'ATRASADA' | 'CANCELADA';
 
 /** Frequência de recorrência (espelha PayableAccount) */
-export type ReceivableRecurrenceFrequency = 'NONE' | 'WEEKLY' | 'MONTHLY' | 'YEARLY';
+export type ReceivableRecurrenceFrequency = 'NONE' | 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'YEARLY' | 'INSTALLMENT';
 
 /**
  * ReceivableAccount — valor futuro a ser recebido.
