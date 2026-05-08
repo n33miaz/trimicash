@@ -63,6 +63,8 @@ interface SelectOption {
           <div
             [id]="listboxId"
             class="select-dropdown"
+            [class.position-bottom]="dropdownPosition() === 'bottom'"
+            [class.position-top]="dropdownPosition() === 'top'"
             role="listbox"
             [attr.aria-labelledby]="label() ? labelId : null">
             @for (opt of options(); track opt.value; let index = $index) {
@@ -214,7 +216,6 @@ interface SelectOption {
 
     .select-dropdown {
       position: absolute;
-      top: calc(100% + var(--space-2));
       left: 0;
       right: 0;
       z-index: 999;
@@ -225,7 +226,22 @@ interface SelectOption {
       border-radius: var(--radius-lg);
       background: var(--color-bg-card);
       box-shadow: var(--shadow-lg);
-      animation: dropdownIn var(--motion-normal);
+    }
+
+    /* Posição para baixo (Padrão) */
+    .select-dropdown.position-bottom {
+      top: calc(100% + var(--space-2));
+      bottom: auto;
+      animation: dropdownInBottom var(--motion-normal);
+      transform-origin: top;
+    }
+
+    /* Posição para cima */
+    .select-dropdown.position-top {
+      bottom: calc(100% + var(--space-2));
+      top: auto;
+      animation: dropdownInTop var(--motion-normal);
+      transform-origin: bottom;
     }
 
     :host-context([data-theme="dark"]) .select-trigger {
@@ -293,10 +309,21 @@ interface SelectOption {
       color: var(--color-text-secondary);
     }
 
-    @keyframes dropdownIn {
+    @keyframes dropdownInBottom {
       from {
         opacity: 0;
         transform: translateY(-4px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes dropdownInTop {
+      from {
+        opacity: 0;
+        transform: translateY(4px);
       }
       to {
         opacity: 1;
@@ -327,6 +354,7 @@ export class SelectComponent implements ControlValueAccessor {
   readonly disabled = signal(false);
   readonly isOpen = signal(false);
   readonly highlightedIndex = signal(-1);
+  readonly dropdownPosition = signal<'bottom' | 'top'>('bottom');
 
   readonly selectedOption = computed(() =>
     this.options().find(option => option.value === this.value()) ?? null
@@ -371,6 +399,7 @@ export class SelectComponent implements ControlValueAccessor {
 
   openDropdown(): void {
     if (this.disabled()) return;
+    this.calculatePosition();
     this.highlightSelectedOption();
     this.isOpen.set(true);
   }
@@ -433,6 +462,23 @@ export class SelectComponent implements ControlValueAccessor {
   onDocumentMouseDown(event: MouseEvent): void {
     if (!this.host.nativeElement.contains(event.target as Node)) {
       this.closeDropdown();
+    }
+  }
+
+  private calculatePosition(): void {
+    // Dropdown max-height is usually around 280px
+    const DROPDOWN_HEIGHT = 300; 
+    const triggerEl = this.host.nativeElement.querySelector('.select-trigger');
+    if (triggerEl) {
+      const rect = triggerEl.getBoundingClientRect();
+      const windowHeight = window.innerHeight;
+      
+      // If space below is less than dropdown height AND space above is greater than space below
+      if (windowHeight - rect.bottom < DROPDOWN_HEIGHT && rect.top > (windowHeight - rect.bottom)) {
+        this.dropdownPosition.set('top');
+      } else {
+        this.dropdownPosition.set('bottom');
+      }
     }
   }
 

@@ -534,8 +534,8 @@ export class CashFlowPageComponent implements OnInit {
   exportPeriod = 'ALL';
   readonly exportPeriodOptions = [
     { label: 'Todo o histórico', value: 'ALL' },
-    { label: 'Este Mês', value: 'CURRENT_MONTH' },
     { label: 'Últimos 30 Dias', value: 'LAST_30_DAYS' },
+    { label: 'Mês Atual', value: 'CURRENT_MONTH' },
     { label: 'Mês Passado', value: 'LAST_MONTH' },
     { label: 'Este Ano', value: 'CURRENT_YEAR' },
   ];

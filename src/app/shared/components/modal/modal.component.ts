@@ -71,7 +71,7 @@ import { ChangeDetectionStrategy, Component, input, output } from '@angular/core
     .tc-modal-close:hover { background: var(--color-background); color: var(--color-text-primary); }
     .tc-modal-content {
       padding: var(--space-5);
-      overflow-y: auto;
+      overflow-y: visible;
     }
     @keyframes modalFadeIn {
       from { opacity: 0; transform: translateY(10px) scale(0.98); }
