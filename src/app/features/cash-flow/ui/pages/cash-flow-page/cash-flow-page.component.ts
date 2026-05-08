@@ -44,7 +44,7 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
     <div class="cash-flow-page">
       <tc-page-header title="Caixa">
         <div class="page-header-action">
-          <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova movimentação</tc-button>
+          <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova Movimentação</tc-button>
         </div>
       </tc-page-header>
 

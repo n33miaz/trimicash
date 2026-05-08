@@ -12,6 +12,7 @@ import { routes } from './app.routes';
 import {
   MOVEMENT_REPOSITORY,
   PAYABLE_REPOSITORY,
+  RECEIVABLE_REPOSITORY,
   CATEGORY_REPOSITORY,
   AUTH_PORT,
   APP_SETTINGS,
@@ -20,6 +21,7 @@ import {
 // ─── Adapters (implementações mock da Fase 1) ────────────────────────────────
 import { MovementLocalAdapter }  from './features/cash-flow/infrastructure/movement-local.adapter';
 import { PayableLocalAdapter }   from './features/accounts-payable/infrastructure/payable-local.adapter';
+import { ReceivableLocalAdapter } from './features/accounts-receivable/infrastructure/receivable-local.adapter';
 import { CategoryLocalAdapter }  from './features/categories/infrastructure/category-local.adapter';
 import { AuthMockAdapter }       from './features/auth/infrastructure/auth-mock.adapter';
 import {
@@ -37,9 +39,10 @@ export const appConfig: ApplicationConfig = {
     provideHttpClient(withFetch()),
 
     // ── Repositórios mock ──
-    { provide: MOVEMENT_REPOSITORY,  useClass: MovementLocalAdapter },
-    { provide: PAYABLE_REPOSITORY,   useClass: PayableLocalAdapter },
-    { provide: CATEGORY_REPOSITORY,  useClass: CategoryLocalAdapter },
+    { provide: MOVEMENT_REPOSITORY,    useClass: MovementLocalAdapter },
+    { provide: PAYABLE_REPOSITORY,     useClass: PayableLocalAdapter },
+    { provide: RECEIVABLE_REPOSITORY,  useClass: ReceivableLocalAdapter },
+    { provide: CATEGORY_REPOSITORY,    useClass: CategoryLocalAdapter },
 
     // ── Auth mock ──
     { provide: AUTH_PORT, useClass: AuthMockAdapter },

@@ -82,3 +82,31 @@
 .delay-4 { animation-delay: 0.32s; }
 .delay-5 { animation-delay: 0.40s; }
 .delay-6 { animation-delay: 0.48s; }
+
+// ─── Custom Scrollbar ─────────────────────────────────────────────────────────
+
+@mixin custom-scrollbar($width: 6px, $track: transparent, $thumb: var(--color-border)) {
+  scrollbar-width: thin;
+  scrollbar-color: $thumb $track;
+
+  &::-webkit-scrollbar { width: $width; height: $width; }
+  &::-webkit-scrollbar-track { background: $track; border-radius: 999px; }
+  &::-webkit-scrollbar-thumb {
+    background: $thumb;
+    border-radius: 999px;
+    border: 2px solid $track;
+    transition: background 0.2s;
+    &:hover { background: var(--color-text-secondary); }
+  }
+}
+
+// Aplica globalmente a todos os elementos com scroll
+* {
+  @include custom-scrollbar();
+}
+
+// Override: sidebar nav sem scrollbar visível (já oculta via scrollbar-width: none no componente)
+.tabs-bar {
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
+}

@@ -37,6 +37,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'accounts-receivable',
+        loadChildren: () =>
+          import('./features/accounts-receivable/accounts-receivable.routes').then(
+            (m) => m.accountsReceivableRoutes
+          ),
+      },
+      {
         path: 'alerts',
         loadChildren: () =>
           import('./features/alerts/alerts.routes').then((m) => m.alertsRoutes),

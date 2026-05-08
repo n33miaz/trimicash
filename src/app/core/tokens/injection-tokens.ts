@@ -9,6 +9,7 @@
 import { InjectionToken, Signal } from '@angular/core';
 import type { MovementRepository } from '../../features/cash-flow/domain/ports/movement.repository';
 import type { PayableRepository } from '../../features/accounts-payable/domain/ports/payable.repository';
+import type { ReceivableRepository } from '../../features/accounts-receivable/domain/ports/receivable.repository';
 import type { CategoryRepository } from '../../features/categories/domain/category.repository';
 import type { AuthPort } from '../../features/auth/domain/auth.types';
 import type { AppSettings } from '../../features/settings/domain/settings.types';
@@ -30,6 +31,11 @@ export const CATEGORY_REPOSITORY = new InjectionToken<CategoryRepository>(
 
 /** Porta de autenticação (mock na Fase 1) */
 export const AUTH_PORT = new InjectionToken<AuthPort>('AUTH_PORT');
+
+/** Repositório de contas a receber */
+export const RECEIVABLE_REPOSITORY = new InjectionToken<ReceivableRepository>(
+  'RECEIVABLE_REPOSITORY'
+);
 
 /** Configurações globais da aplicação como Signal */
 export const APP_SETTINGS = new InjectionToken<Signal<AppSettings>>(
