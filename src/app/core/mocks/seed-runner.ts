@@ -12,6 +12,7 @@ import { SEEDS, type SeedScenario } from './seeds';
 const STORAGE_KEYS = {
   movements:  'trimicash:movements',
   payables:   'trimicash:payables',
+  receivables:'trimicash:receivables',
   categories: 'trimicash:categories',
   session:    'trimicash:session',
   seeded:     'trimicash:seeded',
@@ -62,6 +63,15 @@ export class SeedRunner {
         ...p,
         dueDate: p.dueDate.toISOString(),
         paidAt:  p.paidAt ? p.paidAt.toISOString() : undefined,
+      })))
+    );
+
+    localStorage.setItem(
+      STORAGE_KEYS.receivables,
+      JSON.stringify(data.receivables.map(r => ({
+        ...r,
+        dueDate: r.dueDate.toISOString(),
+        receivedAt: r.receivedAt ? r.receivedAt.toISOString() : undefined,
       })))
     );
 

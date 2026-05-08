@@ -1,6 +1,7 @@
 import { Injectable, computed, inject, signal } from '@angular/core';
 import { CashFlowFacade } from '../../cash-flow/application/cash-flow.facade';
 import { AccountsPayableFacade } from '../../accounts-payable/application/accounts-payable.facade';
+import { AccountsReceivableFacade } from '../../accounts-receivable/application/accounts-receivable.facade';
 import { ProjectedBalanceService } from '../domain/services/projected-balance.service';
 import { RecommendedReserveService } from '../domain/services/recommended-reserve.service';
 import { ReserveHealthService } from '../domain/services/reserve-health.service';
@@ -24,6 +25,7 @@ export interface DashboardReserveHealth {
 export class DashboardFacade {
   private readonly cashFlow = inject(CashFlowFacade);
   private readonly payablesFacade = inject(AccountsPayableFacade);
+  private readonly receivablesFacade = inject(AccountsReceivableFacade);
   private readonly settings = inject(APP_SETTINGS);
 
   private readonly projectedService = new ProjectedBalanceService();
@@ -45,6 +47,7 @@ export class DashboardFacade {
     return this.projectedService.projectedBalance({
       currentBalance: this.cashFlow.currentBalance(),
       payables: this.payablesFacade.payables(),
+      receivables: this.receivablesFacade.receivables(),
       period: getPeriod(this._period(), ref),
       ref
     });
@@ -116,7 +119,8 @@ export class DashboardFacade {
   async loadData(): Promise<void> {
     await Promise.all([
       this.cashFlow.load(),
-      this.payablesFacade.load()
+      this.payablesFacade.load(),
+      this.receivablesFacade.load()
     ]);
   }
 }

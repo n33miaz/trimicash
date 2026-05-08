@@ -211,11 +211,68 @@ export const BLANK_CATEGORIES: Category[] = [
   { id: 'cat-blank-operacional', name: 'Operacional', color: '#2F80ED' },
 ];
 
+import type { ReceivableAccount } from '../../features/accounts-receivable/domain/entities/receivable-account.entity';
+
+export const HEALTHY_RECEIVABLES: ReceivableAccount[] = [
+  {
+    id: 'rec-h-001',
+    description: 'Projeto Alpha - Sinal',
+    amount: 5000,
+    dueDate: daysFromNow(5),
+    categoryId: CAT_IDS.receitas,
+    status: 'PENDENTE',
+    recurrence: 'NONE',
+  },
+  {
+    id: 'rec-h-002',
+    description: 'Manutenção Mensal - Cliente Y',
+    amount: 850,
+    dueDate: daysFromNow(12),
+    categoryId: CAT_IDS.receitas,
+    status: 'PENDENTE',
+    recurrence: 'MONTHLY',
+  },
+  {
+    id: 'rec-h-003',
+    description: 'Consultoria Especializada',
+    amount: 1200,
+    dueDate: daysAgo(2),
+    categoryId: CAT_IDS.receitas,
+    status: 'RECEBIDA',
+    receivedAt: daysAgo(1),
+    recurrence: 'NONE',
+  }
+];
+
+export const RISK_RECEIVABLES: ReceivableAccount[] = [
+  {
+    id: 'rec-r-001',
+    description: 'Fatura Vencida - Startup Z',
+    amount: 3500,
+    dueDate: daysAgo(10),
+    categoryId: CAT_IDS.receitas,
+    status: 'PENDENTE', // o facade irá interpretar como ATRASADA
+    recurrence: 'NONE',
+  },
+  {
+    id: 'rec-r-002',
+    description: 'Contrato de Risco',
+    amount: 1500,
+    dueDate: daysFromNow(20),
+    categoryId: CAT_IDS.receitas,
+    status: 'PENDENTE',
+    recurrence: 'NONE',
+  }
+];
+
+export const BLANK_RECEIVABLES: ReceivableAccount[] = [];
+
 export interface SeedData {
   user: DemoUser;
   categories: Category[];
   movements: Movement[];
   payables: PayableAccount[];
+  receivables: ReceivableAccount[];
 }
 
 export const SEEDS: Record<SeedScenario, SeedData> = {
@@ -224,17 +281,20 @@ export const SEEDS: Record<SeedScenario, SeedData> = {
     categories: SEED_CATEGORIES,
     movements: HEALTHY_MOVEMENTS,
     payables: HEALTHY_PAYABLES,
+    receivables: HEALTHY_RECEIVABLES,
   },
   risk: {
     user: DEMO_USERS.risk,
     categories: SEED_CATEGORIES,
     movements: RISK_MOVEMENTS,
     payables: RISK_PAYABLES,
+    receivables: RISK_RECEIVABLES,
   },
   blank: {
     user: DEMO_USERS.blank,
     categories: BLANK_CATEGORIES,
     movements: BLANK_MOVEMENTS,
     payables: BLANK_PAYABLES,
+    receivables: BLANK_RECEIVABLES,
   },
 };

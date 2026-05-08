@@ -217,7 +217,7 @@ interface SelectOption {
       top: calc(100% + var(--space-2));
       left: 0;
       right: 0;
-      z-index: 20;
+      z-index: 999;
       max-height: min(280px, 50vh);
       overflow-y: auto;
       padding: var(--space-2);

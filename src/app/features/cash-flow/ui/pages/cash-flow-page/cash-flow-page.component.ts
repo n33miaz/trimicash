@@ -6,6 +6,7 @@ import {
   inject,
   signal,
 } from '@angular/core';
+import * as XLSX from 'xlsx';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CategoriesFacade } from '../../../../categories/application/categories.facade';
@@ -43,7 +44,8 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
   template: `
     <div class="cash-flow-page">
       <tc-page-header title="Caixa">
-        <div class="page-header-action">
+        <div class="page-header-action" style="display: flex; gap: var(--space-3);">
+          <tc-button variant="secondary" (clicked)="openExportModal()">Exportar Excel</tc-button>
           <tc-button variant="primary" (clicked)="openCreateModal()">+ Nova Movimentação</tc-button>
         </div>
       </tc-page-header>
@@ -198,6 +200,25 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       <div class="modal-actions">
         <tc-button variant="ghost" [block]="true" (clicked)="closeDeleteModal()">Cancelar</tc-button>
         <tc-button variant="danger" [block]="true" [loading]="cashFlowFacade.loading()" (clicked)="confirmDelete()">Excluir</tc-button>
+      </div>
+    </tc-modal>
+
+    <tc-modal
+      [open]="isExportModalOpen()"
+      title="Exportar Caixa"
+      (close)="closeExportModal()"
+    >
+      <div class="form-group" style="margin-bottom: var(--space-5);">
+        <label class="tc-label" style="display: block; margin-bottom: var(--space-2); font-weight: 500;">Selecione o Período</label>
+        <tc-select
+          [options]="exportPeriodOptions"
+          [(ngModel)]="exportPeriod"
+          [fullWidth]="true"
+        ></tc-select>
+      </div>
+      <div class="modal-actions">
+        <tc-button variant="ghost" [block]="true" (clicked)="closeExportModal()">Cancelar</tc-button>
+        <tc-button variant="primary" [block]="true" (clicked)="exportExcel()">Gerar Excel</tc-button>
       </div>
     </tc-modal>
   `,
@@ -509,6 +530,16 @@ export class CashFlowPageComponent implements OnInit {
     { label: 'Saídas', value: 'SAIDA' as const },
   ];
 
+  readonly isExportModalOpen = signal(false);
+  exportPeriod = 'ALL';
+  readonly exportPeriodOptions = [
+    { label: 'Todo o histórico', value: 'ALL' },
+    { label: 'Este Mês', value: 'CURRENT_MONTH' },
+    { label: 'Últimos 30 Dias', value: 'LAST_30_DAYS' },
+    { label: 'Mês Passado', value: 'LAST_MONTH' },
+    { label: 'Este Ano', value: 'CURRENT_YEAR' },
+  ];
+
   readonly categoryOptions = computed(() => {
     return [
       { label: 'Todas as categorias', value: '' },
@@ -582,10 +613,66 @@ export class CashFlowPageComponent implements OnInit {
 
     try {
       await this.cashFlowFacade.remove(movement.id);
-      this.toast.show('Movimenta??o exclu?da.', 'success');
+      this.toast.show('Movimentação excluída.', 'success');
       this.closeDeleteModal();
     } catch {
       this.toast.show('Erro ao excluir movimentação.', 'error');
     }
+  }
+
+  openExportModal(): void {
+    this.exportPeriod = 'ALL';
+    this.isExportModalOpen.set(true);
+  }
+
+  closeExportModal(): void {
+    this.isExportModalOpen.set(false);
+  }
+
+  exportExcel(): void {
+    const movements = this.cashFlowFacade.movements();
+    const now = new Date();
+    
+    let filtered = movements;
+    if (this.exportPeriod === 'CURRENT_MONTH') {
+      const start = new Date(now.getFullYear(), now.getMonth(), 1);
+      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
+      filtered = movements.filter(m => m.date >= start && m.date <= end);
+    } else if (this.exportPeriod === 'LAST_30_DAYS') {
+      const start = new Date();
+      start.setDate(start.getDate() - 30);
+      filtered = movements.filter(m => m.date >= start);
+    } else if (this.exportPeriod === 'LAST_MONTH') {
+      const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
+      const end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
+      filtered = movements.filter(m => m.date >= start && m.date <= end);
+    } else if (this.exportPeriod === 'CURRENT_YEAR') {
+      const start = new Date(now.getFullYear(), 0, 1);
+      const end = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
+      filtered = movements.filter(m => m.date >= start && m.date <= end);
+    }
+
+    filtered = [...filtered].sort((a, b) => b.date.getTime() - a.date.getTime());
+
+    const dataToExport = filtered.map(m => ({
+      Data: new Date(m.date).toLocaleDateString('pt-BR'),
+      Descrição: m.description,
+      Categoria: this.getCategoryName(m.categoryId),
+      Tipo: m.type === 'ENTRADA' ? 'Entrada' : 'Saída',
+      'Valor (R$)': m.amount
+    }));
+
+    if (dataToExport.length === 0) {
+      this.toast.show('Nenhuma movimentação neste período para exportar.', 'error');
+      return;
+    }
+
+    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
+    const wb: XLSX.WorkBook = XLSX.utils.book_new();
+    XLSX.utils.book_append_sheet(wb, ws, 'Fluxo_de_Caixa');
+    
+    XLSX.writeFile(wb, `Fluxo_de_Caixa_${this.exportPeriod}.xlsx`);
+    this.closeExportModal();
+    this.toast.show('Exportação concluída.', 'success');
   }
 }
