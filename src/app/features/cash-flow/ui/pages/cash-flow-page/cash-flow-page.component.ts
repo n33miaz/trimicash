@@ -10,6 +10,8 @@ import * as XLSX from 'xlsx';
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CategoriesFacade } from '../../../../categories/application/categories.facade';
+import { AccountsPayableFacade } from '../../../../accounts-payable/application/accounts-payable.facade';
+import { AccountsReceivableFacade } from '../../../../accounts-receivable/application/accounts-receivable.facade';
 import { CashFlowFacade } from '../../../application/cash-flow.facade';
 import { Movement, MovementType } from '../../../domain/entities/movement.entity';
 import { MovementFormComponent } from '../../components/movement-form/movement-form.component';
@@ -212,16 +214,19 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 
     <tc-modal
       [open]="isExportModalOpen()"
-      title="Exportar Caixa"
+      title="Exportar Fluxo de Caixa"
       (close)="closeExportModal()"
     >
-      <div class="form-group" style="margin-bottom: var(--space-5);">
-        <label class="tc-label" style="display: block; margin-bottom: var(--space-2); font-weight: 500;">Selecione o Período</label>
-        <tc-select
-          [options]="exportPeriodOptions"
-          [(ngModel)]="exportPeriod"
-          [fullWidth]="true"
-        ></tc-select>
+      <div class="export-month-selector" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: var(--space-5); background: var(--color-bg-card); padding: var(--space-3); border-radius: var(--radius-md); border: 1px solid var(--color-border-card);">
+        <tc-button variant="ghost" size="sm" (clicked)="previousMonth()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </tc-button>
+        <span style="font-weight: 600; font-family: var(--font-family-display); font-size: var(--font-size-md);">
+          {{ exportMonthLabel() }}
+        </span>
+        <tc-button variant="ghost" size="sm" (clicked)="nextMonth()">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </tc-button>
       </div>
       <div class="modal-actions">
         <tc-button variant="ghost" [block]="true" (clicked)="closeExportModal()">Cancelar</tc-button>
@@ -551,6 +556,8 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 export class CashFlowPageComponent implements OnInit {
   readonly cashFlowFacade = inject(CashFlowFacade);
   readonly categoriesFacade = inject(CategoriesFacade);
+  readonly payablesFacade = inject(AccountsPayableFacade);
+  readonly receivablesFacade = inject(AccountsReceivableFacade);
   private readonly toast = inject(ToastService);
 
   readonly activeType = signal<'ALL' | MovementType>('ALL');
@@ -568,14 +575,17 @@ export class CashFlowPageComponent implements OnInit {
   ];
 
   readonly isExportModalOpen = signal(false);
-  exportPeriod = 'ALL';
-  readonly exportPeriodOptions = [
-    { label: 'Todo o histórico', value: 'ALL' },
-    { label: 'Últimos 30 Dias', value: 'LAST_30_DAYS' },
-    { label: 'Mês Atual', value: 'CURRENT_MONTH' },
-    { label: 'Mês Passado', value: 'LAST_MONTH' },
-    { label: 'Este Ano', value: 'CURRENT_YEAR' },
-  ];
+  
+  // Controle de mês para o modal de exportação
+  readonly exportMonth = signal(new Date().getMonth());
+  readonly exportYear = signal(new Date().getFullYear());
+  
+  readonly exportMonthLabel = computed(() => {
+    const date = new Date(this.exportYear(), this.exportMonth(), 1);
+    const formatter = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' });
+    const formatted = formatter.format(date).toUpperCase();
+    return formatted.replace(' DE ', ' / ');
+  });
 
   readonly categoryOptions = computed(() => {
     return [
@@ -607,6 +617,8 @@ export class CashFlowPageComponent implements OnInit {
     await Promise.all([
       this.cashFlowFacade.load(),
       this.categoriesFacade.load(),
+      this.payablesFacade.load(),
+      this.receivablesFacade.load(),
     ]);
   }
 
@@ -658,7 +670,9 @@ export class CashFlowPageComponent implements OnInit {
   }
 
   openExportModal(): void {
-    this.exportPeriod = 'ALL';
+    const now = new Date();
+    this.exportMonth.set(now.getMonth());
+    this.exportYear.set(now.getFullYear());
     this.isExportModalOpen.set(true);
   }
 
@@ -666,49 +680,216 @@ export class CashFlowPageComponent implements OnInit {
     this.isExportModalOpen.set(false);
   }
 
+  previousMonth(): void {
+    const currentM = this.exportMonth();
+    if (currentM === 0) {
+      this.exportMonth.set(11);
+      this.exportYear.update(y => y - 1);
+    } else {
+      this.exportMonth.update(m => m - 1);
+    }
+  }
+
+  nextMonth(): void {
+    const currentM = this.exportMonth();
+    if (currentM === 11) {
+      this.exportMonth.set(0);
+      this.exportYear.update(y => y + 1);
+    } else {
+      this.exportMonth.update(m => m + 1);
+    }
+  }
+
   exportExcel(): void {
+    const year = this.exportYear();
+    const month = this.exportMonth();
+    const startDate = new Date(year, month, 1);
+    const endDate = new Date(year, month + 1, 0, 23, 59, 59);
+
+    const daysInMonth = endDate.getDate();
+    const days: Date[] = [];
+    for (let d = 1; d <= daysInMonth; d++) {
+      days.push(new Date(year, month, d));
+    }
+
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+
     const movements = this.cashFlowFacade.movements();
-    const now = new Date();
-    
-    let filtered = movements;
-    if (this.exportPeriod === 'CURRENT_MONTH') {
-      const start = new Date(now.getFullYear(), now.getMonth(), 1);
-      const end = new Date(now.getFullYear(), now.getMonth() + 1, 0, 23, 59, 59);
-      filtered = movements.filter(m => m.date >= start && m.date <= end);
-    } else if (this.exportPeriod === 'LAST_30_DAYS') {
-      const start = new Date();
-      start.setDate(start.getDate() - 30);
-      filtered = movements.filter(m => m.date >= start);
-    } else if (this.exportPeriod === 'LAST_MONTH') {
-      const start = new Date(now.getFullYear(), now.getMonth() - 1, 1);
-      const end = new Date(now.getFullYear(), now.getMonth(), 0, 23, 59, 59);
-      filtered = movements.filter(m => m.date >= start && m.date <= end);
-    } else if (this.exportPeriod === 'CURRENT_YEAR') {
-      const start = new Date(now.getFullYear(), 0, 1);
-      const end = new Date(now.getFullYear(), 11, 31, 23, 59, 59);
-      filtered = movements.filter(m => m.date >= start && m.date <= end);
+    const payables = this.payablesFacade.payables();
+    const receivables = this.receivablesFacade.receivables();
+    const categories = this.categoriesFacade.categories();
+    const catName = (id: string) => categories.find(c => c.id === id)?.name || 'Sem Categoria';
+
+    // ── Dados agrupados por dia e categoria ──────────────────────────────
+    const dailyIn = new Map<number, { realized: Map<string, number>; predicted: Map<string, number> }>();
+    const dailyOut = new Map<number, { realized: Map<string, number>; predicted: Map<string, number> }>();
+    const overdueIn = new Map<string, number>();
+    const overdueOut = new Map<string, number>();
+
+    for (let d = 1; d <= daysInMonth; d++) {
+      dailyIn.set(d, { realized: new Map(), predicted: new Map() });
+      dailyOut.set(d, { realized: new Map(), predicted: new Map() });
     }
 
-    filtered = [...filtered].sort((a, b) => b.date.getTime() - a.date.getTime());
+    // Realizados
+    movements.filter(m => m.date >= startDate && m.date <= endDate).forEach(m => {
+      const day = m.date.getDate();
+      const target = m.type === 'ENTRADA' ? dailyIn.get(day)!.realized : dailyOut.get(day)!.realized;
+      target.set(m.categoryId, (target.get(m.categoryId) || 0) + m.amount);
+    });
 
-    const dataToExport = filtered.map(m => ({
-      Data: new Date(m.date).toLocaleDateString('pt-BR'),
-      Descrição: m.description,
-      Categoria: this.getCategoryName(m.categoryId),
-      Tipo: m.type === 'ENTRADA' ? 'Entrada' : 'Saída',
-      'Valor (R$)': m.amount
-    }));
+    // Previstos — contas a receber
+    receivables.filter(r => r.status === 'PENDENTE' || r.status === 'ATRASADA').forEach(r => {
+      if (r.dueDate < startDate) {
+        if (r.status === 'ATRASADA') overdueIn.set(r.categoryId, (overdueIn.get(r.categoryId) || 0) + r.amount);
+      } else if (r.dueDate <= endDate) {
+        const map = dailyIn.get(r.dueDate.getDate())!.predicted;
+        map.set(r.categoryId, (map.get(r.categoryId) || 0) + r.amount);
+      }
+    });
 
-    if (dataToExport.length === 0) {
-      this.toast.show('Nenhuma movimentação neste período para exportar.', 'error');
-      return;
+    // Previstos — contas a pagar
+    payables.filter(p => p.status === 'PENDENTE' || p.status === 'ATRASADA').forEach(p => {
+      if (p.dueDate < startDate) {
+        if (p.status === 'ATRASADA') overdueOut.set(p.categoryId, (overdueOut.get(p.categoryId) || 0) + p.amount);
+      } else if (p.dueDate <= endDate) {
+        const map = dailyOut.get(p.dueDate.getDate())!.predicted;
+        map.set(p.categoryId, (map.get(p.categoryId) || 0) + p.amount);
+      }
+    });
+
+    // Categorias usadas
+    const inflowCats = new Set<string>();
+    const outflowCats = new Set<string>();
+    overdueIn.forEach((_, c) => inflowCats.add(c));
+    overdueOut.forEach((_, c) => outflowCats.add(c));
+    dailyIn.forEach(v => { v.realized.forEach((_, c) => inflowCats.add(c)); v.predicted.forEach((_, c) => inflowCats.add(c)); });
+    dailyOut.forEach(v => { v.realized.forEach((_, c) => outflowCats.add(c)); v.predicted.forEach((_, c) => outflowCats.add(c)); });
+
+    // ── Helpers ──────────────────────────────────────────────────────────
+    const weekdays = ['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'];
+    const pad = (n: number) => String(n).padStart(2, '0');
+    const totalCols = daysInMonth + 2; // col 0 = Categoria, col 1 = Atrasados, cols 2..N+1 = dias
+
+    const sumMap = (m: Map<string, number>) => { let s = 0; m.forEach(v => s += v); return s; };
+
+    const dayTotal = (day: number, source: Map<number, { realized: Map<string, number>; predicted: Map<string, number> }>) => {
+      const d = source.get(day)!;
+      return sumMap(d.realized) + sumMap(d.predicted);
+    };
+
+    const dayCatTotal = (day: number, catId: string, source: Map<number, { realized: Map<string, number>; predicted: Map<string, number> }>) => {
+      const d = source.get(day)!;
+      return (d.realized.get(catId) || 0) + (d.predicted.get(catId) || 0);
+    };
+
+    // Saldo de abertura (movimentações anteriores ao mês)
+    const pastMovements = movements.filter(m => m.date < startDate);
+    const openingBalance = pastMovements.reduce((acc, m) => acc + (m.type === 'ENTRADA' ? m.amount : -m.amount), 0);
+
+    // ── Construir AOA (array of arrays) ─────────────────────────────────
+    const aoa: (string | number)[][] = [];
+
+    // ── Linha 0: Título ──
+    const titleRow: (string | number)[] = [`FLUXO DE CAIXA - ${this.exportMonthLabel()}`];
+    for (let i = 1; i < totalCols; i++) titleRow.push('');
+    aoa.push(titleRow);
+
+    // ── Linha 1: Cabeçalho de datas  (ex: "Sáb, 18/10") ──
+    const dateHeaderRow: (string | number)[] = ['', ''];
+    days.forEach(d => dateHeaderRow.push(`${weekdays[d.getDay()]}, ${pad(d.getDate())}/${pad(d.getMonth() + 1)}`));
+    aoa.push(dateHeaderRow);
+
+    // ── Linha 2: Sub-cabeçalho (Categoria | Atrasados Hoje | Realizado/Previsto...) ──
+    const subHeaderRow: (string | number)[] = ['Categoria', 'Atrasados Hoje'];
+    days.forEach(d => subHeaderRow.push(d <= today ? 'Realizado' : 'Previsto'));
+    aoa.push(subHeaderRow);
+
+    // ── Helper genérico para adicionar uma linha de dados ──
+    const addDataRow = (label: string, overdueVal: number, dailyValues: number[]) => {
+      const row: (string | number)[] = [label, overdueVal];
+      dailyValues.forEach(v => row.push(v));
+      aoa.push(row);
+    };
+
+    // ── SALDO INICIAL ──
+    let runningBalance = openingBalance;
+    const dailyOpenBalances: number[] = [];
+    const saldoValues: number[] = [];
+
+    days.forEach(d => {
+      const day = d.getDate();
+      saldoValues.push(runningBalance);
+      dailyOpenBalances[day] = runningBalance;
+      runningBalance += dayTotal(day, dailyIn) - dayTotal(day, dailyOut);
+    });
+    addDataRow('SALDO INICIAL', 0, saldoValues);
+
+    // ── RECEITAS ──
+    const overdueInTotal = sumMap(overdueIn);
+    const receitasDailyTotals = days.map(d => dayTotal(d.getDate(), dailyIn));
+    addDataRow('RECEITAS', overdueInTotal, receitasDailyTotals);
+
+    inflowCats.forEach(catId => {
+      const dailyVals = days.map(d => dayCatTotal(d.getDate(), catId, dailyIn));
+      addDataRow(`  ${catName(catId)}`, overdueIn.get(catId) || 0, dailyVals);
+    });
+
+    // ── DESPESAS (valores negativos) ──
+    const overdueOutTotal = sumMap(overdueOut);
+    const despesasDailyTotals = days.map(d => -dayTotal(d.getDate(), dailyOut));
+    addDataRow('DESPESAS', -overdueOutTotal, despesasDailyTotals);
+
+    outflowCats.forEach(catId => {
+      const dailyVals = days.map(d => -dayCatTotal(d.getDate(), catId, dailyOut));
+      addDataRow(`  ${catName(catId)}`, -(overdueOut.get(catId) || 0), dailyVals);
+    });
+
+    // ── RESULTADO ──
+    const resultadoOverdue = overdueInTotal - overdueOutTotal;
+    const resultadoDailyVals = days.map(d => {
+      const day = d.getDate();
+      return dayTotal(day, dailyIn) - dayTotal(day, dailyOut);
+    });
+    addDataRow('RESULTADO', resultadoOverdue, resultadoDailyVals);
+
+    // ── RESULTADO ACUMULADO ──
+    const acumuladoDailyVals = days.map(d => {
+      const day = d.getDate();
+      return dailyOpenBalances[day] + dayTotal(day, dailyIn) - dayTotal(day, dailyOut);
+    });
+    addDataRow('RESULTADO ACUMULADO', 0, acumuladoDailyVals);
+
+    // ── LIMITE DISPONÍVEL ──
+    addDataRow('LIMITE DISPONÍVEL', 0, acumuladoDailyVals);
+
+    // ── Gerar worksheet via AOA ─────────────────────────────────────────
+    const ws: XLSX.WorkSheet = XLSX.utils.aoa_to_sheet(aoa);
+
+    // Merge do título (linha 0, colunas 0..totalCols-1)
+    ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: totalCols - 1 } }];
+
+    // Largura das colunas
+    const colWidths: { wch: number }[] = [{ wch: 30 }, { wch: 16 }];
+    for (let i = 0; i < daysInMonth; i++) colWidths.push({ wch: 14 });
+    ws['!cols'] = colWidths;
+
+    // Formatar números como moeda BR (2 decimais) nas células de dados (linhas 3+)
+    const numFmt = '#.##0,00;-#.##0,00;0,00';
+    for (let r = 3; r < aoa.length; r++) {
+      for (let c = 1; c < totalCols; c++) {
+        const cellRef = XLSX.utils.encode_cell({ r, c });
+        if (ws[cellRef] && typeof ws[cellRef].v === 'number') {
+          ws[cellRef].z = numFmt;
+        }
+      }
     }
 
-    const ws: XLSX.WorkSheet = XLSX.utils.json_to_sheet(dataToExport);
     const wb: XLSX.WorkBook = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, 'Fluxo_de_Caixa');
-    
-    XLSX.writeFile(wb, `Fluxo_de_Caixa_${this.exportPeriod}.xlsx`);
+
+    XLSX.writeFile(wb, `Fluxo_de_Caixa_${year}_${pad(month + 1)}.xlsx`);
     this.closeExportModal();
     this.toast.show('Exportação concluída.', 'success');
   }
