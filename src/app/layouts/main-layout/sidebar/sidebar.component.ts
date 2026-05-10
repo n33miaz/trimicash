@@ -55,6 +55,18 @@ import { ThemeService } from '../../../core/services/theme.service';
         </a>
 
         <a class="nav-item"
+           routerLink="/cash-flow-report"
+           routerLinkActive="active"
+           (click)="onNavClick()">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"/>
+            <line x1="12" y1="20" x2="12" y2="4"/>
+            <line x1="6" y1="20" x2="6" y2="14"/>
+          </svg>
+          <span>Fluxo</span>
+        </a>
+
+        <a class="nav-item"
            routerLink="/cash-flow"
            routerLinkActive="active"
            (click)="onNavClick()">
@@ -429,7 +441,7 @@ export class SidebarComponent implements OnInit {
     void this.alertsFacade.loadData();
   }
 
-  open(): void  { this.isOpen.set(true); }
+  open(): void { this.isOpen.set(true); }
   close(): void { this.isOpen.set(false); }
   toggle(): void { this.isOpen.update(v => !v); }
 

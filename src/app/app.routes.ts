@@ -23,6 +23,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'cash-flow-report',
+        loadChildren: () =>
+          import('./features/cash-flow/cash-flow-report.routes').then(
+            (m) => m.cashFlowReportRoutes
+          ),
+      },
+      {
         path: 'cash-flow',
         loadChildren: () =>
           import('./features/cash-flow/cash-flow.routes').then(

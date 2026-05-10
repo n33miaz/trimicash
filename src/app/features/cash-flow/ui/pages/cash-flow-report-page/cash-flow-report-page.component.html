@@ -1,0 +1,121 @@
+<div class="report-page">
+  <tc-page-header title="Fluxo de Caixa" [stackOnMobile]="false">
+    <div class="header-controls">
+      <tc-button variant="secondary" (clicked)="exportExcel()" title="Exportar Excel" class="export-btn">
+        <span class="btn-text">Exportar Excel</span>
+        <svg class="btn-icon" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+          <polyline points="7 10 12 15 17 10"></polyline>
+          <line x1="12" y1="15" x2="12" y2="3"></line>
+        </svg>
+      </tc-button>
+      <div class="view-toggle desktop-only">
+        <button class="toggle-btn" [class.active]="viewMode() === 'WEEKLY'" (click)="setMode('WEEKLY')">Semanal</button>
+        <button class="toggle-btn" [class.active]="viewMode() === 'MONTHLY'" (click)="setMode('MONTHLY')">Mensal</button>
+      </div>
+      <div class="period-nav desktop-only">
+        <button class="nav-arrow" (click)="previousPeriod()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+        </button>
+        <span class="period-label">{{ periodLabel() }}</span>
+        <button class="nav-arrow" (click)="nextPeriod()">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+        </button>
+      </div>
+    </div>
+  </tc-page-header>
+
+  <div class="mobile-controls-bar mobile-only">
+    <div class="view-toggle">
+      <button class="toggle-btn" [class.active]="viewMode() === 'WEEKLY'" (click)="setMode('WEEKLY')">Semanal</button>
+      <button class="toggle-btn" [class.active]="viewMode() === 'MONTHLY'" (click)="setMode('MONTHLY')">Mensal</button>
+    </div>
+    <div class="period-nav">
+      <button class="nav-arrow" (click)="previousPeriod()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"></polyline></svg>
+      </button>
+      <span class="period-label">{{ periodLabel() }}</span>
+      <button class="nav-arrow" (click)="nextPeriod()">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"></polyline></svg>
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <tc-loading-state message="Carregando fluxo de caixa..."></tc-loading-state>
+  } @else {
+    <!-- DESKTOP TABLE -->
+    <div class="flow-table-wrapper desktop-only">
+      <div class="flow-title-bar">FLUXO DE CAIXA - {{ periodLabel() }}</div>
+      <div class="flow-scroll">
+        <table class="flow-table">
+          <thead>
+            <tr class="date-header-row">
+              <th class="sticky-col col-cat">Categoria</th>
+              <th class="col-overdue">Atrasados Hoje</th>
+              @for (col of dayColumns(); track col.label) {
+                <th class="col-day">{{ col.label }}</th>
+              }
+            </tr>
+          </thead>
+          <tbody>
+            @for (row of flowRows(); track row.label) {
+              <tr [class]="'row-' + row.section" [class.row-header]="row.isHeader" [class.row-child]="!row.isHeader">
+                <td class="sticky-col col-cat" [class.indent]="!row.isHeader">{{ row.label }}</td>
+                <td class="col-overdue" [class.val-neg]="row.overdueValue < 0" [class.val-pos]="row.overdueValue > 0 && row.section === 'receita'">
+                  {{ row.overdueValue | brlCurrency }}
+                </td>
+                @for (val of row.dailyValues; track $index) {
+                  <td class="col-day" [class.val-neg]="val < 0" [class.val-pos]="val > 0 && (row.section === 'receita' || row.section === 'acumulado')">
+                    {{ val | brlCurrency }}
+                  </td>
+                }
+              </tr>
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- MOBILE CARDS -->
+    <div class="mobile-cards mobile-only">
+      @for (col of dayColumns(); track col.label; let i = $index) {
+        <div class="day-card" [class.expanded]="isDayExpanded(i)">
+          <button class="day-card-header" (click)="toggleDay(i)">
+            <div class="day-info">
+              <span class="day-label">{{ col.label }}</span>
+            </div>
+            <div class="day-result-preview">
+              @for (row of flowRows(); track row.label) {
+                @if (row.section === 'resultado' && row.isHeader) {
+                  <span class="day-result-value" [class.val-neg]="row.dailyValues[i] < 0" [class.val-pos]="row.dailyValues[i] >= 0">
+                    {{ row.dailyValues[i] | brlCurrency }}
+                  </span>
+                }
+              }
+            </div>
+            <svg class="expand-icon" [class.rotated]="isDayExpanded(i)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+          </button>
+          @if (isDayExpanded(i)) {
+            <div class="day-card-body">
+              @for (row of flowRows(); track row.label) {
+                <div class="mobile-row" [class]="'mrow-' + row.section" [class.mrow-header]="row.isHeader" [class.mrow-child]="!row.isHeader">
+                  <span class="mrow-label">{{ row.label }}</span>
+                  <span class="mrow-value" [class.val-neg]="row.dailyValues[i] < 0" [class.val-pos]="row.dailyValues[i] > 0 && (row.section === 'receita' || row.section === 'acumulado')">
+                    {{ row.dailyValues[i] | brlCurrency }}
+                  </span>
+                </div>
+              }
+            </div>
+          }
+        </div>
+      }
+    </div>
+
+    <!-- MOBILE BOTTOM BAR -->
+    <div class="mobile-summary-bar mobile-only">
+      <span class="summary-label">Resultado do Período</span>
+      <span class="summary-value" [class.val-neg]="monthResult() < 0" [class.val-pos]="monthResult() >= 0">{{ monthResult() | brlCurrency }}</span>
+    </div>
+  }
+</div>
