@@ -1,34 +1,25 @@
 import {
   ChangeDetectionStrategy, Component, OnInit, computed, inject, signal,
 } from '@angular/core';
-import { DatePipe } from '@angular/common';
 import * as XLSX from 'xlsx';
 import { CategoriesFacade } from '../../../../categories/application/categories.facade';
 import { AccountsPayableFacade } from '../../../../accounts-payable/application/accounts-payable.facade';
 import { AccountsReceivableFacade } from '../../../../accounts-receivable/application/accounts-receivable.facade';
 import { CashFlowFacade } from '../../../application/cash-flow.facade';
+import {
+  CashFlowReportCalculatorService,
+  CashFlowReportViewMode,
+  DayColumn,
+} from '../../../application/cash-flow-report-calculator.service';
 import { PageHeaderComponent } from '../../../../../shared/components/page-header/page-header.component';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
 import { LoadingStateComponent } from '../../../../../shared/components/loading-state/loading-state.component';
 import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
 
-interface FlowRow {
-  label: string;
-  section: 'saldo'|'receita'|'despesa'|'resultado'|'acumulado'|'limite';
-  isHeader: boolean;
-  overdueValue: number;
-  dailyValues: number[];
-}
-
-interface DayColumn {
-  date: Date;
-  label: string;
-}
-
 @Component({
   selector: 'tc-cash-flow-report-page',
   standalone: true,
-  imports: [DatePipe, PageHeaderComponent, ButtonComponent, LoadingStateComponent, BrlCurrencyPipe],
+  imports: [PageHeaderComponent, ButtonComponent, LoadingStateComponent, BrlCurrencyPipe],
   templateUrl: './cash-flow-report-page.component.html',
   styleUrl: './cash-flow-report-page.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -38,15 +29,25 @@ export class CashFlowReportPageComponent implements OnInit {
   private readonly payables = inject(AccountsPayableFacade);
   private readonly receivables = inject(AccountsReceivableFacade);
   private readonly categories = inject(CategoriesFacade);
+  private readonly reportCalculator = new CashFlowReportCalculatorService();
 
   readonly loading = computed(() => this.cashFlow.loading());
-  readonly viewMode = signal<'WEEKLY'|'MONTHLY'>('MONTHLY');
+  readonly viewMode = signal<CashFlowReportViewMode>('MONTHLY');
+  readonly currentDay = signal(this.startOfToday());
   readonly currentMonth = signal(new Date().getMonth());
   readonly currentYear = signal(new Date().getFullYear());
   readonly currentWeekStart = signal(this.getMonday(new Date()));
   readonly expandedDays = signal<Set<number>>(new Set());
 
   readonly periodLabel = computed(() => {
+    if (this.viewMode() === 'DAILY') {
+      return new Intl.DateTimeFormat('pt-BR', {
+        weekday: 'long',
+        day: '2-digit',
+        month: 'long',
+        year: 'numeric',
+      }).format(this.currentDay());
+    }
     if (this.viewMode() === 'MONTHLY') {
       const d = new Date(this.currentYear(), this.currentMonth(), 1);
       return new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' })
@@ -60,6 +61,10 @@ export class CashFlowReportPageComponent implements OnInit {
 
   readonly dayColumns = computed<DayColumn[]>(() => {
     const wk = ['Dom','Seg','Ter','Qua','Qui','Sex','Sáb'];
+    if (this.viewMode() === 'DAILY') {
+      const d = this.currentDay();
+      return [{ date: d, label: `${wk[d.getDay()]}, ${String(d.getDate()).padStart(2,'0')}/${String(d.getMonth()+1).padStart(2,'0')}` }];
+    }
     if (this.viewMode() === 'MONTHLY') {
       const y = this.currentYear(), m = this.currentMonth();
       const dim = new Date(y, m+1, 0).getDate();
@@ -75,85 +80,22 @@ export class CashFlowReportPageComponent implements OnInit {
     });
   });
 
-  readonly flowRows = computed<FlowRow[]>(() => {
-    const cols = this.dayColumns();
-    if (!cols.length) return [];
-    const movements = this.cashFlow.movements();
-    const pays = this.payables.payables();
-    const recs = this.receivables.receivables();
-    const cats = this.categories.categories();
-    const catName = (id: string) => cats.find(c => c.id === id)?.name || 'Sem Categoria';
+  readonly reportSnapshot = computed(() => this.reportCalculator.build({
+    columns: this.dayColumns(),
+    movements: this.cashFlow.movements(),
+    payables: this.payables.payables(),
+    receivables: this.receivables.receivables(),
+    categories: this.categories.categories(),
+  }));
 
-    const startDate = cols[0].date;
-    const endDate = new Date(cols[cols.length-1].date); endDate.setHours(23,59,59);
-    const numDays = cols.length;
+  readonly flowRows = computed(() => this.reportSnapshot().rows);
 
-    type DayMap = Map<string, number>;
-    const dailyIn: {realized: DayMap; predicted: DayMap}[] = [];
-    const dailyOut: {realized: DayMap; predicted: DayMap}[] = [];
-    const overdueIn = new Map<string, number>();
-    const overdueOut = new Map<string, number>();
+  readonly dailySummary = computed(() => this.reportSnapshot().dailySummary);
 
-    for (let i = 0; i < numDays; i++) {
-      dailyIn.push({realized: new Map(), predicted: new Map()});
-      dailyOut.push({realized: new Map(), predicted: new Map()});
-    }
-
-    const dayIndex = (d: Date) => {
-      const diff = Math.floor((d.getTime() - startDate.getTime()) / 86400000);
-      return diff >= 0 && diff < numDays ? diff : -1;
-    };
-
-    movements.filter(m => m.date >= startDate && m.date <= endDate).forEach(m => {
-      const idx = dayIndex(m.date); if (idx < 0) return;
-      const t = m.type === 'ENTRADA' ? dailyIn[idx].realized : dailyOut[idx].realized;
-      t.set(m.categoryId, (t.get(m.categoryId)||0) + m.amount);
-    });
-
-    recs.filter(r => r.status === 'PENDENTE' || r.status === 'ATRASADA').forEach(r => {
-      if (r.dueDate < startDate) { if (r.status === 'ATRASADA') overdueIn.set(r.categoryId, (overdueIn.get(r.categoryId)||0)+r.amount); }
-      else { const idx = dayIndex(r.dueDate); if (idx >= 0) { const m = dailyIn[idx].predicted; m.set(r.categoryId, (m.get(r.categoryId)||0)+r.amount); } }
-    });
-
-    pays.filter(p => p.status === 'PENDENTE' || p.status === 'ATRASADA').forEach(p => {
-      if (p.dueDate < startDate) { if (p.status === 'ATRASADA') overdueOut.set(p.categoryId, (overdueOut.get(p.categoryId)||0)+p.amount); }
-      else { const idx = dayIndex(p.dueDate); if (idx >= 0) { const m = dailyOut[idx].predicted; m.set(p.categoryId, (m.get(p.categoryId)||0)+p.amount); } }
-    });
-
-    const sumMap = (m: DayMap) => { let s=0; m.forEach(v => s+=v); return s; };
-    const dayInTotal = (i: number) => sumMap(dailyIn[i].realized) + sumMap(dailyIn[i].predicted);
-    const dayOutTotal = (i: number) => sumMap(dailyOut[i].realized) + sumMap(dailyOut[i].predicted);
-    const dayCatIn = (i: number, c: string) => (dailyIn[i].realized.get(c)||0) + (dailyIn[i].predicted.get(c)||0);
-    const dayCatOut = (i: number, c: string) => (dailyOut[i].realized.get(c)||0) + (dailyOut[i].predicted.get(c)||0);
-
-    const pastMov = movements.filter(m => m.date < startDate);
-    const opening = pastMov.reduce((a, m) => a + (m.type === 'ENTRADA' ? m.amount : -m.amount), 0);
-
-    const inCats = new Set<string>(); const outCats = new Set<string>();
-    overdueIn.forEach((_,c) => inCats.add(c)); overdueOut.forEach((_,c) => outCats.add(c));
-    dailyIn.forEach(d => { d.realized.forEach((_,c) => inCats.add(c)); d.predicted.forEach((_,c) => inCats.add(c)); });
-    dailyOut.forEach(d => { d.realized.forEach((_,c) => outCats.add(c)); d.predicted.forEach((_,c) => outCats.add(c)); });
-
-    const rows: FlowRow[] = [];
-    let bal = opening;
-    const balArr: number[] = [];
-    const saldoVals: number[] = [];
-    for (let i = 0; i < numDays; i++) { saldoVals.push(bal); balArr.push(bal); bal += dayInTotal(i) - dayOutTotal(i); }
-    rows.push({ label: 'SALDO INICIAL', section: 'saldo', isHeader: true, overdueValue: 0, dailyValues: saldoVals });
-
-    const oInT = sumMap(overdueIn);
-    rows.push({ label: 'RECEITAS', section: 'receita', isHeader: true, overdueValue: oInT, dailyValues: Array.from({length:numDays},(_,i) => dayInTotal(i)) });
-    inCats.forEach(c => rows.push({ label: catName(c), section: 'receita', isHeader: false, overdueValue: overdueIn.get(c)||0, dailyValues: Array.from({length:numDays},(_,i) => dayCatIn(i,c)) }));
-
-    const oOutT = sumMap(overdueOut);
-    rows.push({ label: 'DESPESAS', section: 'despesa', isHeader: true, overdueValue: -oOutT, dailyValues: Array.from({length:numDays},(_,i) => -dayOutTotal(i)) });
-    outCats.forEach(c => rows.push({ label: catName(c), section: 'despesa', isHeader: false, overdueValue: -(overdueOut.get(c)||0), dailyValues: Array.from({length:numDays},(_,i) => -dayCatOut(i,c)) }));
-
-    rows.push({ label: 'RESULTADO', section: 'resultado', isHeader: true, overdueValue: oInT-oOutT, dailyValues: Array.from({length:numDays},(_,i) => dayInTotal(i)-dayOutTotal(i)) });
-    rows.push({ label: 'RESULTADO ACUMULADO', section: 'acumulado', isHeader: true, overdueValue: 0, dailyValues: Array.from({length:numDays},(_,i) => balArr[i]+dayInTotal(i)-dayOutTotal(i)) });
-    rows.push({ label: 'LIMITE DISPONÍVEL', section: 'limite', isHeader: true, overdueValue: 0, dailyValues: Array.from({length:numDays},(_,i) => balArr[i]+dayInTotal(i)-dayOutTotal(i)) });
-
-    return rows;
+  readonly periodProjectedResult = computed(() => {
+    const row = this.flowRows().find(item => item.section === 'projetado');
+    if (!row) return 0;
+    return row.dailyValues.reduce((acc, value) => acc + value, 0) + row.overdueValue;
   });
 
   readonly monthResult = computed(() => {
@@ -167,10 +109,12 @@ export class CashFlowReportPageComponent implements OnInit {
     await Promise.all([this.cashFlow.load(), this.categories.load(), this.payables.load(), this.receivables.load()]);
   }
 
-  setMode(mode: 'WEEKLY'|'MONTHLY') { this.viewMode.set(mode); }
+  setMode(mode: CashFlowReportViewMode) { this.viewMode.set(mode); }
 
   previousPeriod() {
-    if (this.viewMode() === 'MONTHLY') {
+    if (this.viewMode() === 'DAILY') {
+      const d = new Date(this.currentDay()); d.setDate(d.getDate()-1); this.currentDay.set(d);
+    } else if (this.viewMode() === 'MONTHLY') {
       if (this.currentMonth() === 0) { this.currentMonth.set(11); this.currentYear.update(y=>y-1); }
       else this.currentMonth.update(m=>m-1);
     } else {
@@ -179,7 +123,9 @@ export class CashFlowReportPageComponent implements OnInit {
   }
 
   nextPeriod() {
-    if (this.viewMode() === 'MONTHLY') {
+    if (this.viewMode() === 'DAILY') {
+      const d = new Date(this.currentDay()); d.setDate(d.getDate()+1); this.currentDay.set(d);
+    } else if (this.viewMode() === 'MONTHLY') {
       if (this.currentMonth() === 11) { this.currentMonth.set(0); this.currentYear.update(y=>y+1); }
       else this.currentMonth.update(m=>m+1);
     } else {
@@ -188,17 +134,28 @@ export class CashFlowReportPageComponent implements OnInit {
   }
 
   toggleDay(idx: number) {
+    if (this.viewMode() === 'DAILY') return;
     const s = new Set(this.expandedDays());
     if (s.has(idx)) s.delete(idx); else s.add(idx);
     this.expandedDays.set(s);
   }
 
-  isDayExpanded(idx: number) { return this.expandedDays().has(idx); }
+  isDayExpanded(idx: number) { return this.viewMode() === 'DAILY' || this.expandedDays().has(idx); }
+
+  isPositiveSection(section: string): boolean {
+    return section === 'receita' || section === 'projetado' || section === 'acumulado' || section === 'limite';
+  }
 
   private getMonday(d: Date): Date {
     const dt = new Date(d); dt.setHours(0,0,0,0);
     const day = dt.getDay(); const diff = dt.getDate() - day + (day === 0 ? -6 : 1);
     dt.setDate(diff); return dt;
+  }
+
+  private startOfToday(): Date {
+    const d = new Date();
+    d.setHours(0,0,0,0);
+    return d;
   }
 
   exportExcel(): void {
@@ -208,11 +165,11 @@ export class CashFlowReportPageComponent implements OnInit {
     
     const aoa: (string | number)[][] = [];
     
-    const titleRow: (string | number)[] = [`FLUXO DE CAIXA - ${this.periodLabel()}`];
+    const titleRow: (string | number)[] = [this.periodLabel()];
     for (let i = 1; i < totalCols; i++) titleRow.push('');
     aoa.push(titleRow);
     
-    const headerRow: (string | number)[] = ['Categoria', 'Atrasados Hoje'];
+    const headerRow: (string | number)[] = ['Categoria', 'Hoje'];
     cols.forEach(c => headerRow.push(c.label));
     aoa.push(headerRow);
     
@@ -226,7 +183,7 @@ export class CashFlowReportPageComponent implements OnInit {
     ws['!merges'] = [{ s: { r: 0, c: 0 }, e: { r: 0, c: totalCols - 1 } }];
     
     const colWidths = [{ wch: 30 }, { wch: 16 }];
-    for (let i = 0; i < cols.length; i++) colWidths.push({ wch: 14 });
+    cols.forEach(() => colWidths.push({ wch: 14 }));
     ws['!cols'] = colWidths;
     
     const numFmt = '#.##0,00;-#.##0,00;0,00';

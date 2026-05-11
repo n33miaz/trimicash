@@ -10,6 +10,7 @@
         </svg>
       </tc-button>
       <div class="view-toggle desktop-only">
+        <button class="toggle-btn" [class.active]="viewMode() === 'DAILY'" (click)="setMode('DAILY')">Diário</button>
         <button class="toggle-btn" [class.active]="viewMode() === 'WEEKLY'" (click)="setMode('WEEKLY')">Semanal</button>
         <button class="toggle-btn" [class.active]="viewMode() === 'MONTHLY'" (click)="setMode('MONTHLY')">Mensal</button>
       </div>
@@ -27,6 +28,7 @@
 
   <div class="mobile-controls-bar mobile-only">
     <div class="view-toggle">
+      <button class="toggle-btn" [class.active]="viewMode() === 'DAILY'" (click)="setMode('DAILY')">Diário</button>
       <button class="toggle-btn" [class.active]="viewMode() === 'WEEKLY'" (click)="setMode('WEEKLY')">Semanal</button>
       <button class="toggle-btn" [class.active]="viewMode() === 'MONTHLY'" (click)="setMode('MONTHLY')">Mensal</button>
     </div>
@@ -44,15 +46,113 @@
   @if (loading()) {
     <tc-loading-state message="Carregando fluxo de caixa..."></tc-loading-state>
   } @else {
+    @if (viewMode() === 'DAILY') {
+      <section class="daily-insights" aria-label="Resumo diário do fluxo">
+        <div class="daily-hero">
+          <div class="daily-heading">
+            <span class="daily-kicker">Visão diária</span>
+            <h2>{{ dailySummary().dateLabel }}</h2>
+          </div>
+          <div class="daily-balance" [class.val-neg]="dailySummary().projectedClosingBalance < 0" [class.val-pos]="dailySummary().projectedClosingBalance >= 0">
+            <span>Saldo previsto</span>
+            <strong>{{ dailySummary().projectedClosingBalance | brlCurrency }}</strong>
+          </div>
+        </div>
+
+        <div class="daily-metrics">
+          <div class="daily-metric">
+            <span class="metric-label">Saldo inicial</span>
+            <strong>{{ dailySummary().openingBalance | brlCurrency }}</strong>
+          </div>
+          <div class="daily-metric">
+            <span class="metric-label">Entrou</span>
+            <strong class="val-pos">{{ dailySummary().realizedInflow | brlCurrency }}</strong>
+          </div>
+          <div class="daily-metric">
+            <span class="metric-label">Saiu</span>
+            <strong class="val-neg">{{ dailySummary().realizedOutflow | brlCurrency }}</strong>
+          </div>
+          <div class="daily-metric">
+            <span class="metric-label">Projetado</span>
+            <strong [class.val-neg]="dailySummary().projectedResult < 0" [class.val-pos]="dailySummary().projectedResult >= 0">
+              {{ dailySummary().projectedResult | brlCurrency }}
+            </strong>
+          </div>
+          <div class="daily-metric">
+            <span class="metric-label">Saldo realizado</span>
+            <strong [class.val-neg]="dailySummary().closingBalance < 0" [class.val-pos]="dailySummary().closingBalance >= 0">
+              {{ dailySummary().closingBalance | brlCurrency }}
+            </strong>
+          </div>
+          <div class="daily-metric">
+            <span class="metric-label">Antes do dia</span>
+            <strong [class.val-neg]="dailySummary().overdueProjectedResult < 0" [class.val-pos]="dailySummary().overdueProjectedResult > 0">
+              {{ dailySummary().overdueProjectedResult | brlCurrency }}
+            </strong>
+          </div>
+        </div>
+
+        <div class="daily-detail-grid">
+          <article class="daily-detail-panel">
+            <div class="panel-title">
+              <span>Projetado para o dia</span>
+              <small>{{ dailySummary().projectedCount }} itens</small>
+            </div>
+            @if (dailySummary().projectedItems.length === 0) {
+              <div class="daily-empty">Nada projetado.</div>
+            } @else {
+              <div class="daily-item-list">
+                @for (item of dailySummary().projectedItems; track item.id) {
+                  <div class="daily-item" [class.item-out]="item.direction === 'out'" [class.item-in]="item.direction === 'in'">
+                    <div class="item-main">
+                      <span class="item-description">{{ item.description }}</span>
+                      <span class="item-category">{{ item.category }}</span>
+                    </div>
+                    <strong class="item-amount" [class.val-neg]="item.direction === 'out'" [class.val-pos]="item.direction === 'in'">
+                      {{ item.direction === 'out' ? '-' : '+' }}{{ item.amount | brlCurrency }}
+                    </strong>
+                  </div>
+                }
+              </div>
+            }
+          </article>
+
+          <article class="daily-detail-panel">
+            <div class="panel-title">
+              <span>Movimentações realizadas</span>
+              <small>{{ dailySummary().movementCount }} itens</small>
+            </div>
+            @if (dailySummary().movementItems.length === 0) {
+              <div class="daily-empty">Nenhuma movimentação.</div>
+            } @else {
+              <div class="daily-item-list">
+                @for (item of dailySummary().movementItems; track item.id) {
+                  <div class="daily-item" [class.item-out]="item.direction === 'out'" [class.item-in]="item.direction === 'in'">
+                    <div class="item-main">
+                      <span class="item-description">{{ item.description }}</span>
+                      <span class="item-category">{{ item.category }}</span>
+                    </div>
+                    <strong class="item-amount" [class.val-neg]="item.direction === 'out'" [class.val-pos]="item.direction === 'in'">
+                      {{ item.direction === 'out' ? '-' : '+' }}{{ item.amount | brlCurrency }}
+                    </strong>
+                  </div>
+                }
+              </div>
+            }
+          </article>
+        </div>
+      </section>
+    }
+
     <!-- DESKTOP TABLE -->
     <div class="flow-table-wrapper desktop-only">
-      <div class="flow-title-bar">FLUXO DE CAIXA - {{ periodLabel() }}</div>
+      <div class="flow-title-bar">{{ periodLabel() }}</div>
       <div class="flow-scroll">
         <table class="flow-table">
           <thead>
             <tr class="date-header-row">
               <th class="sticky-col col-cat">Categoria</th>
-              <th class="col-overdue">Atrasados Hoje</th>
+              <th class="col-overdue">Hoje</th>
               @for (col of dayColumns(); track col.label) {
                 <th class="col-day">{{ col.label }}</th>
               }
@@ -62,11 +162,11 @@
             @for (row of flowRows(); track row.label) {
               <tr [class]="'row-' + row.section" [class.row-header]="row.isHeader" [class.row-child]="!row.isHeader">
                 <td class="sticky-col col-cat" [class.indent]="!row.isHeader">{{ row.label }}</td>
-                <td class="col-overdue" [class.val-neg]="row.overdueValue < 0" [class.val-pos]="row.overdueValue > 0 && row.section === 'receita'">
+                <td class="col-overdue" [class.val-neg]="row.overdueValue < 0" [class.val-pos]="row.overdueValue > 0 && isPositiveSection(row.section)">
                   {{ row.overdueValue | brlCurrency }}
                 </td>
                 @for (val of row.dailyValues; track $index) {
-                  <td class="col-day" [class.val-neg]="val < 0" [class.val-pos]="val > 0 && (row.section === 'receita' || row.section === 'acumulado')">
+                  <td class="col-day" [class.val-neg]="val < 0" [class.val-pos]="val > 0 && isPositiveSection(row.section)">
                     {{ val | brlCurrency }}
                   </td>
                 }
@@ -88,20 +188,33 @@
             <div class="day-result-preview">
               @for (row of flowRows(); track row.label) {
                 @if (row.section === 'resultado' && row.isHeader) {
-                  <span class="day-result-value" [class.val-neg]="row.dailyValues[i] < 0" [class.val-pos]="row.dailyValues[i] >= 0">
-                    {{ row.dailyValues[i] | brlCurrency }}
+                  <span class="preview-line">
+                    <span class="preview-label">Realizado</span>
+                    <span class="day-result-value" [class.val-neg]="row.dailyValues[i] < 0" [class.val-pos]="row.dailyValues[i] >= 0">
+                      {{ row.dailyValues[i] | brlCurrency }}
+                    </span>
+                  </span>
+                }
+                @if (row.section === 'projetado' && row.isHeader) {
+                  <span class="preview-line">
+                    <span class="preview-label">Projetado</span>
+                    <span class="day-result-value" [class.val-neg]="row.dailyValues[i] < 0" [class.val-pos]="row.dailyValues[i] >= 0">
+                      {{ row.dailyValues[i] | brlCurrency }}
+                    </span>
                   </span>
                 }
               }
             </div>
-            <svg class="expand-icon" [class.rotated]="isDayExpanded(i)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            @if (viewMode() !== 'DAILY') {
+              <svg class="expand-icon" [class.rotated]="isDayExpanded(i)" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+            }
           </button>
           @if (isDayExpanded(i)) {
             <div class="day-card-body">
               @for (row of flowRows(); track row.label) {
                 <div class="mobile-row" [class]="'mrow-' + row.section" [class.mrow-header]="row.isHeader" [class.mrow-child]="!row.isHeader">
                   <span class="mrow-label">{{ row.label }}</span>
-                  <span class="mrow-value" [class.val-neg]="row.dailyValues[i] < 0" [class.val-pos]="row.dailyValues[i] > 0 && (row.section === 'receita' || row.section === 'acumulado')">
+                  <span class="mrow-value" [class.val-neg]="row.dailyValues[i] < 0" [class.val-pos]="row.dailyValues[i] > 0 && isPositiveSection(row.section)">
                     {{ row.dailyValues[i] | brlCurrency }}
                   </span>
                 </div>
@@ -114,8 +227,14 @@
 
     <!-- MOBILE BOTTOM BAR -->
     <div class="mobile-summary-bar mobile-only">
-      <span class="summary-label">Resultado do Período</span>
-      <span class="summary-value" [class.val-neg]="monthResult() < 0" [class.val-pos]="monthResult() >= 0">{{ monthResult() | brlCurrency }}</span>
+      <div class="summary-group">
+        <span class="summary-label">Realizado</span>
+        <span class="summary-value" [class.val-neg]="monthResult() < 0" [class.val-pos]="monthResult() >= 0">{{ monthResult() | brlCurrency }}</span>
+      </div>
+      <div class="summary-group align-right">
+        <span class="summary-label">Projetado</span>
+        <span class="summary-value" [class.val-neg]="periodProjectedResult() < 0" [class.val-pos]="periodProjectedResult() >= 0">{{ periodProjectedResult() | brlCurrency }}</span>
+      </div>
     </div>
   }
 </div>
