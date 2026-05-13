@@ -33,6 +33,8 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
     .tc-input-wrapper { display: flex; flex-direction: column; gap: var(--space-2); }
     label { font-size: var(--font-size-sm); font-weight: 500; color: var(--color-text-primary); }
     input {
+      width: 100%;
+      box-sizing: border-box;
       padding: var(--space-3) var(--space-4);
       border: 1px solid var(--color-border);
       border-radius: var(--radius-md);
