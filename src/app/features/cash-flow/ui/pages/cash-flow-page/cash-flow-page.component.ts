@@ -442,8 +442,6 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       gap: var(--space-3);
     }
 
-    .btn-icon { display: none; }
-
     .desktop-only { display: block !important; }
     .mobile-only { display: none !important; }
 
@@ -478,25 +476,11 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
         gap: var(--space-2);
       }
 
-      .page-header-action tc-button:first-child {
-        width: 44px;
-        min-width: 44px;
-        padding: 0;
-      }
-
-      .page-header-action tc-button:first-child .btn-text {
-        display: none;
-      }
-
-      .page-header-action tc-button:first-child .btn-icon {
-        display: block;
-      }
-
-      .page-header-action tc-button:last-child {
+      .page-header-action tc-button {
         flex: 1;
       }
 
-      .page-header-action tc-button:last-child ::ng-deep .tc-btn {
+      .page-header-action tc-button ::ng-deep .tc-btn {
         width: 100%;
       }
     }
