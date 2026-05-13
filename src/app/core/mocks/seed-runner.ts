@@ -2,7 +2,7 @@
  * seed-runner.ts — TrimiCash
  * Inicializa o localStorage com dados de demonstração.
  * Executado via provideAppInitializer no app.config.ts.
- * Suporta query param ?seed=healthy|risk para troca de cenário.
+ * Suporta query param ?seed=healthy|risk|blank para troca de cenário.
  * TypeScript puro (lógica) — usa serviços Angular apenas para inject.
  */
 
@@ -18,6 +18,20 @@ const STORAGE_KEYS = {
   seeded:     'trimicash:seeded',
 } as const;
 
+/**
+ * Chaves adicionais do app que não fazem parte dos seeds,
+ * mas precisam ser limpas para garantir um reset completo.
+ */
+const AUXILIARY_KEYS = [
+  'trimicash:session',           // sessionStorage — auth
+  'trimicash:userName',          // localStorage — nome do usuário
+  'trimicash:demoCredentials',   // localStorage — credenciais de demo
+  'trimicash:settings',          // localStorage — preferências
+  'trimicash:theme',             // localStorage — tema light/dark
+  'trimicash:intro-modal-seen',  // localStorage — flag intro modal
+  'trimicash:read-alerts',       // localStorage — alertas lidos
+] as const;
+
 @Injectable({ providedIn: 'root' })
 export class SeedRunner {
   /**
@@ -29,7 +43,7 @@ export class SeedRunner {
     const scenario = this.resolveScenario();
 
     if (scenario) {
-      // Parâmetro de URL presente → força reset do cenário indicado
+      // Parâmetro de URL presente → força reset completo + cenário indicado
       this.reseed(scenario);
       // Remove o parâmetro da URL sem recarregar a página
       this.cleanUrlParam();
@@ -43,10 +57,15 @@ export class SeedRunner {
   }
 
   /**
-   * Zera todos os dados e popula com o cenário especificado.
+   * Zera TODOS os dados do app e popula com o cenário especificado.
+   * Limpa localStorage (seeds + auxiliares) e sessionStorage (auth).
    * Pode ser chamado pela tela de Settings/dev para resetar a demo.
    */
   reseed(scenario: SeedScenario): void {
+    // ── 1. Limpeza completa de todo estado anterior ──
+    this.clearAll();
+
+    // ── 2. Popular com o novo cenário ──
     const data = SEEDS[scenario];
 
     localStorage.setItem(
@@ -84,6 +103,23 @@ export class SeedRunner {
   }
 
   // ─── Privados ─────────────────────────────────────────────────────────────
+
+  /**
+   * Remove TODAS as chaves do app tanto do localStorage quanto do sessionStorage.
+   * Garante que um cenário via QR code comece 100% limpo.
+   */
+  private clearAll(): void {
+    // Limpa chaves de seed
+    for (const key of Object.values(STORAGE_KEYS)) {
+      localStorage.removeItem(key);
+    }
+
+    // Limpa chaves auxiliares (auth, settings, theme, intro, alerts)
+    for (const key of AUXILIARY_KEYS) {
+      localStorage.removeItem(key);
+      sessionStorage.removeItem(key);
+    }
+  }
 
   private resolveScenario(): SeedScenario | null {
     try {
