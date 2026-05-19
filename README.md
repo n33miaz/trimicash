@@ -57,6 +57,7 @@ npx playwright install chromium
 
 A demo sobe sem backend. Os dados são populados automaticamente no primeiro acesso.
 
+- `/?seed=blank`: cenário vazio, todo o sistema zerado.
 - `/?seed=healthy`: cenário saudável, com reserva atendida.
 - `/?seed=risk`: cenário de risco, com atraso, déficit e alertas críticos.
 

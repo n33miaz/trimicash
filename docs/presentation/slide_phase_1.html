@@ -1,0 +1,471 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>TrimiCash - Banner LinkedIn (Fase 1)</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@500;700;800&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --primary-dark: #050E2B;
+      --primary-mid: #0A1845;
+      --primary-main: #051B61;
+      --accent: #2F80ED;
+      --accent-soft: #56A0FF;
+      --success: #16A34A;
+      --warning: #F59E0B;
+      --text-main: #FFFFFF;
+      --text-muted: #8A9ABF;
+      --text-faint: #5B6B8E;
+      --font-display: 'Plus Jakarta Sans', sans-serif;
+      --font-body: 'Inter', sans-serif;
+      --font-mono: 'JetBrains Mono', monospace;
+    }
+
+    body {
+      background-color: #111;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      font-family: var(--font-body);
+    }
+
+    /* Container (1200x630 — LinkedIn) */
+    .linkedin-banner {
+      width: 1200px;
+      height: 630px;
+      background: radial-gradient(ellipse at top left, #0A1845 0%, var(--primary-dark) 60%);
+      position: relative;
+      overflow: hidden;
+      box-shadow: 0 20px 50px rgba(0,0,0,0.5);
+    }
+
+    /* Fundo: grade + glows */
+    .bg-grid {
+      position: absolute;
+      inset: 0;
+      background-image:
+        linear-gradient(rgba(255, 255, 255, 0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255, 255, 255, 0.035) 1px, transparent 1px);
+      background-size: 44px 44px;
+      mask-image: radial-gradient(ellipse at center, #000 40%, transparent 80%);
+      z-index: 1;
+    }
+
+    .glow-1 {
+      position: absolute;
+      top: -180px;
+      left: -120px;
+      width: 600px;
+      height: 600px;
+      background: radial-gradient(circle, rgba(47, 128, 237, 0.28) 0%, transparent 70%);
+      z-index: 2;
+    }
+
+    .glow-2 {
+      position: absolute;
+      bottom: -200px;
+      right: -80px;
+      width: 700px;
+      height: 700px;
+      background: radial-gradient(circle, rgba(5, 27, 97, 0.7) 0%, transparent 70%);
+      z-index: 2;
+    }
+
+    /* Conteúdo */
+    .content {
+      position: relative;
+      z-index: 10;
+      display: grid;
+      grid-template-columns: 1.05fr 1fr;
+      width: 100%;
+      height: 100%;
+      padding: 56px 60px;
+      gap: 40px;
+      align-items: center;
+    }
+
+    /* ESQUERDA */
+    .left {
+      display: flex;
+      flex-direction: column;
+      gap: 22px;
+    }
+
+    .brand-row {
+      display: flex;
+      align-items: center;
+      gap: 14px;
+    }
+
+    .brand-mark {
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      filter: drop-shadow(0 6px 16px rgba(47, 128, 237, 0.45));
+    }
+
+    .brand-mark img {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+
+    .brand-name {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      letter-spacing: -0.3px;
+    }
+
+    .brand-name span { color: var(--accent-soft); }
+
+    .launch-badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      background: rgba(47, 128, 237, 0.12);
+      border: 1px solid rgba(47, 128, 237, 0.35);
+      color: #B8D4FF;
+      padding: 7px 14px;
+      border-radius: 100px;
+      font-weight: 600;
+      font-size: 12px;
+      width: fit-content;
+      letter-spacing: 1.2px;
+      text-transform: uppercase;
+    }
+
+    .launch-badge::before {
+      content: '';
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: #56A0FF;
+      box-shadow: 0 0 0 4px rgba(86, 160, 255, 0.18);
+    }
+
+    .headline {
+      font-family: var(--font-display);
+      font-size: 54px;
+      font-weight: 800;
+      color: var(--text-main);
+      line-height: 1.05;
+      letter-spacing: -1.5px;
+    }
+
+    .headline .accent {
+      background: linear-gradient(135deg, #56A0FF 0%, #2F80ED 100%);
+      -webkit-background-clip: text;
+      background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .subtitle {
+      font-size: 18px;
+      color: var(--text-muted);
+      line-height: 1.55;
+      font-weight: 400;
+      max-width: 95%;
+    }
+
+    .subtitle strong {
+      color: #DCE5F7;
+      font-weight: 600;
+    }
+
+    /* Métricas chave */
+    .metrics {
+      display: flex;
+      gap: 14px;
+      margin-top: 4px;
+    }
+
+    .metric {
+      flex: 1;
+      background: rgba(255, 255, 255, 0.03);
+      border: 1px solid rgba(255, 255, 255, 0.08);
+      border-radius: 12px;
+      padding: 14px 16px;
+    }
+
+    .metric-value {
+      font-family: var(--font-display);
+      font-size: 22px;
+      font-weight: 700;
+      color: var(--text-main);
+      line-height: 1;
+      letter-spacing: -0.5px;
+    }
+
+    .metric-value.accent { color: var(--accent-soft); }
+
+    .metric-label {
+      font-size: 11px;
+      color: var(--text-faint);
+      margin-top: 6px;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      font-weight: 500;
+    }
+
+    /* Stack */
+    .stack-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 6px;
+    }
+
+    .pill {
+      background: rgba(255, 255, 255, 0.04);
+      border: 1px solid rgba(255, 255, 255, 0.1);
+      color: #C8D3EC;
+      padding: 6px 12px;
+      border-radius: 7px;
+      font-size: 12px;
+      font-weight: 500;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      font-family: var(--font-body);
+    }
+
+    .pill .dot-color {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+    }
+
+    /* DIREITA: mockups */
+    .right {
+      position: relative;
+      height: 100%;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .desktop-mockup {
+      position: absolute;
+      top: 50%;
+      right: -20px;
+      transform: translateY(-50%) rotate(-2deg);
+      width: 540px;
+      height: 340px;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow:
+        0 30px 60px rgba(0,0,0,0.55),
+        0 0 0 1px rgba(255,255,255,0.08);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+    }
+
+    .browser-header {
+      height: 26px;
+      background: #E5E7EB;
+      display: flex;
+      align-items: center;
+      padding: 0 12px;
+      gap: 6px;
+    }
+
+    .dot { width: 9px; height: 9px; border-radius: 50%; }
+    .dot.red { background: #FF5F56; }
+    .dot.yellow { background: #FFBD2E; }
+    .dot.green { background: #27C93F; }
+
+    .url-bar {
+      flex: 1;
+      height: 16px;
+      background: #fff;
+      border-radius: 4px;
+      margin-left: 12px;
+      display: flex;
+      align-items: center;
+      padding: 0 8px;
+      font-family: var(--font-mono);
+      font-size: 9px;
+      color: #6B7280;
+    }
+
+    .desktop-screen {
+      flex: 1;
+      background: #F4F6FB;
+      position: relative;
+    }
+
+    .mobile-mockup {
+      position: absolute;
+      bottom: 10px;
+      left: -10px;
+      transform: rotate(4deg);
+      width: 190px;
+      height: 380px;
+      background: #111827;
+      border-radius: 30px;
+      border: 7px solid #111827;
+      box-shadow:
+        -20px 30px 60px rgba(0,0,0,0.7),
+        0 0 0 1px rgba(255,255,255,0.08);
+      overflow: hidden;
+      z-index: 20;
+    }
+
+    .mobile-screen {
+      width: 100%;
+      height: 100%;
+      background: #050E2B;
+      position: relative;
+      border-radius: 22px;
+      overflow: hidden;
+    }
+
+    .print-img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      object-position: top center;
+    }
+
+    /* Rodapé */
+    .footer {
+      position: absolute;
+      bottom: 24px;
+      left: 60px;
+      right: 60px;
+      z-index: 11;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--text-faint);
+    }
+
+    .footer-url {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      color: var(--text-muted);
+    }
+
+    .footer-url svg {
+      width: 14px;
+      height: 14px;
+      stroke: var(--accent-soft);
+    }
+
+    .footer-author {
+      color: var(--text-faint);
+    }
+    .footer-author strong {
+      color: #C8D3EC;
+      font-weight: 600;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="linkedin-banner">
+
+    <div class="bg-grid"></div>
+    <div class="glow-1"></div>
+    <div class="glow-2"></div>
+
+    <div class="content">
+
+      <!-- ESQUERDA -->
+      <div class="left">
+        <div class="brand-row">
+          <div class="brand-mark">
+            <img src="../../public/assets/icons/logo.png" alt="TrimiCash" />
+          </div>
+          <div class="brand-name">Trimi<span>Cash</span></div>
+        </div>
+
+        <!-- <div class="launch-badge">Fase 1 · Demo navegável</div> -->
+
+        <h1 class="headline">
+          Gestão de Caixa<br/>
+          <span class="accent">em segundos.</span>
+        </h1>
+
+        <p class="subtitle">
+          Saldo <strong>atual e projetado</strong>, recomendações de <strong>saúde</strong> financeira e
+          <strong>alertas</strong> para pequenos empreendedores.
+        </p>
+
+        <div class="metrics">
+          <div class="metric">
+            <div class="metric-value accent">100%</div>
+            <div class="metric-label">Standalone Signals</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">Strict</div>
+            <div class="metric-label">TypeScript Mode</div>
+          </div>
+          <div class="metric">
+            <div class="metric-value">E2E</div>
+            <div class="metric-label">Vitest + Playwright</div>
+          </div>
+        </div>
+
+        <div class="stack-row">
+          <div class="pill"><span class="dot-color" style="background:#DD0031"></span>Angular 18</div>
+          <div class="pill"><span class="dot-color" style="background:#3178C6"></span>TypeScript</div>
+          <div class="pill"><span class="dot-color" style="background:#CC6699"></span>SCSS Tokens</div>
+          <div class="pill"><span class="dot-color" style="background:#16A34A"></span>Clean Arch</div>
+          <div class="pill"><span class="dot-color" style="background:#F59E0B"></span>Vitest</div>
+          <!-- <div class="pill"><span class="dot-color" style="background:#2EAD33"></span>Playwright</div> -->
+        </div>
+      </div>
+
+      <!-- DIREITA: Mockups -->
+      <div class="right">
+        <div class="desktop-mockup">
+          <div class="browser-header">
+            <div class="dot red"></div>
+            <div class="dot yellow"></div>
+            <div class="dot green"></div>
+            <div class="url-bar">trimicash.vercel.app</div>
+          </div>
+          <div class="desktop-screen">
+            <img src="./screenshots/home_desktop.png" alt="" class="print-img">
+          </div>
+        </div>
+
+        <div class="mobile-mockup">
+          <div class="mobile-screen">
+            <img src="./screenshots/home_mobile.png" alt="" class="print-img">
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Rodapé -->
+    <div class="footer">
+      <div class="footer-url">
+        <svg viewBox="0 0 24 24" fill="none">
+          <circle cx="12" cy="12" r="10" stroke-width="2"/>
+          <path d="M2 12h20M12 2a15.3 15.3 0 010 20M12 2a15.3 15.3 0 000 20" stroke-width="2"/>
+        </svg>
+        trimicash.vercel.app
+      </div>
+      <div class="footer-author">por <strong>Neemias Manso</strong> · FullStack Engineer</div>
+    </div>
+  </div>
+
+</body>
+</html>
