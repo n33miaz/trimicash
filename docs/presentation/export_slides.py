@@ -7,7 +7,7 @@ Pre-requisitos:
 
 Uso:
     python export_slides.py
-    python export_slides.py --scale 2          # imagem retina (2400x1260)
+    python export_slides.py --scale 3          # imagem 4K (3600x1890)
     python export_slides.py --slide 1          # exporta apenas slide_phase_1
     python export_slides.py --out ./build      # diretório de saída customizado
 """
@@ -34,7 +34,7 @@ BANNER_SELECTOR = ".linkedin-banner"
 SCRIPT_DIR = Path(__file__).resolve().parent
 
 
-def export_slide(html_path: Path, out_path: Path, scale: int = 1) -> None:
+def export_slide(html_path: Path, out_path: Path, scale: int = 2) -> None:
     """Renderiza o HTML e captura o elemento .linkedin-banner como PNG."""
     if not html_path.is_file():
         raise FileNotFoundError(f"HTML não encontrado: {html_path}")
@@ -56,7 +56,7 @@ def export_slide(html_path: Path, out_path: Path, scale: int = 1) -> None:
 
         banner = page.locator(BANNER_SELECTOR)
         banner.wait_for(state="visible", timeout=5_000)
-        banner.screenshot(path=str(out_path), omit_background=False)
+        banner.screenshot(path=str(out_path), omit_background=False, type="png")
 
         browser.close()
 
@@ -74,8 +74,8 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument(
         "--scale",
         type=int,
-        default=1,
-        help="Device scale factor (1 = 1200x630, 2 = 2400x1260). Default: 1.",
+        default=2,
+        help="Device scale factor (1 = 1200x630, 2 = 2400x1260, 3 = 3600x1890). Default: 2 (HD).",
     )
     parser.add_argument(
         "--out",
