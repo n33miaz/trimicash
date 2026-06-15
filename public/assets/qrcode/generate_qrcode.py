@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Dependências:
-  pip install qrcode[pil]
+Dependências (bibliotecas):
+  pip install qrcode[pil] 
 """
 
 import qrcode
