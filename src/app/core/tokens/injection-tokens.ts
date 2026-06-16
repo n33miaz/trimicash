@@ -11,6 +11,7 @@ import type { MovementRepository } from '../../features/cash-flow/domain/ports/m
 import type { PayableRepository } from '../../features/accounts-payable/domain/ports/payable.repository';
 import type { ReceivableRepository } from '../../features/accounts-receivable/domain/ports/receivable.repository';
 import type { CategoryRepository } from '../../features/categories/domain/category.repository';
+import type { BankIntegrationRepository } from '../../features/bank-integration/domain/ports/bank-integration.repository';
 import type { AuthPort } from '../../features/auth/domain/auth.types';
 import type { AppSettings } from '../../features/settings/domain/settings.types';
 
@@ -41,3 +42,7 @@ export const RECEIVABLE_REPOSITORY = new InjectionToken<ReceivableRepository>(
 export const APP_SETTINGS = new InjectionToken<Signal<AppSettings>>(
   'APP_SETTINGS'
 );
+
+/** Porta de integração bancária / Open Finance (mock na Fase 1) */
+export const BANK_INTEGRATION_REPOSITORY =
+  new InjectionToken<BankIntegrationRepository>('BANK_INTEGRATION_REPOSITORY');

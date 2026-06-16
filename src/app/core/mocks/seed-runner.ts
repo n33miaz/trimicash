@@ -30,6 +30,7 @@ const AUXILIARY_KEYS = [
   'trimicash:theme',             // localStorage — tema light/dark
   'trimicash:intro-modal-seen',  // localStorage — flag intro modal
   'trimicash:read-alerts',       // localStorage — alertas lidos
+  'trimicash:bank-connections',  // localStorage — conexões Open Finance (demo)
 ] as const;
 
 @Injectable({ providedIn: 'root' })

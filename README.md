@@ -71,6 +71,19 @@ A demo sobe sem backend. Os dados são populados automaticamente no primeiro ace
 6. Confirmar que o saldo atual diminui, a reserva cai e a saída aparece em **Caixa**.
 7. Abrir **Alertas** para mostrar os riscos financeiros calculados.
 
+## Open Finance (demo)
+
+A tela **Open Finance** simula a conexão com várias instituições financeiras
+(Banco do Brasil, Itaú, Bradesco, Santander, Caixa, Nubank, Inter, C6, BTG,
+Sicoob, Sicredi e Mercado Pago) para visualizar saldos e extrato consolidado.
+
+- Fluxo de consentimento simulado (redirecionamento, autorização e sincronização).
+- Saldos e extratos são gerados por mock, de forma estável por instituição.
+- As conexões ficam em `localStorage` (`trimicash:bank-connections`) e são limpas no reset de seeds.
+- Não há conexão real com bancos — é uma prévia navegável da experiência da Fase 2.
+
 ## Limites da Fase 1
 
-Esta entrega é uma demo navegável e mockada. Não inclui backend, banco real, autenticação real, integração bancária, notificações externas, exportação de relatórios, multiusuário ou permissões.
+Esta entrega é uma demo navegável e mockada. Não inclui backend, banco real,
+autenticação real, integração bancária **real** (o Open Finance acima é apenas
+simulado), notificações externas, exportação de relatórios, multiusuário ou permissões.

@@ -51,6 +51,13 @@ export const routes: Routes = [
           ),
       },
       {
+        path: 'bank-integration',
+        loadChildren: () =>
+          import('./features/bank-integration/bank-integration.routes').then(
+            (m) => m.bankIntegrationRoutes
+          ),
+      },
+      {
         path: 'alerts',
         loadChildren: () =>
           import('./features/alerts/alerts.routes').then((m) => m.alertsRoutes),

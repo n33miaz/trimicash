@@ -14,6 +14,7 @@ import {
   PAYABLE_REPOSITORY,
   RECEIVABLE_REPOSITORY,
   CATEGORY_REPOSITORY,
+  BANK_INTEGRATION_REPOSITORY,
   AUTH_PORT,
   APP_SETTINGS,
 } from './core/tokens/injection-tokens';
@@ -23,6 +24,7 @@ import { MovementLocalAdapter }  from './features/cash-flow/infrastructure/movem
 import { PayableLocalAdapter }   from './features/accounts-payable/infrastructure/payable-local.adapter';
 import { ReceivableLocalAdapter } from './features/accounts-receivable/infrastructure/receivable-local.adapter';
 import { CategoryLocalAdapter }  from './features/categories/infrastructure/category-local.adapter';
+import { BankIntegrationMockAdapter } from './features/bank-integration/infrastructure/bank-integration-mock.adapter';
 import { AuthMockAdapter }       from './features/auth/infrastructure/auth-mock.adapter';
 import {
   SettingsLocalAdapter,
@@ -43,6 +45,7 @@ export const appConfig: ApplicationConfig = {
     { provide: PAYABLE_REPOSITORY,     useClass: PayableLocalAdapter },
     { provide: RECEIVABLE_REPOSITORY,  useClass: ReceivableLocalAdapter },
     { provide: CATEGORY_REPOSITORY,    useClass: CategoryLocalAdapter },
+    { provide: BANK_INTEGRATION_REPOSITORY, useClass: BankIntegrationMockAdapter },
 
     // ── Auth mock ──
     { provide: AUTH_PORT, useClass: AuthMockAdapter },

@@ -394,4 +394,6 @@ Nao implementar na Fase 1, exceto se virar requisito novo:
 - dark mode completo;
 - PWA instalavel;
 - exportacao PDF/Excel;
-- integracoes bancarias.
+- integracoes bancarias reais (o modulo `bank-integration` / Open Finance da Fase 1 e
+  apenas uma simulacao navegavel: porta + adapter mock com extratos ficticios. A Fase 2
+  troca o adapter mock por um cliente HTTP do agregador Open Finance sem mexer na UI/facade).
