@@ -6,6 +6,7 @@ import type {
   BankTransaction,
 } from '../domain/entities/bank-transaction.entity';
 import { sum } from '@core/utils/money.util';
+import { BankCashflowSyncService } from './bank-cashflow-sync.service';
 
 function errorMessage(err: unknown, fallback: string): string {
   return err instanceof Error ? err.message : fallback;
@@ -19,6 +20,7 @@ export interface ConsolidatedTransaction extends BankTransaction {
 @Injectable({ providedIn: 'root' })
 export class BankIntegrationFacade {
   private readonly repository = inject(BANK_INTEGRATION_REPOSITORY);
+  private readonly cashSync = inject(BankCashflowSyncService);
 
   // ── State ──
   private readonly _banks = signal<Bank[]>([]);
@@ -80,6 +82,8 @@ export class BankIntegrationFacade {
       ]);
       this._banks.set(banks);
       this._connections.set(connections);
+      // Garante que o caixa reflita as conexões já existentes (idempotente).
+      await this.cashSync.reconcileAll(connections);
     } catch (err: unknown) {
       this._error.set(errorMessage(err, 'Erro ao carregar integrações.'));
     } finally {
@@ -94,6 +98,8 @@ export class BankIntegrationFacade {
     try {
       const connection = await this.repository.connect(bankId);
       this._connections.update((list) => [...list, connection]);
+      // Reflete as transações no caixa (entradas/saídas, saldo e dashboard).
+      await this.cashSync.importConnection(connection);
     } catch (err: unknown) {
       this._error.set(errorMessage(err, 'Erro ao conectar instituição.'));
       throw err;
@@ -107,6 +113,8 @@ export class BankIntegrationFacade {
     this._loading.set(true);
     this._error.set(null);
     try {
+      // Remove do caixa antes de revogar (somem de Caixa, Fluxo e Dashboard).
+      await this.cashSync.removeConnection(connectionId);
       await this.repository.disconnect(connectionId);
       this._connections.update((list) => list.filter((c) => c.id !== connectionId));
     } catch (err: unknown) {
@@ -125,6 +133,9 @@ export class BankIntegrationFacade {
       this._connections.update((list) =>
         list.map((c) => (c.id === connectionId ? refreshed : c))
       );
+      // Re-reflete o extrato atualizado no caixa.
+      await this.cashSync.removeConnection(connectionId);
+      await this.cashSync.importConnection(refreshed);
     } catch (err: unknown) {
       this._error.set(errorMessage(err, 'Erro ao sincronizar extrato.'));
       throw err;

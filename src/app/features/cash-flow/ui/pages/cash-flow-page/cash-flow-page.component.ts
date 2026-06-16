@@ -13,6 +13,8 @@ import { AccountsPayableFacade } from '../../../../accounts-payable/application/
 import { AccountsReceivableFacade } from '../../../../accounts-receivable/application/accounts-receivable.facade';
 import { CashFlowFacade } from '../../../application/cash-flow.facade';
 import { Movement, MovementType } from '../../../domain/entities/movement.entity';
+import type { Bank } from '../../../../bank-integration/domain/entities/bank.entity';
+import { findBank } from '../../../../bank-integration/infrastructure/bank-catalog';
 import { MovementFormComponent } from '../../components/movement-form/movement-form.component';
 import { BadgeComponent } from '../../../../../shared/components/badge/badge.component';
 import { ButtonComponent } from '../../../../../shared/components/button/button.component';
@@ -117,7 +119,12 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
               @for (m of filteredMovements(); track m.id) {
                 <tr>
                   <td class="text-center text-secondary">{{ m.date | date:'dd/MM/yyyy' }}</td>
-                  <td class="truncate-cell" [title]="m.description">{{ m.description }}</td>
+                  <td class="truncate-cell" [title]="m.description">
+                    @if (bankOf(m); as bank) {
+                      <img class="mov-bank-logo" [src]="bank.logo" [alt]="bank.name" [title]="'Importado de ' + bank.name" />
+                    }
+                    {{ m.description }}
+                  </td>
                   <td class="text-center">
                     <tc-badge tone="neutral">{{ getCategoryName(m.categoryId) }}</tc-badge>
                   </td>
@@ -130,10 +137,14 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
                     {{ m.type === 'ENTRADA' ? '+' : '-' }}{{ m.amount | brlCurrency }}
                   </td>
                   <td class="text-center">
-                    <div class="actions-cell">
-                      <tc-button variant="secondary" size="sm" (clicked)="openEditModal(m)">Editar</tc-button>
-                      <tc-button variant="danger" size="sm" (clicked)="openDeleteModal(m)">Excluir</tc-button>
-                    </div>
+                    @if (bankOf(m)) {
+                      <span class="mov-source-tag" title="Sincronizado via Open Finance. Gerencie na tela Open Finance.">Open Finance</span>
+                    } @else {
+                      <div class="actions-cell">
+                        <tc-button variant="secondary" size="sm" (clicked)="openEditModal(m)">Editar</tc-button>
+                        <tc-button variant="danger" size="sm" (clicked)="openDeleteModal(m)">Excluir</tc-button>
+                      </div>
+                    }
                   </td>
                 </tr>
               }
@@ -147,7 +158,12 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
               <div class="movement-card-header" [class.is-entrada]="m.type === 'ENTRADA'" [class.is-saida]="m.type === 'SAIDA'">
                 <div class="movement-card-row movement-card-row-top">
                   <div class="movement-main">
-                    <span class="movement-description">{{ m.description }}</span>
+                    <span class="movement-description">
+                      @if (bankOf(m); as bank) {
+                        <img class="mov-bank-logo" [src]="bank.logo" [alt]="bank.name" />
+                      }
+                      {{ m.description }}
+                    </span>
                   </div>
                   <span class="movement-amount" [class.amount-entrada]="m.type === 'ENTRADA'" [class.amount-saida]="m.type === 'SAIDA'">
                     {{ m.type === 'ENTRADA' ? '+' : '-' }}{{ m.amount | brlCurrency }}
@@ -166,10 +182,14 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
               </div>
  
               <div class="movement-card-footer">
-                <div class="actions-cell">
-                  <tc-button variant="secondary" size="sm" [block]="true" (clicked)="openEditModal(m)">Editar</tc-button>
-                  <tc-button variant="danger" size="sm" [block]="true" (clicked)="openDeleteModal(m)">Excluir</tc-button>
-                </div>
+                @if (bankOf(m)) {
+                  <span class="mov-source-tag">Sincronizado via Open Finance</span>
+                } @else {
+                  <div class="actions-cell">
+                    <tc-button variant="secondary" size="sm" [block]="true" (clicked)="openEditModal(m)">Editar</tc-button>
+                    <tc-button variant="danger" size="sm" [block]="true" (clicked)="openDeleteModal(m)">Excluir</tc-button>
+                  </div>
+                }
               </div>
             </div>
           }
@@ -332,6 +352,30 @@ import { BrlCurrencyPipe } from '../../../../../shared/pipes/brl-currency.pipe';
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+
+    /* Origem bancária (Open Finance) */
+    .mov-bank-logo {
+      width: 18px;
+      height: 18px;
+      border-radius: 5px;
+      object-fit: cover;
+      vertical-align: middle;
+      margin-right: 6px;
+      background: #fff;
+    }
+    .mov-source-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 4px;
+      font-size: var(--font-size-xs);
+      font-weight: 600;
+      color: var(--color-accent-500);
+      background: rgba(47, 128, 237, 0.08);
+      border: 1px solid rgba(47, 128, 237, 0.18);
+      padding: 4px 10px;
+      border-radius: var(--radius-full);
+      white-space: nowrap;
     }
 
     .movement-card {
@@ -577,6 +621,11 @@ export class CashFlowPageComponent implements OnInit {
 
   getCategoryName(categoryId: string): string {
     return this.categoriesFacade.categories().find(category => category.id === categoryId)?.name ?? '-';
+  }
+
+  /** Banco de origem de uma movimentação importada via Open Finance (se houver). */
+  bankOf(movement: Movement): Bank | undefined {
+    return movement.sourceBankId ? findBank(movement.sourceBankId) : undefined;
   }
 
   openCreateModal(): void {

@@ -30,4 +30,11 @@ export interface Movement {
    * referencia o ID da PayableAccount de origem.
    */
   sourcePayableId?: string;
+  /**
+   * Se importada de uma conexão Open Finance, referencia a conexão.
+   * Permite remover do caixa quando o banco for desconectado.
+   */
+  sourceBankConnectionId?: string;
+  /** Banco de origem (Open Finance), usado para exibir logo/nome no Caixa. */
+  sourceBankId?: string;
 }
