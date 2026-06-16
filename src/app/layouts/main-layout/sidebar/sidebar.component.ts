@@ -99,6 +99,22 @@ import { ThemeService } from '../../../core/services/theme.service';
           <span>Contas a Receber</span>
         </a>
 
+        <a class="nav-item"
+           routerLink="/bank-integration"
+           routerLinkActive="active"
+           (click)="onNavClick()">
+          <svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="3" y1="22" x2="21" y2="22"/>
+            <line x1="6" y1="18" x2="6" y2="11"/>
+            <line x1="10" y1="18" x2="10" y2="11"/>
+            <line x1="14" y1="18" x2="14" y2="11"/>
+            <line x1="18" y1="18" x2="18" y2="11"/>
+            <polygon points="12 2 20 7 4 7"/>
+          </svg>
+          <span>Open Finance</span>
+          <span class="nav-badge-new" aria-label="Novidade">NOVO</span>
+        </a>
+
         <span class="nav-label">Sistema</span>
 
         <a class="nav-item"
@@ -335,6 +351,26 @@ import { ThemeService } from '../../../core/services/theme.service';
     @keyframes pulseBadge {
       0%, 100% { box-shadow: 0 0 0 0 rgba(220, 38, 38, 0.4); }
       50%       { box-shadow: 0 0 0 6px rgba(220, 38, 38, 0); }
+    }
+
+    /* Badge "NOVO" — destaque da feature recente */
+    .nav-badge-new {
+      margin-left: auto;
+      background: var(--gradient-primary);
+      color: #fff;
+      font-size: 0.6rem;
+      font-weight: 800;
+      letter-spacing: 0.06em;
+      padding: 2px 7px;
+      border-radius: var(--radius-full);
+      line-height: 1.4;
+      box-shadow: 0 2px 8px rgba(47, 128, 237, 0.35);
+      animation: pulseNew 2.4s ease-in-out infinite;
+    }
+
+    @keyframes pulseNew {
+      0%, 100% { transform: scale(1); box-shadow: 0 2px 8px rgba(47, 128, 237, 0.35); }
+      50%       { transform: scale(1.06); box-shadow: 0 2px 14px rgba(47, 128, 237, 0.55); }
     }
 
     /* ─── T4: Toggle tema ────────────────────────────────── */
